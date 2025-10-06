@@ -15,15 +15,6 @@
             background-color: #3a241d; /* Dark Wood Brown */
             color: #e6d5b8; /* Parchment */
         }
-        #login-screen {
-            background-image: url('https://i.postimg.cc/pTBMMgj7/cozy1.png');
-            background-size: cover;
-            background-position: center;
-        }
-        .login-box {
-             background-color: rgba(45, 55, 72, 0.85);
-             backdrop-filter: blur(4px);
-        }
         .gruvhub-bg {
             background-color: #5a3d2b; /* Leather Brown */
             box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;
@@ -86,9 +77,6 @@
             text-shadow: 1px 1px 2px black;
             background-size: cover;
             background-position: center;
-        }
-        .map-token.not-movable {
-            cursor: default;
         }
         .map-token:active {
             cursor: grabbing;
@@ -162,47 +150,18 @@
             align-items: center;
             justify-content: center;
         }
-        .role-selector input:checked + label {
-            background-color: #b8860b;
-            color: #fff;
-            border-color: #ffd700;
-        }
-         .role-selector input:disabled + label {
-            background-color: #4a2c2a;
-            color: #8b7d6b;
-            cursor: not-allowed;
-            border-color: #6d5d4b;
-        }
     </style>
 </head>
 <body class="overflow-hidden h-screen">
-    <!-- Login Screen -->
-    <div id="login-screen" class="absolute inset-0 z-50 flex items-center justify-center">
-        <div class="login-box gruvhub-border rounded-lg p-8 shadow-2xl text-center w-full max-w-sm">
-            <h1 class="text-3xl font-bold text-white mb-2" style="font-family: 'Cinzel', serif;">Gruvhub VTT</h1>
-            <p class="text-gray-300 mb-6">Join a Session</p>
-            <div class="space-y-4">
-                <input type="text" id="username-input" placeholder="Enter your name..." class="gruvhub-input w-full rounded p-3 text-center">
-                <div class="role-selector grid grid-cols-2 gap-4">
-                    <input type="radio" name="role" id="role-player" value="player" class="hidden" checked>
-                    <label for="role-player" class="gruvhub-border p-3 rounded-lg cursor-pointer transition-colors">Player</label>
-                    <input type="radio" name="role" id="role-dm" value="dm" class="hidden">
-                    <label for="role-dm" class="gruvhub-border p-3 rounded-lg cursor-pointer transition-colors">Dungeon Master</label>
-                </div>
-                <button id="join-session-btn" class="gruvhub-button rounded p-3 w-full text-lg">Join</button>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Main Application Container -->
-    <div id="app" class="grid grid-cols-12 grid-rows-1 h-screen gap-4 p-4 hidden">
+    <div id="app" class="grid grid-cols-12 grid-rows-1 h-screen gap-4 p-4">
         <!-- Left Panel: Chat, Dice, Turn Tracker -->
         <div class="col-span-3 h-full flex flex-col gap-4">
             <!-- Info Panel -->
             <div class="gruvhub-bg gruvhub-border rounded-lg p-3">
                 <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">VTT Info</h2>
-                <p class="text-xs"><strong>Your Name:</strong> <span id="userNameDisplay"></span></p>
+                <p class="text-xs"><strong>User ID:</strong> <span id="userIdDisplay"></span></p>
                 <p class="text-xs mt-1"><strong>Session ID:</strong> <span id="sessionIdDisplay"></span></p>
                 <p class="text-xs mt-2"><strong>Voice/Video:</strong> Use a separate app like Discord or Google Meet.</p>
             </div>
@@ -257,9 +216,9 @@
                      <!-- Tokens and Fog will be added here by JS -->
                 </div>
             </div>
-            <!-- DM Controls Panel (Visible to DM only) -->
-             <div id="dm-controls-panel" class="gruvhub-bg gruvhub-border rounded-lg p-3 hidden">
-                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">DM Controls</h2>
+            <!-- DM Controls Panel -->
+             <div id="dm-controls-panel" class="gruvhub-bg gruvhub-border rounded-lg p-3">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Controls</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                     <!-- General Controls -->
                     <div class="flex flex-col gap-2">
@@ -291,13 +250,6 @@
                             <button data-status="frightened" title="Frightened" class="status-effect-btn gruvhub-button rounded p-1" disabled>😨</button>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Player Hub Panel (Visible to Players only) -->
-            <div id="player-hub-panel" class="gruvhub-bg gruvhub-border rounded-lg p-3 hidden">
-                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Encounter Stats</h2>
-                <div id="player-hub-content" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                    <!-- Player stat cards will be inserted here by JS -->
                 </div>
             </div>
         </div>
@@ -399,8 +351,6 @@
 
 
         let userId = 'anonymous';
-        let userName = 'Player';
-        let userRole = 'player';
         let vttState = {};
         let selectedElement = null;
         
@@ -435,31 +385,7 @@
         }
         
         function setupLoginScreen() {
-            const usernameInput = document.getElementById('username-input');
-            const joinBtn = document.getElementById('join-session-btn');
-            
-            const savedUsername = localStorage.getItem('vtt-username');
-            if(savedUsername) usernameInput.value = savedUsername;
-
-            joinBtn.addEventListener('click', () => {
-                const username = usernameInput.value.trim();
-                if(!username) {
-                    usernameInput.classList.add('border-red-500');
-                    setTimeout(()=> usernameInput.classList.remove('border-red-500'), 2000);
-                    return;
-                }
-                const role = document.querySelector('input[name="role"]:checked').value;
-                
-                userName = username;
-                userRole = role;
-
-                localStorage.setItem('vtt-username', userName);
-
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-
-                initializeAppCore();
-            });
+             // This is now gone, the app will load directly
         }
 
 
@@ -467,9 +393,8 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     userId = user.uid;
-                    document.getElementById('userNameDisplay').textContent = `${userName} (${userRole})`;
+                    document.getElementById('userIdDisplay').textContent = `User-${userId.substring(0, 4)}`;
                     setupVTTListener();
-                    setupUIAfterLogin();
                 } else {
                     try {
                         if (typeof __initial_auth_token !== 'undefined') {
@@ -483,35 +408,16 @@
                 }
             });
         }
-        
-        function setupUIAfterLogin() {
-             const dmControls = document.getElementById('dm-controls-panel');
-             const playerHub = document.getElementById('player-hub-panel');
-             if (userRole !== 'dm') {
-                dmControls.classList.add('hidden');
-                playerHub.classList.remove('hidden');
-             } else {
-                dmControls.classList.remove('hidden');
-                playerHub.classList.add('hidden');
-             }
-        }
 
         // --- Firestore Listener ---
         function setupVTTListener() {
             onSnapshot(vttDocRef, (doc) => {
                 if (doc.exists()) {
-                    const waitingMessage = document.getElementById('waiting-for-dm');
-                    if (waitingMessage) waitingMessage.remove();
                     vttState = { ...DEFAULT_STATE, ...doc.data() };
                     render();
                 } else {
-                    if(userRole === 'dm'){
-                         setDoc(vttDocRef, DEFAULT_STATE).catch(console.error);
-                    } else {
-                        const mapContainer = document.getElementById('map-container');
-                        mapContainer.innerHTML = `<div id="waiting-for-dm" class="flex items-center justify-center h-full text-center text-xl text-yellow-300 p-8">Waiting for the DM to start the session...</div>`;
-                        mapContainer.style.backgroundImage = 'none';
-                    }
+                    // First user to join creates the document
+                    setDoc(vttDocRef, DEFAULT_STATE).catch(console.error);
                 }
             }, (error) => {
                 console.error("Firestore listener error: ", error);
@@ -529,15 +435,11 @@
             renderTurnTracker();
             renderJournal();
             renderTokenControls();
-            renderPlayerHub();
         }
 
         function renderMap() {
             const mapContainer = document.getElementById('map-container');
-            // Only render map if not waiting for DM
-            if(!document.getElementById('waiting-for-dm')) {
-                mapContainer.style.backgroundImage = `url('${vttState.mapUrl}')`;
-            }
+            mapContainer.style.backgroundImage = `url('${vttState.mapUrl}')`;
         }
 
         function renderTokens() {
@@ -589,16 +491,14 @@
                 });
                 tokenEl.appendChild(statusContainer);
 
-                if (userRole === 'dm') {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = '&times;';
-                    deleteBtn.className = 'absolute -top-1 -right-1 text-white bg-black bg-opacity-50 rounded-full h-4 w-4 flex items-center justify-center text-xs z-20';
-                    deleteBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        handleDeleteToken(token.id);
-                    };
-                    tokenEl.appendChild(deleteBtn);
-                }
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.className = 'absolute -top-1 -right-1 text-white bg-black bg-opacity-50 rounded-full h-4 w-4 flex items-center justify-center text-xs z-20';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    handleDeleteToken(token.id);
+                };
+                tokenEl.appendChild(deleteBtn);
                 
                 mapContainer.appendChild(tokenEl);
                 makeDraggable(tokenEl, token.id, 'token');
@@ -624,12 +524,10 @@
                     render();
                 });
                 
-                if (userRole === 'dm') {
-                    fogEl.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        handleDeleteFogBlock(block.id);
-                    });
-                }
+                fogEl.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    handleDeleteFogBlock(block.id);
+                });
 
                 if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) {
                     fogEl.classList.add('selected');
@@ -671,13 +569,11 @@
                 itemEl.className = `p-1.5 rounded text-sm flex justify-between items-center transition-all duration-200 ${isActive ? 'bg-[#b8860b] text-white font-bold ring-2 ring-yellow-300' : ''}`;
                 itemEl.textContent = `${isActive ? '» ' : ''}${index + 1}. ${name}`;
                 
-                if (userRole === 'dm') {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = '&times;';
-                    deleteBtn.className = `hover:text-red-200 ml-2 ${isActive ? 'text-white' : 'text-red-400'}`;
-                    deleteBtn.onclick = () => handleDeleteFromTracker(index);
-                    itemEl.appendChild(deleteBtn);
-                }
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.className = `hover:text-red-200 ml-2 ${isActive ? 'text-white' : 'text-red-400'}`;
+                deleteBtn.onclick = () => handleDeleteFromTracker(index);
+                itemEl.appendChild(deleteBtn);
                 
                 listEl.appendChild(itemEl);
             });
@@ -701,7 +597,7 @@
                 entryEl.innerHTML = `
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-gray-200">${entry.title}</h3>
-                        ${userRole === 'dm' ? `<button data-id="${entry.id}" class="delete-journal-btn text-red-400 hover:text-red-200">&times;</button>` : ''}
+                        <button data-id="${entry.id}" class="delete-journal-btn text-red-400 hover:text-red-200">&times;</button>
                     </div>
                     ${contentHTML}
                 `;
@@ -716,12 +612,6 @@
             const panel = document.getElementById('token-controls-panel');
             const container = document.getElementById('status-effects-container');
             const title = panel.querySelector('h3');
-
-            if (userRole !== 'dm') {
-                panel.classList.add('hidden');
-                return;
-            }
-            panel.classList.remove('hidden');
 
             if (selectedElement && selectedElement.type === 'token') {
                 const token = (vttState.tokens || []).find(t => t.id === selectedElement.id);
@@ -750,33 +640,6 @@
             }
         }
         
-        function renderPlayerHub() {
-            const container = document.getElementById('player-hub-content');
-            if (userRole === 'dm' || !container) return; // Don't render for DM
-            
-            container.innerHTML = '';
-
-            (vttState.tokens || []).forEach(token => {
-                const card = document.createElement('div');
-                card.className = 'gruvhub-border bg-[#4a2c2a] rounded p-2 text-center text-xs flex flex-col justify-between';
-
-                const tokenImage = token.imageUrl 
-                    ? `<img src="${token.imageUrl}" class="w-16 h-16 rounded-full mx-auto my-1 border-2 border-[#c0a080] object-cover">` 
-                    : `<div class="w-16 h-16 rounded-full mx-auto my-1 border-2 border-[#c0a080] flex items-center justify-center" style="background-color:${token.color};"><span class="text-white font-bold text-lg">${token.name.charAt(0)}</span></div>`;
-                
-                const content = `
-                    <h4 class="font-bold text-sm text-yellow-300 truncate">${token.name}</h4>
-                    ${tokenImage}
-                    <div class="mt-1">
-                        <p><strong>HP:</strong> ${token.hp ?? 0} / ${token.maxHp ?? 0}</p>
-                        <p><strong>AC:</strong> ${token.ac ?? 0}</p>
-                    </div>
-                `;
-                card.innerHTML = content;
-                container.appendChild(card);
-            });
-        }
-        
         // --- Event Handlers & Logic ---
         document.getElementById('change-map-btn').addEventListener('click', () => {
             const url = document.getElementById('map-url-input').value;
@@ -789,12 +652,10 @@
             const name = document.getElementById('token-name-input').value;
             const color = document.getElementById('token-color-input').value;
             const imageUrl = document.getElementById('token-image-url-input').value;
-            const owner = document.getElementById('token-owner-input').value.trim();
-
 
             if (name) {
                 const newToken = {
-                    id: crypto.randomUUID(), name, color, imageUrl, owner,
+                    id: crypto.randomUUID(), name, color, imageUrl,
                     x: 50, y: 50, width: 50, height: 50, 
                     statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: ''
                 };
@@ -802,7 +663,6 @@
                 updateDoc(vttDocRef, { tokens: updatedTokens });
                 document.getElementById('token-name-input').value = '';
                 document.getElementById('token-image-url-input').value = '';
-                document.getElementById('token-owner-input').value = '';
             }
         });
         
@@ -829,7 +689,8 @@
         // Chat & Dice
         function sendChatMessage(text, type = 'message') {
             if (!text) return;
-            const newMessage = { id: crypto.randomUUID(), sender: userName, text, type, timestamp: Date.now() };
+            const senderName = `User-${userId.substring(0,4)}`;
+            const newMessage = { id: crypto.randomUUID(), sender: senderName, text, type, timestamp: Date.now() };
             const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100);
             updateDoc(vttDocRef, { chatMessages: updatedMessages });
         }
@@ -975,12 +836,11 @@
             document.getElementById('stat-block-ac').value = token.ac || 0;
             document.getElementById('stat-block-notes').value = token.notes || '';
             
-            const canEdit = userRole === 'dm'; // Only DM can edit stats now
-            document.getElementById('stat-block-hp').disabled = !canEdit;
-            document.getElementById('stat-block-max-hp').disabled = !canEdit;
-            document.getElementById('stat-block-ac').disabled = !canEdit;
-            document.getElementById('stat-block-notes').disabled = !canEdit;
-            document.getElementById('stat-block-save-btn').classList.toggle('hidden', !canEdit);
+            document.getElementById('stat-block-hp').disabled = false;
+            document.getElementById('stat-block-max-hp').disabled = false;
+            document.getElementById('stat-block-ac').disabled = false;
+            document.getElementById('stat-block-notes').disabled = false;
+            document.getElementById('stat-block-save-btn').classList.remove('hidden');
 
             modal.classList.remove('hidden');
         }
@@ -1018,14 +878,6 @@
             element.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
-                const canMove = userRole === 'dm'; // Simplified: only DM can move tokens and fog
-
-                if (!canMove) {
-                    element.classList.add('not-movable');
-                    setTimeout(() => element.classList.remove('not-movable'), 500);
-                    return;
-                }
-
                 e.preventDefault();
                 e.stopPropagation();
                 pos3 = e.clientX;
@@ -1111,7 +963,7 @@
         }
 
         // --- Start the App ---
-        setupLoginScreen();
+        initializeAppCore();
 
     </script>
 </body>
