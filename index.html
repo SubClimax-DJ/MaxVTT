@@ -272,7 +272,6 @@
                      <div class="flex flex-col gap-2">
                         <input type="text" id="token-name-input" placeholder="Token Name..." class="gruvhub-input w-full rounded p-2">
                         <input type="text" id="token-image-url-input" placeholder="Token Image URL..." class="gruvhub-input w-full rounded p-2">
-                        <input type="text" id="token-owner-input" placeholder="Owner Name (Optional)..." class="gruvhub-input w-full rounded p-2 text-sm mt-1">
                          <div class="flex gap-1 mt-1">
                             <input type="color" id="token-color-input" value="#ff0000" class="p-0 h-9 w-10 rounded border-none bg-transparent" title="Fallback color if no image">
                             <button id="add-token-btn" class="gruvhub-button rounded p-2 flex-grow">Add Token</button>
@@ -814,7 +813,7 @@
         });
         
         document.getElementById('clear-all-btn').addEventListener('click', () => {
-            showModal( "Clear All Data?", "This will reset players and all map data.", () => setDoc(vttDocRef, DEFAULT_STATE) );
+            showModal( "Clear All Data?", "This will reset the entire session.", () => setDoc(vttDocRef, DEFAULT_STATE) );
         });
 
         function handleDeleteToken(tokenId) {
@@ -976,7 +975,7 @@
             document.getElementById('stat-block-ac').value = token.ac || 0;
             document.getElementById('stat-block-notes').value = token.notes || '';
             
-            const canEdit = userRole === 'dm' || userName === token.owner;
+            const canEdit = userRole === 'dm'; // Only DM can edit stats now
             document.getElementById('stat-block-hp').disabled = !canEdit;
             document.getElementById('stat-block-max-hp').disabled = !canEdit;
             document.getElementById('stat-block-ac').disabled = !canEdit;
@@ -1019,9 +1018,7 @@
             element.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
-                const tokenData = (vttState.tokens || []).find(t => t.id === id);
-                const isOwner = tokenData && tokenData.owner && tokenData.owner.toLowerCase() === userName.toLowerCase();
-                const canMove = userRole === 'dm' || type === 'fog' || (type === 'token' && isOwner);
+                const canMove = userRole === 'dm'; // Simplified: only DM can move tokens and fog
 
                 if (!canMove) {
                     element.classList.add('not-movable');
