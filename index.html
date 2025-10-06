@@ -235,7 +235,7 @@
             </div>
 
             <!-- Turn Tracker -->
-            <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex-grow flex flex-col min-h-0">
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex flex-col min-h-0">
                 <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Turn Tracker</h2>
                 <div id="turn-tracker-list" class="flex-grow overflow-y-auto space-y-1 pr-2"></div>
                 <div class="mt-2 text-xs flex justify-center gap-2">
@@ -501,16 +501,23 @@
         function setupVTTListener() {
             onSnapshot(vttDocRef, (doc) => {
                 if (doc.exists()) {
+                    const waitingMessage = document.getElementById('waiting-for-dm');
+                    if (waitingMessage) waitingMessage.remove();
                     vttState = { ...DEFAULT_STATE, ...doc.data() };
+                    render();
                 } else {
-                    vttState = { ...DEFAULT_STATE };
                     if(userRole === 'dm'){
-                         setDoc(vttDocRef, vttState).catch(console.error);
+                         setDoc(vttDocRef, DEFAULT_STATE).catch(console.error);
+                    } else {
+                        const mapContainer = document.getElementById('map-container');
+                        mapContainer.innerHTML = `<div id="waiting-for-dm" class="flex items-center justify-center h-full text-center text-xl text-yellow-300 p-8">Waiting for the DM to start the session...</div>`;
+                        mapContainer.style.backgroundImage = 'none';
                     }
                 }
-                render();
             }, (error) => {
                 console.error("Firestore listener error: ", error);
+                 const mapContainer = document.getElementById('map-container');
+                mapContainer.innerHTML = `<div class="text-red-400 p-8 text-center">Error connecting to the session. Please check your connection and refresh.</div>`;
             });
         }
         
@@ -528,7 +535,10 @@
 
         function renderMap() {
             const mapContainer = document.getElementById('map-container');
-            mapContainer.style.backgroundImage = `url('${vttState.mapUrl}')`;
+            // Only render map if not waiting for DM
+            if(!document.getElementById('waiting-for-dm')) {
+                mapContainer.style.backgroundImage = `url('${vttState.mapUrl}')`;
+            }
         }
 
         function renderTokens() {
