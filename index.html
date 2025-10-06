@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gruvhub VTT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Gruvhub Theme Custom CSS */
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: #3a241d; /* Dark Wood Brown */
+            color: #e6d5b8; /* Parchment */
+        }
+        #login-screen {
+            background-image: url('https://i.postimg.cc/pTBMMgj7/cozy1.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .login-box {
+             background-color: rgba(45, 55, 72, 0.85);
+             backdrop-filter: blur(4px);
+        }
+        .gruvhub-bg {
+            background-color: #5a3d2b; /* Leather Brown */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;
+        }
+        .gruvhub-border {
+            border: 2px solid #c0a080; /* Tan Gold */
+        }
+        .gruvhub-input {
+            background-color: #e6d5b8; /* Parchment */
+            border: 1px solid #c0a080; /* Tan Gold */
+            color: #3a241d; /* Dark Wood Brown */
+        }
+        .gruvhub-input::placeholder {
+            color: #6d5d4b;
+        }
+        .gruvhub-input:focus {
+            outline: none;
+            border-color: #ffd700; /* Gold */
+            box-shadow: 0 0 5px #ffd700;
+        }
+        .gruvhub-button {
+            background-color: #4a2c2a; /* Dark Reddish Brown */
+            color: #e6d5b8; /* Parchment */
+            border: 1px solid #c0a080; /* Tan Gold */
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .gruvhub-button:hover {
+            background-color: #6b4c4a;
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+        .gruvhub-button:disabled {
+            background-color: #3a2c2a;
+            color: #8b7d6b;
+            cursor: not-allowed;
+        }
+        .gruvhub-button.active {
+             background-color: #b8860b;
+            color: #fff;
+            border-color: #ffd700;
+        }
+        .map-token {
+            cursor: grab;
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            user-select: none;
+            font-size: 10px;
+            color: white;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.7);
+            overflow-wrap: break-word;
+            padding: 2px;
+            text-shadow: 1px 1px 2px black;
+            background-size: cover;
+            background-position: center;
+        }
+        .map-token.not-movable {
+            cursor: default;
+        }
+        .map-token:active {
+            cursor: grabbing;
+        }
+        .fog-block {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px dashed #c0a080;
+            cursor: pointer;
+        }
+        .map-container {
+            border: 4px ridge #c0a080;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        .selected {
+            border: 2px solid #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffd700;
+            border: 1px solid #fff;
+            z-index: 10;
+        }
+        .resize-handle.br {
+            bottom: -5px;
+            right: -5px;
+            cursor: nwse-resize;
+        }
+        .status-effect-icon {
+            position: absolute;
+            font-size: 14px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-shadow: 0 0 2px black;
+        }
+        .status-effect-btn.active {
+            background-color: #ffd700;
+            color: #3a241d;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #3a241d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5a3d2b;
+            border: 1px solid #c0a080;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7a5d4b;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .role-selector input:checked + label {
+            background-color: #b8860b;
+            color: #fff;
+            border-color: #ffd700;
+        }
+         .role-selector input:disabled + label {
+            background-color: #4a2c2a;
+            color: #8b7d6b;
+            cursor: not-allowed;
+            border-color: #6d5d4b;
+        }
+    </style>
+</head>
+<body class="overflow-hidden h-screen">
+    <!-- Login Screen -->
+    <div id="login-screen" class="absolute inset-0 z-50 flex items-center justify-center">
+        <div class="login-box gruvhub-border rounded-lg p-8 shadow-2xl text-center w-full max-w-sm">
+            <h1 class="text-3xl font-bold text-white mb-2" style="font-family: 'Cinzel', serif;">Gruvhub VTT</h1>
+            <p class="text-gray-300 mb-6">Join a Session</p>
+            <div class="space-y-4">
+                <input type="text" id="username-input" placeholder="Enter your name..." class="gruvhub-input w-full rounded p-3 text-center">
+                <div class="role-selector grid grid-cols-2 gap-4">
+                    <input type="radio" name="role" id="role-player" value="player" class="hidden" checked>
+                    <label for="role-player" class="gruvhub-border p-3 rounded-lg cursor-pointer transition-colors">Player</label>
+                    <input type="radio" name="role" id="role-dm" value="dm" class="hidden">
+                    <label for="role-dm" class="gruvhub-border p-3 rounded-lg cursor-pointer transition-colors">Dungeon Master</label>
+                </div>
+                <button id="join-session-btn" class="gruvhub-button rounded p-3 w-full text-lg">Join</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main Application Container -->
+    <div id="app" class="grid grid-cols-12 grid-rows-1 h-screen gap-4 p-4 hidden">
+        <!-- Left Panel: Chat, Dice, Turn Tracker -->
+        <div class="col-span-3 h-full flex flex-col gap-4">
+            <!-- Info Panel -->
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">VTT Info</h2>
+                <p class="text-xs"><strong>Your Name:</strong> <span id="userNameDisplay"></span></p>
+                <p class="text-xs mt-1"><strong>Session ID:</strong> <span id="sessionIdDisplay"></span></p>
+                <p class="text-xs mt-2"><strong>Voice/Video:</strong> Use a separate app like Discord or Google Meet.</p>
+            </div>
+            
+            <!-- Chat -->
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex flex-col flex-grow min-h-0">
+                <div class="flex justify-between items-center border-b border-[#c0a080] pb-2 mb-2">
+                    <h2 class="text-lg font-bold text-gray-200">Chat & Rolls</h2>
+                    <button id="clear-chat-btn" title="Clear Chat Log" class="text-xs text-[#c0a080] hover:text-white">Clear</button>
+                </div>
+                <div id="chat-messages" class="flex-grow overflow-y-auto pr-2 space-y-2"></div>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Type message..." class="gruvhub-input w-full rounded p-2 text-sm">
+                    <button id="send-chat" class="gruvhub-button rounded px-4 py-2 text-sm">Send</button>
+                </div>
+            </div>
+
+            <!-- Dice Roller -->
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Dice Roller</h2>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <button data-die="d4" class="dice-roll-btn gruvhub-button rounded p-2">d4</button>
+                    <button data-die="d6" class="dice-roll-btn gruvhub-button rounded p-2">d6</button>
+                    <button data-die="d8" class="dice-roll-btn gruvhub-button rounded p-2">d8</button>
+                    <button data-die="d10" class="dice-roll-btn gruvhub-button rounded p-2">d10</button>
+                    <button data-die="d12" class="dice-roll-btn gruvhub-button rounded p-2">d12</button>
+                    <button data-die="d20" class="dice-roll-btn gruvhub-button rounded p-2">d20</button>
+                    <button data-die="d100" class="dice-roll-btn gruvhub-button rounded p-2 col-span-2">d100</button>
+                </div>
+            </div>
+
+            <!-- Turn Tracker -->
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex-grow flex flex-col min-h-0">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Turn Tracker</h2>
+                <div id="turn-tracker-list" class="flex-grow overflow-y-auto space-y-1 pr-2"></div>
+                <div class="mt-2 text-xs flex justify-center gap-2">
+                     <button id="prev-turn" class="gruvhub-button rounded px-3 py-1">Prev</button>
+                    <button id="next-turn" class="gruvhub-button rounded px-3 py-1">Next</button>
+                    <button id="reset-turn" class="gruvhub-button rounded px-3 py-1">Reset</button>
+                </div>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="turn-tracker-input" placeholder="Add character..." class="gruvhub-input w-full rounded p-2 text-sm">
+                    <button id="add-to-tracker" class="gruvhub-button rounded px-4 py-2 text-sm">Add</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Map and DM Controls -->
+        <div class="col-span-6 h-full flex flex-col gap-4">
+            <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex flex-col flex-grow">
+                <div id="map-container" class="map-container flex-grow">
+                     <!-- Tokens and Fog will be added here by JS -->
+                </div>
+            </div>
+            <!-- DM Controls Panel (Visible to DM only) -->
+             <div id="dm-controls-panel" class="gruvhub-bg gruvhub-border rounded-lg p-3 hidden">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">DM Controls</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <!-- General Controls -->
+                    <div class="flex flex-col gap-2">
+                        <input type="text" id="map-url-input" placeholder="Map Image URL..." class="gruvhub-input w-full rounded p-2">
+                        <button id="change-map-btn" class="gruvhub-button rounded p-2">Set Map</button>
+                        <button id="add-fog-btn" class="gruvhub-button rounded p-2">Add Fog Block</button>
+                         <button id="clear-all-btn" class="bg-red-800 hover:bg-red-700 text-white rounded p-2 gruvhub-button mt-1">Clear All Data</button>
+                    </div>
+                    <!-- Token Creation -->
+                     <div class="flex flex-col gap-2">
+                        <input type="text" id="token-name-input" placeholder="Token Name..." class="gruvhub-input w-full rounded p-2">
+                        <input type="text" id="token-image-url-input" placeholder="Token Image URL..." class="gruvhub-input w-full rounded p-2">
+                        <input type="text" id="token-owner-input" placeholder="Owner Name (Optional)..." class="gruvhub-input w-full rounded p-2 text-sm mt-1">
+                         <div class="flex gap-1 mt-1">
+                            <input type="color" id="token-color-input" value="#ff0000" class="p-0 h-9 w-10 rounded border-none bg-transparent" title="Fallback color if no image">
+                            <button id="add-token-btn" class="gruvhub-button rounded p-2 flex-grow">Add Token</button>
+                         </div>
+                    </div>
+                    <!-- Selected Token Controls -->
+                    <div id="token-controls-panel">
+                        <h3 class="font-bold text-gray-300 mb-2">Status Effects (No Token)</h3>
+                        <div id="status-effects-container" class="grid grid-cols-4 gap-2 opacity-50 pointer-events-none">
+                            <button data-status="poisoned" title="Poisoned" class="status-effect-btn gruvhub-button rounded p-1" disabled>💀</button>
+                            <button data-status="blessed" title="Blessed" class="status-effect-btn gruvhub-button rounded p-1" disabled>✨</button>
+                            <button data-status="burning" title="Burning" class="status-effect-btn gruvhub-button rounded p-1" disabled>🔥</button>
+                            <button data-status="frozen" title="Frozen" class="status-effect-btn gruvhub-button rounded p-1" disabled>❄️</button>
+                            <button data-status="stunned" title="Stunned" class="status-effect-btn gruvhub-button rounded p-1" disabled>😵</button>
+                            <button data-status="shielded" title="Shielded" class="status-effect-btn gruvhub-button rounded p-1" disabled>🛡️</button>
+                            <button data-status="hidden" title="Hidden" class="status-effect-btn gruvhub-button rounded p-1" disabled>👻</button>
+                            <button data-status="frightened" title="Frightened" class="status-effect-btn gruvhub-button rounded p-1" disabled>😨</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Player Hub Panel (Visible to Players only) -->
+            <div id="player-hub-panel" class="gruvhub-bg gruvhub-border rounded-lg p-3 hidden">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Encounter Stats</h2>
+                <div id="player-hub-content" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <!-- Player stat cards will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Journal -->
+        <div class="col-span-3 h-full flex flex-col gap-4">
+             <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex flex-col h-full">
+                <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Journal & Handouts</h2>
+                 <div id="journal-list" class="flex-grow overflow-y-auto pr-2 space-y-2"></div>
+                <div class="mt-2 pt-2 border-t border-[#c0a080]">
+                    <input type="text" id="journal-title-input" placeholder="Entry Title..." class="gruvhub-input w-full rounded p-2 text-sm mb-2">
+                    <textarea id="journal-content-input" placeholder="Text content or Image URL..." class="gruvhub-input w-full rounded p-2 text-sm h-20 mb-2"></textarea>
+                    <button id="add-journal-btn" class="gruvhub-button rounded p-2 w-full">Add Journal Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for confirmation -->
+    <div id="confirmation-modal" class="modal-backdrop hidden">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl max-w-sm mx-auto">
+            <h3 class="text-lg font-bold text-white mb-4" id="modal-title">Are you sure?</h3>
+            <p class="text-sm text-gray-300 mb-6" id="modal-text">This action cannot be undone.</p>
+            <div class="flex justify-end gap-4">
+                <button id="modal-cancel-btn" class="gruvhub-button rounded px-4 py-2">Cancel</button>
+                <button id="modal-confirm-btn" class="bg-red-700 hover:bg-red-600 text-white rounded px-4 py-2 gruvhub-button">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Block Modal -->
+    <div id="stat-block-modal" class="modal-backdrop hidden">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-xl font-bold text-white" id="stat-block-name">Token Name</h3>
+                 <button id="stat-block-close-btn" class="text-2xl text-[#c0a080] hover:text-white">&times;</button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label for="stat-block-hp" class="block text-xs uppercase">Current HP</label>
+                        <input type="number" id="stat-block-hp" class="gruvhub-input w-full rounded p-2">
+                    </div>
+                     <div>
+                        <label for="stat-block-max-hp" class="block text-xs uppercase">Max HP</label>
+                        <input type="number" id="stat-block-max-hp" class="gruvhub-input w-full rounded p-2">
+                    </div>
+                     <div>
+                        <label for="stat-block-ac" class="block text-xs uppercase">Armor Class</label>
+                        <input type="number" id="stat-block-ac" class="gruvhub-input w-full rounded p-2">
+                    </div>
+                </div>
+                <div>
+                    <label for="stat-block-notes" class="block text-xs uppercase">Notes</label>
+                    <textarea id="stat-block-notes" rows="3" class="gruvhub-input w-full rounded p-2"></textarea>
+                </div>
+                 <div class="text-right">
+                     <button id="stat-block-save-btn" class="gruvhub-button rounded px-6 py-2">Save</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // --- Firebase Imports and Configuration ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // --- Global State & Constants ---
+        const fallbackConfig = {
+            apiKey: "AIzaSyANkVaoKLvJmDqkKFJLQEKtv68qpDhHXdk",
+            authDomain: "tabletop-14743.firebaseapp.com",
+            projectId: "tabletop-14743",
+            storageBucket: "tabletop-14743.firebasestorage.app",
+            messagingSenderId: "798645102897",
+            appId: "1:798645102897:web:f7dab152a31896c779a810",
+            measurementId: "G-1V3J132291"
+        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-vtt-session';
+        
+        // --- Firebase Initialization (SINGLETON) ---
+        let db, auth, analytics, vttDocRef;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            analytics = getAnalytics(app);
+            vttDocRef = doc(db, `artifacts/${appId}/public/data/vtt_state`, 'singleton_doc');
+        } catch (e) {
+            console.error("Firebase Initialization Failed:", e);
+            document.body.innerHTML = `<div class="text-red-400 text-center p-8">FATAL ERROR: Could not connect to the session database.</div>`;
+            throw new Error("Firebase init failed");
+        }
+
+
+        let userId = 'anonymous';
+        let userName = 'Player';
+        let userRole = 'player';
+        let vttState = {};
+        let selectedElement = null;
+        
+        const STATUS_ICONS = {
+            poisoned: '💀', blessed: '✨', burning: '🔥', frozen: '❄️',
+            stunned: '😵', shielded: '🛡️', hidden: '👻', frightened: '😨'
+        };
+
+        const DEFAULT_STATE = {
+            mapUrl: 'https://placehold.co/1200x800/5a3d2b/e6d5b8?text=Your+Battlemap',
+            tokens: [],
+            fogBlocks: [],
+            chatMessages: [],
+            turnTracker: { order: [], currentIndex: -1 },
+            journalEntries: []
+        };
+        
+        // --- Initialization ---
+        function initializeAppCore() {
+            authenticateUser();
+            
+            document.getElementById('sessionIdDisplay').textContent = appId;
+            
+            document.getElementById('map-container').addEventListener('click', (e) => {
+                if (e.target.id === 'map-container') {
+                    selectedElement = null;
+                    render();
+                }
+            });
+            document.getElementById('status-effects-container').addEventListener('click', handleStatusEffectClick);
+            setupStatBlockModal();
+        }
+        
+        function setupLoginScreen() {
+            const usernameInput = document.getElementById('username-input');
+            const joinBtn = document.getElementById('join-session-btn');
+            
+            const savedUsername = localStorage.getItem('vtt-username');
+            if(savedUsername) usernameInput.value = savedUsername;
+
+            joinBtn.addEventListener('click', () => {
+                const username = usernameInput.value.trim();
+                if(!username) {
+                    usernameInput.classList.add('border-red-500');
+                    setTimeout(()=> usernameInput.classList.remove('border-red-500'), 2000);
+                    return;
+                }
+                const role = document.querySelector('input[name="role"]:checked').value;
+                
+                userName = username;
+                userRole = role;
+
+                localStorage.setItem('vtt-username', userName);
+
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+
+                initializeAppCore();
+            });
+        }
+
+
+        async function authenticateUser() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    document.getElementById('userNameDisplay').textContent = `${userName} (${userRole})`;
+                    setupVTTListener();
+                    setupUIAfterLogin();
+                } else {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined') {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Authentication failed:", error);
+                    }
+                }
+            });
+        }
+        
+        function setupUIAfterLogin() {
+             const dmControls = document.getElementById('dm-controls-panel');
+             const playerHub = document.getElementById('player-hub-panel');
+             if (userRole !== 'dm') {
+                dmControls.classList.add('hidden');
+                playerHub.classList.remove('hidden');
+             } else {
+                dmControls.classList.remove('hidden');
+                playerHub.classList.add('hidden');
+             }
+        }
+
+        // --- Firestore Listener ---
+        function setupVTTListener() {
+            onSnapshot(vttDocRef, (doc) => {
+                if (doc.exists()) {
+                    vttState = { ...DEFAULT_STATE, ...doc.data() };
+                } else {
+                    vttState = { ...DEFAULT_STATE };
+                    if(userRole === 'dm'){
+                         setDoc(vttDocRef, vttState).catch(console.error);
+                    }
+                }
+                render();
+            }, (error) => {
+                console.error("Firestore listener error: ", error);
+            });
+        }
+        
+        // --- Render Functions ---
+        function render() {
+            renderMap();
+            renderTokens();
+            renderFog();
+            renderChat();
+            renderTurnTracker();
+            renderJournal();
+            renderTokenControls();
+            renderPlayerHub();
+        }
+
+        function renderMap() {
+            const mapContainer = document.getElementById('map-container');
+            mapContainer.style.backgroundImage = `url('${vttState.mapUrl}')`;
+        }
+
+        function renderTokens() {
+            const mapContainer = document.getElementById('map-container');
+            mapContainer.querySelectorAll('.map-token').forEach(el => el.remove());
+            
+            (vttState.tokens || []).forEach(token => {
+                const tokenEl = document.createElement('div');
+                tokenEl.className = 'map-token';
+                tokenEl.id = `token-${token.id}`;
+                tokenEl.style.left = `${token.x}px`;
+                tokenEl.style.top = `${token.y}px`;
+                tokenEl.style.width = `${token.width}px`;
+                tokenEl.style.height = `${token.height}px`;
+
+                if (token.imageUrl) {
+                    tokenEl.style.backgroundImage = `url('${token.imageUrl}')`;
+                    tokenEl.textContent = '';
+                    tokenEl.style.backgroundColor = 'transparent';
+                } else {
+                    tokenEl.style.backgroundColor = token.color;
+                    tokenEl.textContent = token.name;
+                }
+                
+                tokenEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedElement = { type: 'token', id: token.id };
+                    showStatBlock(token);
+                    render();
+                });
+
+                if (selectedElement && selectedElement.type === 'token' && selectedElement.id === token.id) {
+                    tokenEl.classList.add('selected');
+                    addResizeHandles(tokenEl, token, 'token');
+                }
+                
+                const statusContainer = document.createElement('div');
+                statusContainer.className = 'absolute top-0 left-0 w-full h-full';
+                (token.statusEffects || []).forEach((status, index) => {
+                    const statusEl = document.createElement('div');
+                    statusEl.className = 'status-effect-icon';
+                    statusEl.textContent = STATUS_ICONS[status] || '?';
+                    const angle = (index / (token.statusEffects.length || 1)) * 2 * Math.PI;
+                    const x = 50 + 45 * Math.cos(angle);
+                    const y = 50 + 45 * Math.sin(angle);
+                    statusEl.style.left = `calc(${x}% - 8px)`;
+                    statusEl.style.top = `calc(${y}% - 8px)`;
+                    statusContainer.appendChild(statusEl);
+                });
+                tokenEl.appendChild(statusContainer);
+
+                if (userRole === 'dm') {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.className = 'absolute -top-1 -right-1 text-white bg-black bg-opacity-50 rounded-full h-4 w-4 flex items-center justify-center text-xs z-20';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        handleDeleteToken(token.id);
+                    };
+                    tokenEl.appendChild(deleteBtn);
+                }
+                
+                mapContainer.appendChild(tokenEl);
+                makeDraggable(tokenEl, token.id, 'token');
+            });
+        }
+
+        function renderFog() {
+            const mapContainer = document.getElementById('map-container');
+            mapContainer.querySelectorAll('.fog-block').forEach(el => el.remove());
+            
+            (vttState.fogBlocks || []).forEach(block => {
+                const fogEl = document.createElement('div');
+                fogEl.className = 'fog-block';
+                fogEl.id = `fog-${block.id}`;
+                fogEl.style.left = `${block.x}px`;
+                fogEl.style.top = `${block.y}px`;
+                fogEl.style.width = `${block.width}px`;
+                fogEl.style.height = `${block.height}px`;
+
+                fogEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedElement = { type: 'fog', id: block.id };
+                    render();
+                });
+                
+                if (userRole === 'dm') {
+                    fogEl.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        handleDeleteFogBlock(block.id);
+                    });
+                }
+
+                if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) {
+                    fogEl.classList.add('selected');
+                    addResizeHandles(fogEl, block, 'fog');
+                }
+
+                mapContainer.appendChild(fogEl);
+                makeDraggable(fogEl, block.id, 'fog');
+            });
+        }
+
+        function renderChat() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = ''; // Clear existing
+            (vttState.chatMessages || []).forEach(msg => {
+                const p = document.createElement('p');
+                p.className = 'text-sm';
+                const senderDisplay = `<strong>${msg.sender}:</strong>`;
+
+                let messageText;
+                if (msg.type === 'roll') {
+                    messageText = `${senderDisplay} <span class="text-yellow-400 font-bold">${msg.text}</span>`;
+                } else {
+                    messageText = `${senderDisplay} ${msg.text}`;
+                }
+                p.innerHTML = messageText;
+                chatMessages.appendChild(p);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+        }
+        
+        function renderTurnTracker() {
+            const listEl = document.getElementById('turn-tracker-list');
+            listEl.innerHTML = '';
+            const { order = [], currentIndex = -1 } = vttState.turnTracker || {};
+            order.forEach((name, index) => {
+                const itemEl = document.createElement('div');
+                const isActive = index === currentIndex;
+                itemEl.className = `p-1.5 rounded text-sm flex justify-between items-center transition-all duration-200 ${isActive ? 'bg-[#b8860b] text-white font-bold ring-2 ring-yellow-300' : ''}`;
+                itemEl.textContent = `${isActive ? '» ' : ''}${index + 1}. ${name}`;
+                
+                if (userRole === 'dm') {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.className = `hover:text-red-200 ml-2 ${isActive ? 'text-white' : 'text-red-400'}`;
+                    deleteBtn.onclick = () => handleDeleteFromTracker(index);
+                    itemEl.appendChild(deleteBtn);
+                }
+                
+                listEl.appendChild(itemEl);
+            });
+        }
+
+        function renderJournal() {
+            const listEl = document.getElementById('journal-list');
+            listEl.innerHTML = '';
+            (vttState.journalEntries || []).slice().reverse().forEach(entry => {
+                const entryEl = document.createElement('div');
+                entryEl.className = 'gruvhub-border bg-[#4a2c2a] rounded p-2';
+                
+                let contentHTML = '';
+                const isImageUrl = entry.content.match(/\.(jpeg|jpg|gif|png)$/) != null;
+                if (isImageUrl) {
+                    contentHTML = `<img src="${entry.content}" class="max-w-full h-auto rounded mt-1">`;
+                } else {
+                    contentHTML = `<p class="text-xs whitespace-pre-wrap">${entry.content}</p>`;
+                }
+
+                entryEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-gray-200">${entry.title}</h3>
+                        ${userRole === 'dm' ? `<button data-id="${entry.id}" class="delete-journal-btn text-red-400 hover:text-red-200">&times;</button>` : ''}
+                    </div>
+                    ${contentHTML}
+                `;
+                listEl.appendChild(entryEl);
+            });
+            document.querySelectorAll('.delete-journal-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleDeleteJournal(btn.dataset.id));
+            });
+        }
+
+        function renderTokenControls() {
+            const panel = document.getElementById('token-controls-panel');
+            const container = document.getElementById('status-effects-container');
+            const title = panel.querySelector('h3');
+
+            if (userRole !== 'dm') {
+                panel.classList.add('hidden');
+                return;
+            }
+            panel.classList.remove('hidden');
+
+            if (selectedElement && selectedElement.type === 'token') {
+                const token = (vttState.tokens || []).find(t => t.id === selectedElement.id);
+                if (!token) return;
+
+                title.textContent = `Status: ${token.name}`;
+                container.classList.remove('opacity-50', 'pointer-events-none');
+
+                document.querySelectorAll('.status-effect-btn').forEach(btn => {
+                    btn.disabled = false;
+                    const status = btn.dataset.status;
+                    if ((token.statusEffects || []).includes(status)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            } else {
+                // No token selected
+                title.textContent = 'Status (No Token)';
+                container.classList.add('opacity-50', 'pointer-events-none');
+                document.querySelectorAll('.status-effect-btn').forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('active');
+                });
+            }
+        }
+        
+        function renderPlayerHub() {
+            const container = document.getElementById('player-hub-content');
+            if (userRole === 'dm' || !container) return; // Don't render for DM
+            
+            container.innerHTML = '';
+
+            (vttState.tokens || []).forEach(token => {
+                const card = document.createElement('div');
+                card.className = 'gruvhub-border bg-[#4a2c2a] rounded p-2 text-center text-xs flex flex-col justify-between';
+
+                const tokenImage = token.imageUrl 
+                    ? `<img src="${token.imageUrl}" class="w-16 h-16 rounded-full mx-auto my-1 border-2 border-[#c0a080] object-cover">` 
+                    : `<div class="w-16 h-16 rounded-full mx-auto my-1 border-2 border-[#c0a080] flex items-center justify-center" style="background-color:${token.color};"><span class="text-white font-bold text-lg">${token.name.charAt(0)}</span></div>`;
+                
+                const content = `
+                    <h4 class="font-bold text-sm text-yellow-300 truncate">${token.name}</h4>
+                    ${tokenImage}
+                    <div class="mt-1">
+                        <p><strong>HP:</strong> ${token.hp ?? 0} / ${token.maxHp ?? 0}</p>
+                        <p><strong>AC:</strong> ${token.ac ?? 0}</p>
+                    </div>
+                `;
+                card.innerHTML = content;
+                container.appendChild(card);
+            });
+        }
+        
+        // --- Event Handlers & Logic ---
+        document.getElementById('change-map-btn').addEventListener('click', () => {
+            const url = document.getElementById('map-url-input').value;
+            if (url) {
+                updateDoc(vttDocRef, { mapUrl: url });
+            }
+        });
+
+        document.getElementById('add-token-btn').addEventListener('click', () => {
+            const name = document.getElementById('token-name-input').value;
+            const color = document.getElementById('token-color-input').value;
+            const imageUrl = document.getElementById('token-image-url-input').value;
+            const owner = document.getElementById('token-owner-input').value.trim();
+
+
+            if (name) {
+                const newToken = {
+                    id: crypto.randomUUID(), name, color, imageUrl, owner,
+                    x: 50, y: 50, width: 50, height: 50, 
+                    statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: ''
+                };
+                const updatedTokens = [...(vttState.tokens || []), newToken];
+                updateDoc(vttDocRef, { tokens: updatedTokens });
+                document.getElementById('token-name-input').value = '';
+                document.getElementById('token-image-url-input').value = '';
+                document.getElementById('token-owner-input').value = '';
+            }
+        });
+        
+        document.getElementById('add-fog-btn').addEventListener('click', () => {
+             const newBlock = { id: crypto.randomUUID(), x: 50, y: 50, width: 200, height: 200 };
+            const updatedFog = [...(vttState.fogBlocks || []), newBlock];
+            updateDoc(vttDocRef, { fogBlocks: updatedFog });
+        });
+        
+        document.getElementById('clear-all-btn').addEventListener('click', () => {
+            showModal( "Clear All Data?", "This will reset players and all map data.", () => setDoc(vttDocRef, DEFAULT_STATE) );
+        });
+
+        function handleDeleteToken(tokenId) {
+            const updatedTokens = (vttState.tokens || []).filter(t => t.id !== tokenId);
+            updateDoc(vttDocRef, { tokens: updatedTokens });
+        }
+        
+        function handleDeleteFogBlock(blockId) {
+            const updatedFog = (vttState.fogBlocks || []).filter(b => b.id !== blockId);
+            updateDoc(vttDocRef, { fogBlocks: updatedFog });
+        }
+
+        // Chat & Dice
+        function sendChatMessage(text, type = 'message') {
+            if (!text) return;
+            const newMessage = { id: crypto.randomUUID(), sender: userName, text, type, timestamp: Date.now() };
+            const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100);
+            updateDoc(vttDocRef, { chatMessages: updatedMessages });
+        }
+        
+        document.getElementById('clear-chat-btn').addEventListener('click', () => {
+            showModal("Clear Chat Log?", "Are you sure?", () => updateDoc(vttDocRef, { chatMessages: [] }) );
+        });
+        
+        document.getElementById('send-chat').addEventListener('click', () => {
+            const input = document.getElementById('chat-input');
+            sendChatMessage(input.value);
+            input.value = '';
+        });
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('send-chat').click();
+        });
+
+        document.querySelectorAll('.dice-roll-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const die = btn.dataset.die;
+                const sides = parseInt(die.substring(1));
+                const result = Math.floor(Math.random() * sides) + 1;
+                sendChatMessage(`rolled a ${die}: ${result}`, 'roll');
+            });
+        });
+        
+        // Turn Tracker
+        document.getElementById('add-to-tracker').addEventListener('click', () => {
+            const input = document.getElementById('turn-tracker-input');
+            const name = input.value.trim();
+            if (name && !(vttState.turnTracker.order || []).includes(name)) {
+                const newOrder = [...(vttState.turnTracker.order || []), name];
+                const newTracker = {...vttState.turnTracker, order: newOrder};
+                if(newTracker.currentIndex === -1 && newOrder.length > 0) newTracker.currentIndex = 0;
+                updateDoc(vttDocRef, { turnTracker: newTracker });
+                input.value = '';
+            }
+        });
+        
+        document.getElementById('next-turn').addEventListener('click', () => {
+             const tracker = vttState.turnTracker;
+             if (!tracker.order || tracker.order.length === 0) return;
+             let nextIndex = (tracker.currentIndex + 1) % tracker.order.length;
+             updateDoc(vttDocRef, { 'turnTracker.currentIndex': nextIndex });
+        });
+        
+         document.getElementById('prev-turn').addEventListener('click', () => {
+             const tracker = vttState.turnTracker;
+             if (!tracker.order || tracker.order.length === 0) return;
+             let prevIndex = tracker.currentIndex - 1;
+             if (prevIndex < 0) prevIndex = tracker.order.length - 1;
+             updateDoc(vttDocRef, { 'turnTracker.currentIndex': prevIndex });
+        });
+
+        document.getElementById('reset-turn').addEventListener('click', () => {
+            const newIndex = (vttState.turnTracker.order || []).length > 0 ? 0 : -1;
+            updateDoc(vttDocRef, { 'turnTracker.currentIndex': newIndex });
+        });
+
+        function handleDeleteFromTracker(indexToDelete) {
+            const tracker = vttState.turnTracker;
+            const newOrder = tracker.order.filter((_, index) => index !== indexToDelete);
+            let newCurrentIndex = tracker.currentIndex;
+            if (indexToDelete < newCurrentIndex) newCurrentIndex--;
+            else if (indexToDelete === newCurrentIndex && newCurrentIndex >= newOrder.length) {
+                newCurrentIndex = newOrder.length > 0 ? 0 : -1;
+            }
+            if(newCurrentIndex < 0 && newOrder.length > 0) newCurrentIndex = 0;
+            updateDoc(vttDocRef, { turnTracker: { order: newOrder, currentIndex: newCurrentIndex } });
+        }
+        
+        // Journal
+        document.getElementById('add-journal-btn').addEventListener('click', () => {
+            const titleInput = document.getElementById('journal-title-input');
+            const contentInput = document.getElementById('journal-content-input');
+            if (titleInput.value && contentInput.value) {
+                const newEntry = { id: crypto.randomUUID(), title: titleInput.value, content: contentInput.value };
+                const updatedJournal = [...(vttState.journalEntries || []), newEntry];
+                updateDoc(vttDocRef, { journalEntries: updatedJournal });
+                titleInput.value = '';
+                contentInput.value = '';
+            }
+        });
+
+        function handleDeleteJournal(entryId) {
+             const updatedJournal = (vttState.journalEntries || []).filter(e => e.id !== entryId);
+             updateDoc(vttDocRef, { journalEntries: updatedJournal });
+        }
+
+        // Status Effects
+        function handleStatusEffectClick(e) {
+            if (e.target.matches('.status-effect-btn')) {
+                const status = e.target.dataset.status;
+                if (!selectedElement || selectedElement.type !== 'token') return;
+                const tokenIndex = (vttState.tokens || []).findIndex(t => t.id === selectedElement.id);
+                if (tokenIndex === -1) return;
+                const updatedTokens = [...vttState.tokens];
+                const token = { ...updatedTokens[tokenIndex] };
+                const effects = new Set(token.statusEffects || []);
+                if (effects.has(status)) effects.delete(status);
+                else effects.add(status);
+                token.statusEffects = Array.from(effects);
+                updatedTokens[tokenIndex] = token;
+                updateDoc(vttDocRef, { tokens: updatedTokens });
+            }
+        }
+        
+        // --- Modal Logic ---
+        function showModal(title, text, onConfirm) {
+            const modal = document.getElementById('confirmation-modal');
+            modal.querySelector('#modal-title').textContent = title;
+            modal.querySelector('#modal-text').textContent = text;
+            modal.classList.remove('hidden');
+            const confirmBtn = modal.querySelector('#modal-confirm-btn');
+            const cancelBtn = modal.querySelector('#modal-cancel-btn');
+            const confirmHandler = () => { onConfirm(); hideModal(); };
+            const cancelHandler = () => hideModal();
+            const hideModal = () => {
+                 modal.classList.add('hidden');
+                 confirmBtn.removeEventListener('click', confirmHandler);
+                 cancelBtn.removeEventListener('click', cancelHandler);
+            }
+            confirmBtn.addEventListener('click', confirmHandler);
+            cancelBtn.addEventListener('click', cancelHandler);
+        }
+
+        // --- Stat Block Modal Logic ---
+        function setupStatBlockModal() {
+            const modal = document.getElementById('stat-block-modal');
+            document.getElementById('stat-block-close-btn').addEventListener('click', hideStatBlock);
+            document.getElementById('stat-block-save-btn').addEventListener('click', saveStatBlock);
+            modal.addEventListener('click', (e) => {
+                if(e.target.id === 'stat-block-modal') hideStatBlock();
+            });
+        }
+
+        function showStatBlock(token) {
+            const modal = document.getElementById('stat-block-modal');
+            modal.dataset.tokenId = token.id;
+            document.getElementById('stat-block-name').textContent = token.name;
+            document.getElementById('stat-block-hp').value = token.hp || 0;
+            document.getElementById('stat-block-max-hp').value = token.maxHp || 0;
+            document.getElementById('stat-block-ac').value = token.ac || 0;
+            document.getElementById('stat-block-notes').value = token.notes || '';
+            
+            const canEdit = userRole === 'dm' || userName === token.owner;
+            document.getElementById('stat-block-hp').disabled = !canEdit;
+            document.getElementById('stat-block-max-hp').disabled = !canEdit;
+            document.getElementById('stat-block-ac').disabled = !canEdit;
+            document.getElementById('stat-block-notes').disabled = !canEdit;
+            document.getElementById('stat-block-save-btn').classList.toggle('hidden', !canEdit);
+
+            modal.classList.remove('hidden');
+        }
+        
+        function hideStatBlock() {
+            document.getElementById('stat-block-modal').classList.add('hidden');
+        }
+
+        function saveStatBlock() {
+            const modal = document.getElementById('stat-block-modal');
+            const tokenId = modal.dataset.tokenId;
+            const tokenIndex = vttState.tokens.findIndex(t => t.id === tokenId);
+            if (tokenIndex === -1) return;
+
+            const updatedTokens = [...vttState.tokens];
+            const token = { ...updatedTokens[tokenIndex] };
+            
+            token.hp = parseInt(document.getElementById('stat-block-hp').value, 10);
+            token.maxHp = parseInt(document.getElementById('stat-block-max-hp').value, 10);
+            token.ac = parseInt(document.getElementById('stat-block-ac').value, 10);
+            token.notes = document.getElementById('stat-block-notes').value;
+            
+            updatedTokens[tokenIndex] = token;
+            updateDoc(vttDocRef, { tokens: updatedTokens });
+            hideStatBlock();
+        }
+
+        // --- Draggable & Resizable Logic ---
+        function makeDraggable(element, id, type) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            if (element.querySelector('.resize-handle')) {
+                element.querySelector('.resize-handle').onmousedown = (e) => e.stopPropagation();
+            }
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                const tokenData = (vttState.tokens || []).find(t => t.id === id);
+                const isOwner = tokenData && tokenData.owner && tokenData.owner.toLowerCase() === userName.toLowerCase();
+                const canMove = userRole === 'dm' || type === 'fog' || (type === 'token' && isOwner);
+
+                if (!canMove) {
+                    element.classList.add('not-movable');
+                    setTimeout(() => element.classList.remove('not-movable'), 500);
+                    return;
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                const mapContainer = document.getElementById('map-container');
+                const rect = mapContainer.getBoundingClientRect();
+                let finalX = Math.max(0, Math.min(element.offsetLeft, rect.width - element.offsetWidth));
+                let finalY = Math.max(0, Math.min(element.offsetTop, rect.height - element.offsetHeight));
+                element.style.left = finalX + 'px';
+                element.style.top = finalY + 'px';
+                
+                const dataArray = type === 'token' ? vttState.tokens : vttState.fogBlocks;
+                const itemIndex = dataArray.findIndex(item => item.id === id);
+                if (itemIndex > -1) {
+                    const updatedArray = [...dataArray];
+                    updatedArray[itemIndex] = { ...updatedArray[itemIndex], x: finalX, y: finalY };
+                    const key = type === 'token' ? 'tokens' : 'fogBlocks';
+                    updateDoc(vttDocRef, { [key]: updatedArray });
+                }
+            }
+        }
+
+        function addResizeHandles(element, data, type) {
+            const handle = document.createElement('div');
+            handle.className = 'resize-handle br';
+            element.appendChild(handle);
+            handle.addEventListener('mousedown', (e) => initResize(e, element, data, type));
+        }
+
+        function initResize(e, element, data, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
+            const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
+
+            function doResize(e) {
+                let newWidth = startWidth + e.clientX - startX;
+                let newHeight = startHeight + e.clientY - startY;
+                if (type === 'token') {
+                    const aspectRatio = startWidth / startHeight;
+                    newWidth = Math.max(newWidth, newHeight * aspectRatio);
+                    newHeight = newWidth / aspectRatio;
+                }
+                element.style.width = Math.max(20, newWidth) + 'px';
+                element.style.height = Math.max(20, newHeight) + 'px';
+            }
+
+            function stopResize() {
+                document.removeEventListener('mousemove', doResize);
+                document.removeEventListener('mouseup', stopResize);
+                const finalWidth = parseInt(element.style.width, 10);
+                const finalHeight = parseInt(element.style.height, 10);
+                const dataArray = type === 'token' ? vttState.tokens : vttState.fogBlocks;
+                const itemIndex = dataArray.findIndex(item => item.id === data.id);
+                if (itemIndex > -1) {
+                    const updatedArray = [...dataArray];
+                    updatedArray[itemIndex] = { ...updatedArray[itemIndex], width: finalWidth, height: finalHeight };
+                    const key = type === 'token' ? 'tokens' : 'fogBlocks';
+                    updateDoc(vttDocRef, { [key]: updatedArray });
+                }
+            }
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+        }
+
+        // --- Start the App ---
+        setupLoginScreen();
+
+    </script>
+</body>
+</html>
+
