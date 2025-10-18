@@ -59,7 +59,7 @@
             color: #8b7d6b;
             cursor: not-allowed;
         }
-        .gruvhub-button.active, .tab-btn.active {
+        .gruvhub-button.active, .tab-btn.active, .tool-btn.active {
             background-color: #b8860b;
             color: #fff;
             border-color: #ffd700;
@@ -316,8 +316,6 @@
     </style>
 </head>
 <body class="overflow-hidden h-screen">
-    <!-- The old audio element is removed. -->
-
     <!-- Title Screen -->
     <div id="title-screen" class="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center hidden" style="background-image: url('https://i.postimg.cc/mDZs980Y/Gemini-Generated-Image-4h0rp14h0rp14h0r.png'); background-size: contain; background-position: center; z-index: 150; background-repeat: no-repeat; background-color: #3a241d;">
         <div class="text-center bg-black bg-opacity-50 p-8 rounded-lg">
@@ -487,6 +485,25 @@
                         <button id="add-fog-btn" class="gruvhub-button rounded p-2">Add Fog Block</button>
                         
                         <div class="border-t border-[#c0a080] my-2"></div>
+                        
+                        <!-- NEW: DM Drawing Controls -->
+                        <div id="dm-drawing-controls" class="flex flex-col gap-2 border-b border-[#c0a080] pb-2">
+                            <h4 class="font-bold text-xs uppercase text-gray-300">DM Drawing Tools</h4>
+                            <div class="flex gap-2">
+                                <button id="draw-tool-btn" data-tool="draw" class="tool-btn gruvhub-button flex-1 rounded p-2 text-base">✏️ Draw</button>
+                                <button id="erase-tool-btn" data-tool="erase" class="tool-btn gruvhub-button flex-1 rounded p-2 text-base">🧼 Erase</button>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <label for="drawing-color-input" class="text-xs font-bold uppercase">Color</label>
+                                <input type="color" id="drawing-color-input" value="#ff0000" class="p-0 h-7 w-10 rounded border-none bg-transparent">
+                                <label for="drawing-thickness-input" class="text-xs font-bold uppercase ml-2">Size (<span id="drawing-thickness-display">5</span>)</label>
+                                <input type="range" id="drawing-thickness-input" min="2" max="30" value="5" class="w-full">
+                            </div>
+                            <button id="clear-drawing-btn" class="gruvhub-button bg-red-800 hover:bg-red-700 rounded p-2">Clear Drawings</button>
+                        </div>
+                        <!-- END NEW DM Drawing Controls -->
+                        
+                        <div class="border-t border-[#c0a080] my-2"></div>
                         <h3 class="font-bold text-gray-300">Session Management</h3>
                         <div class="grid grid-cols-2 gap-2 mt-1">
                             <button id="sync-data-btn" class="bg-blue-800 hover:bg-blue-700 text-white rounded p-2 gruvhub-button">Sync to Cloud</button>
@@ -583,7 +600,7 @@
                     <!-- Elements visible to players -->
                     <div class="flex flex-col gap-2">
                         <h3 class="font-bold text-gray-300">Map Tools</h3>
-                        <button id="ruler-tool-btn" class="gruvhub-button rounded p-2">Ruler</button>
+                        <button id="ruler-tool-btn" data-tool="ruler" class="tool-btn gruvhub-button rounded p-2">Ruler</button>
                     </div>
                     <div class="border-t border-[#c0a080] my-2"></div>
                     
@@ -810,12 +827,17 @@
         let battleActionState = { step: 'main', selectedAbility: null };
 
         // Tool State
-        let activeTool = 'pan'; // 'pan', 'ruler', 'template'
+        let activeTool = 'pan'; // 'pan', 'ruler', 'template', 'draw', 'erase'
         let rulerState = { active: false, start: null, end: null };
         let activeTemplateShape = null;
         let canvasInteraction = { active: false, type: null, targetId: null, handle: null, startPos: null, startDims: null };
-
-
+        
+        // Drawing State (NEW)
+        let isDrawing = false;
+        let currentLine = null;
+        // The drawing color/thickness settings are now primarily stored in activeMap.drawing,
+        // but this client-side state can track the current tool's settings if not using live update
+        
         // Panning State
         let isPanning = false;
         let lastPanPoint = { x: 0, y: 0 };
@@ -840,8 +862,14 @@
                 tokens: [],
                 fogBlocks: [],
                 grid: { enabled: false, size: 50, color: '#FFFFFF' },
-                spellTemplates: []
-            }], // Removed DM screenshare map
+                spellTemplates: [],
+                // NEW: Drawing data
+                drawing: {
+                    lines: [], 
+                    color: '#ff0000',
+                    thickness: 5,
+                },
+            }], 
             activeMapId: 'default-map-1',
             presetMaps: [
                 { name: 'SSP Overworld', url: 'https://i.postimg.cc/R0N8x258/SSP-overworld.png' },
@@ -909,7 +937,6 @@
                 turnIndex: 0,
                 log: []
             },
-            // UPDATED STATE FOR AUDIO LINK SHARING
             audioLink: null,
         };
         
@@ -970,7 +997,12 @@
         // --- Helper function to get the currently active map object ---
         function getActiveMap() {
             if (!vttState.activeMapId || !vttState.maps) return null;
-            return vttState.maps.find(m => m.id === vttState.activeMapId);
+            // Ensure drawing object exists for consistency
+            let activeMap = vttState.maps.find(m => m.id === vttState.activeMapId);
+            if (activeMap && !activeMap.drawing) {
+                activeMap.drawing = DEFAULT_STATE.maps[0].drawing;
+            }
+            return activeMap;
         }
         
         // Helper function to find a token on the active map
@@ -1074,9 +1106,11 @@
             dmControlsWrappers.forEach(wrapper => {
                 if (isDM) {
                     wrapper.classList.remove('hidden');
+                    wrapper.style.display = 'flex'; // Ensure flex layout is restored
                 } else {
                     // Use CSS to hide elements not controlled by the user
                     wrapper.classList.add('hidden');
+                    wrapper.style.display = 'none';
                 }
             });
 
@@ -1126,6 +1160,7 @@
                         const handle = el.querySelector('.resize-handle');
                         if (handle) handle.remove();
                     });
+                    redrawDrawingCanvas(); // Deselect templates too
                     renderTokenControls();
                     renderTemplateControls();
                 }
@@ -1134,13 +1169,14 @@
             document.getElementById('add-map-btn').addEventListener('click', handleAddMap);
             setupMapControls();
             setupGridControls();
+            setupDrawingControls(); 
             document.getElementById('status-effects-container').addEventListener('click', handleStatusEffectClick);
             setupStatBlockModal();
             setupTabs();
             setupEffectControls();
             setupToolControls();
             setupTokenBankControls();
-            setupEmbeddedAudioControls(); // UPDATED to reflect link sharing logic
+            setupEmbeddedAudioControls(); 
             applyPermissions();
         }
 
@@ -1244,16 +1280,20 @@
                     if (!data.maps || !Array.isArray(data.maps)) {
                         console.log("Old VTT state detected, migrating...");
                         const newMapId = crypto.randomUUID();
-                        const migratedMap = { id: newMapId, name: "Imported Map", url: data.mapUrl || DEFAULT_STATE.maps[0].url, width: data.mapWidth || 1200, height: data.mapHeight || 800, transform: data.mapTransform || { scale: 1, panX: 0, panY: 0 }, tokens: data.tokens || [], fogBlocks: data.fogBlocks || [], grid: data.grid || { enabled: false, size: 50, color: '#FFFFFF' }, spellTemplates: [] };
+                        const migratedMap = { id: newMapId, name: "Imported Map", url: data.mapUrl || DEFAULT_STATE.maps[0].url, width: data.mapWidth || 1200, height: data.mapHeight || 800, transform: data.mapTransform || { scale: 1, panX: 0, panY: 0 }, tokens: data.tokens || [], fogBlocks: data.fogBlocks || [], grid: data.grid || { enabled: false, size: 50, color: '#FFFFFF' }, spellTemplates: [], drawing: DEFAULT_STATE.maps[0].drawing };
                         const migratedState = { ...DEFAULT_STATE, maps: [migratedMap], activeMapId: newMapId, presetMaps: data.presetMaps || DEFAULT_STATE.presetMaps, chatMessages: data.chatMessages || [], turnTracker: data.turnTracker || DEFAULT_STATE.turnTracker, journalEntries: data.journalEntries || [] };
                         setDoc(vttDocRef, migratedState);
                         return;
                     }
                     vttState = { ...DEFAULT_STATE, ...data };
+                    // Ensure drawing sub-state exists on all maps (for backward compatibility)
+                    vttState.maps = vttState.maps.map(m => {
+                        if (!m.drawing) m.drawing = DEFAULT_STATE.maps[0].drawing;
+                        return m;
+                    });
                     // Ensure audioLink exists on state
                     if (!vttState.audioLink) vttState.audioLink = DEFAULT_STATE.audioLink;
 
-                    // DM screenshare map logic removed
                     
                     if (!vttState.activeMapId || !vttState.maps.find(m => m.id === vttState.activeMapId)) {
                         vttState.activeMapId = vttState.maps.length > 0 ? vttState.maps[0].id : null;
@@ -1300,6 +1340,7 @@
                 renderMapTabs();
                 renderMap();
                 renderGridControls();
+                renderDrawingControls(); 
                 renderPresetMaps();
                 renderTokensAndFog();
                 renderChat();
@@ -1307,14 +1348,13 @@
                 renderJournal();
                 renderTokenControls();
                 renderTemplateControls();
-                renderSpellTemplates();
+                redrawDrawingCanvas(); // Master redraw for drawing/templates/ruler
             }
         }
         
         function handleRenameMap(mapId) {
             const map = vttState.maps.find(m => m.id === mapId);
             if (!map || !isDM) return;
-            // Removed DM Screenshare check
             
             const newName = prompt(`Rename map "${map.name}" to:`, map.name);
             if (newName && newName.trim() !== map.name) {
@@ -1334,7 +1374,7 @@
 
                 if (map.id === vttState.activeMapId) tab.classList.add('active');
                 
-                // Click to switch map (no screenshare exception needed now)
+                // Click to switch map
                 tab.addEventListener('click', () => { if (vttState.activeMapId !== map.id) updateDoc(vttDocRef, { activeMapId: map.id }); });
                 
                 // Right-click to rename map (DM ONLY)
@@ -1379,7 +1419,18 @@
             drawingCanvas.height = height;
             mapContent.style.transform = `translate(${transform.panX}px, ${transform.panY}px) scale(${transform.scale})`;
             drawGrid();
-            renderSpellTemplates();
+            // redrawDrawingCanvas(); // Called by render()
+            
+            // NEW: Update drawing controls UI based on active map
+            const drawingControls = document.getElementById('dm-drawing-controls');
+            if (drawingControls) {
+                drawingControls.style.display = isDM ? 'flex' : 'none';
+            }
+            if (isDM && activeMap.drawing) {
+                document.getElementById('drawing-color-input').value = activeMap.drawing.color;
+                document.getElementById('drawing-thickness-input').value = activeMap.drawing.thickness;
+                document.getElementById('drawing-thickness-display').textContent = activeMap.drawing.thickness;
+            }
         }
 
         function drawGrid() {
@@ -1474,6 +1525,7 @@
                         addResizeHandles(tokenEl, token, 'token');
                         renderTokenControls();
                         renderTemplateControls();
+                        redrawDrawingCanvas(); // Deselect other elements/handles
                     }
                 });
 
@@ -1489,6 +1541,7 @@
                         addResizeHandles(tokenEl, token, 'token');
                         renderTokenControls();
                         renderTemplateControls();
+                        redrawDrawingCanvas(); // Deselect other elements/handles
                         showStatBlock(token);
                     }
                 });
@@ -1518,7 +1571,7 @@
                 fogEl.style.top = `${block.y}px`;
                 fogEl.style.width = `${block.width}px`;
                 fogEl.style.height = `${block.height}px`;
-                fogEl.addEventListener('click', (e) => { e.stopPropagation(); if (!isDM) return; if (armedEffect) { playEffect(e); return; } if (selectedElement && selectedElement.id === block.id) return; selectedElement = { type: 'fog', id: block.id }; document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); }); fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); renderTokenControls(); });
+                fogEl.addEventListener('click', (e) => { e.stopPropagation(); if (!isDM) return; if (armedEffect) { playEffect(e); return; } if (selectedElement && selectedElement.id === block.id) return; selectedElement = { type: 'fog', id: block.id }; document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); }); fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); renderTokenControls(); redrawDrawingCanvas(); });
                 fogEl.addEventListener('contextmenu', (e) => { e.preventDefault(); if (isDM) handleDeleteFogBlock(block.id); });
                 if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) { fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); }
                 mapContent.appendChild(fogEl);
@@ -1785,6 +1838,7 @@
             tokenToUpdate.ac = parseInt(document.getElementById('stat-block-ac').value, 10) || 0;
             tokenToUpdate.notes = document.getElementById('stat-block-notes').value;
             tokenToUpdate.ownedBy = document.getElementById('stat-block-owner').value;
+            tokenToUpdate.abilities = tokenToUpdate.abilities || []; // Ensure abilities are preserved if not re-saved
             updateDoc(vttDocRef, { maps: updatedMaps });
             hideStatBlock();
         }
@@ -1803,14 +1857,14 @@
                 tokens: [], 
                 fogBlocks: [], 
                 grid: { enabled: false, size: 50, color: '#FFFFFF' }, 
-                spellTemplates: [] 
+                spellTemplates: [],
+                drawing: DEFAULT_STATE.maps[0].drawing, // Add drawing state
             }; 
-            const updatedMaps = [...(vttState.maps || []), newMap]; // Screenshare map logic removed
+            const updatedMaps = [...(vttState.maps || []), newMap]; 
             updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newMapId }); 
         }
 
         function handleDeleteMap(mapId) { 
-            // Removed screenshare map check. Now only check for minimum of one map.
             if ((vttState.maps || []).length <= 1) { 
                 showModal("Cannot Delete", "You must keep at least one map.", () => {});
                 return;
@@ -1856,9 +1910,29 @@
             }); 
         }
 
-        function setupGridControls() { const updateGrid = (prop, value) => { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.grid[prop] = value; updateDoc(vttDocRef, { maps: vttState.maps }); }; document.getElementById('grid-toggle').addEventListener('change', (e) => updateGrid('enabled', e.target.checked)); document.getElementById('grid-size-input').addEventListener('input', (e) => { document.getElementById('grid-size-display').textContent = e.target.value; }); document.getElementById('grid-size-input').addEventListener('change', (e) => updateGrid('size', parseInt(e.target.value, 10))); document.getElementById('grid-color-input').addEventListener('input', (e) => updateGrid('color', e.target.value)); }
-        function renderGridControls() { const activeMap = getActiveMap(); const enabled = activeMap ? activeMap.grid.enabled : false; const size = activeMap ? activeMap.grid.size : 50; const color = activeMap ? activeMap.grid.color : '#FFFFFF'; document.getElementById('grid-toggle').checked = enabled; document.getElementById('grid-size-input').value = size; document.getElementById('grid-size-display').textContent = size; document.getElementById('grid-color-input').value = color; }
-
+        function setupGridControls() { 
+            const updateGrid = (prop, value) => { 
+                const activeMap = getActiveMap(); 
+                if (!activeMap) return; 
+                activeMap.grid[prop] = value; 
+                updateDoc(vttDocRef, { maps: vttState.maps }); 
+            }; 
+            document.getElementById('grid-toggle').addEventListener('change', (e) => updateGrid('enabled', e.target.checked)); 
+            document.getElementById('grid-size-input').addEventListener('input', (e) => { document.getElementById('grid-size-display').textContent = e.target.value; }); 
+            document.getElementById('grid-size-input').addEventListener('change', (e) => updateGrid('size', parseInt(e.target.value, 10))); 
+            document.getElementById('grid-color-input').addEventListener('input', (e) => updateGrid('color', e.target.value)); 
+        }
+        function renderGridControls() { 
+            const activeMap = getActiveMap(); 
+            const enabled = activeMap ? activeMap.grid.enabled : false; 
+            const size = activeMap ? activeMap.grid.size : 50; 
+            const color = activeMap ? activeMap.grid.color : '#FFFFFF'; 
+            document.getElementById('grid-toggle').checked = enabled; 
+            document.getElementById('grid-size-input').value = size; 
+            document.getElementById('grid-size-display').textContent = size; 
+            document.getElementById('grid-color-input').value = color; 
+        }
+        
         // --- Draggable & Resizable Logic ---
         function makeDraggable(element, id, type) { 
             const item = (getActiveMap()?.[type === 'token' ? 'tokens' : 'fogBlocks'] || []).find(i => i.id === id);
@@ -1935,7 +2009,62 @@
             sendChatMessage(`${currentUsername} added a ${name} token to the map.`, 'system');
         }
 
+        function setupDrawingControls() { 
+            // 1. Tool selection (Pencil/Eraser/Ruler) - Handled in setupToolControls now for unified UX
+            
+            // 2. Color Input (DM-Only)
+            const colorInput = document.getElementById('drawing-color-input');
+            colorInput.addEventListener('input', (e) => {
+                if (!isDM) return;
+                const activeMap = getActiveMap();
+                if (!activeMap) return;
+                // Live update the value, but defer Firestore update
+                activeMap.drawing.color = e.target.value; 
+            });
+            colorInput.addEventListener('change', (e) => {
+                if (!isDM) return;
+                updateDoc(vttDocRef, { maps: vttState.maps });
+            });
+
+            // 3. Thickness Input (DM-Only)
+            const thicknessInput = document.getElementById('drawing-thickness-input');
+            const thicknessDisplay = document.getElementById('drawing-thickness-display');
+            thicknessInput.addEventListener('input', (e) => {
+                if (!isDM) return;
+                const activeMap = getActiveMap();
+                if (!activeMap) return;
+                activeMap.drawing.thickness = parseInt(e.target.value, 10);
+                thicknessDisplay.textContent = e.target.value;
+            });
+            thicknessInput.addEventListener('change', (e) => {
+                if (!isDM) return;
+                updateDoc(vttDocRef, { maps: vttState.maps });
+            });
+
+            // 4. Clear Drawing
+            document.getElementById('clear-drawing-btn').addEventListener('click', () => {
+                if (!isDM) return;
+                showModal("Clear Drawings?", "This will permanently erase all free-hand drawings on this map.", () => {
+                    const activeMap = getActiveMap();
+                    if (activeMap) {
+                        activeMap.drawing.lines = [];
+                        updateDoc(vttDocRef, { maps: vttState.maps });
+                    }
+                });
+            });
+        }
+        
+        function renderDrawingControls() { 
+            const activeMap = getActiveMap();
+            if (activeMap && activeMap.drawing) {
+                document.getElementById('drawing-color-input').value = activeMap.drawing.color;
+                document.getElementById('drawing-thickness-input').value = activeMap.drawing.thickness;
+                document.getElementById('drawing-thickness-display').textContent = activeMap.drawing.thickness;
+            }
+        }
+
         function setupToolControls() {
+            // --- File Controls ---
             document.getElementById('sync-data-btn').addEventListener('click', () => {
                 setDoc(vttDocRef, vttState).then(() => {
                     const btn = document.getElementById('sync-data-btn');
@@ -1956,13 +2085,24 @@
             document.getElementById('save-active-map-btn').addEventListener('click', saveActiveMapToFile);
             document.getElementById('load-map-data-input').addEventListener('change', handleMapLoadFromFile);
 
-            document.getElementById('ruler-tool-btn').addEventListener('click', () => {
-                if (activeTool === 'ruler') {
-                    setActiveTool('pan');
-                } else {
-                    setActiveTool('ruler');
-                }
+            // --- Core Tool Activation (Ruler, Draw, Erase) ---
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Use closest to ensure the click handler works even if clicking a child element (e.g. ✏️)
+                    const clickedButton = e.target.closest('.tool-btn'); 
+                    if (!clickedButton) return;
+                    
+                    const tool = clickedButton.dataset.tool;
+                    if (!tool) return;
+                    
+                    if (activeTool === tool) {
+                        setActiveTool('pan');
+                    } else {
+                        setActiveTool(tool);
+                    }
+                });
             });
+            
             document.getElementById('spell-templates-panel').addEventListener('click', (e) => {
                 if(e.target.matches('.template-btn')) {
                     const shape = e.target.dataset.template;
@@ -1988,7 +2128,7 @@
                 const template = activeMap.spellTemplates.find(t => t.id === selectedElement.id);
                 if (template) {
                     template.color = e.target.value + '80'; // Add alpha
-                    renderSpellTemplates(); // Live preview
+                    redrawDrawingCanvas(); // Live preview
                 }
             });
             document.getElementById('template-color-input').addEventListener('change', (e) => {
@@ -2151,7 +2291,13 @@
                             const updatedMaps = vttState.maps.map(m => {
                                 if (m.id === activeMap.id) {
                                     // Keep the current map's ID, but update everything else from the loaded file.
-                                    return { ...m, ...loadedMap, id: m.id, transform: activeMap.transform || { scale: 1, panX: 0, panY: 0 } };
+                                    return { 
+                                        ...m, 
+                                        ...loadedMap, 
+                                        id: m.id, 
+                                        transform: activeMap.transform || { scale: 1, panX: 0, panY: 0 },
+                                        drawing: loadedMap.drawing || DEFAULT_STATE.maps[0].drawing // Include drawing data
+                                    };
                                 }
                                 return m;
                             });
@@ -2356,14 +2502,23 @@
             if (tool !== 'template') activeTemplateShape = null;
             if (tool !== 'pan') { selectedElement = null; render(); }
 
-            document.getElementById('ruler-tool-btn').classList.toggle('active', tool === 'ruler');
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            if (tool !== 'pan') {
+                 document.querySelector(`[data-tool="${tool}"]`)?.classList.add('active');
+            }
+            
             document.querySelectorAll('.template-btn').forEach(btn => {
                 btn.classList.toggle('active', tool === 'template' && activeTemplateShape === btn.dataset.template);
             });
+            document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
+            armedEffect = null;
+
 
             const mapContainer = document.getElementById('map-container');
             switch(tool) {
                 case 'ruler':
+                case 'draw': // NEW
+                case 'erase': // NEW
                 case 'template':
                     mapContainer.style.cursor = 'crosshair';
                     break;
@@ -2372,58 +2527,100 @@
                     mapContainer.style.cursor = 'move';
                     break;
             }
-            clearDrawingCanvas();
-            renderSpellTemplates();
+            redrawDrawingCanvas(); // Master redraw
         }
 
         function handleMapMouseDown(e) {
             if (e.button !== 0) return;
             const coords = getMapCoords(e);
+            const activeMap = getActiveMap();
+            if (!activeMap) return;
 
-            switch (activeTool) {
-                case 'ruler':
-                    rulerState.active = true;
-                    rulerState.start = coords;
-                    rulerState.end = coords;
-                    break;
-                case 'template':
-                    if (isDM) {
-                         placeSpellTemplate(e);
+            // --- 1. Drawing/Erasing (NEW) ---
+            if ((activeTool === 'draw' || activeTool === 'erase') && isDM) {
+                isDrawing = true;
+                
+                // Use the map's persistent settings for the drawing
+                const { color, thickness } = activeMap.drawing;
+                
+                currentLine = {
+                    points: [coords],
+                    color: activeTool === 'draw' ? color : 'rgba(0,0,0,1)', // Use map color for draw
+                    thickness: thickness,
+                    mode: activeTool // 'draw' or 'erase'
+                };
+
+                // Set up canvas context for drawing/erasing immediately
+                drawCtx.strokeStyle = currentLine.color;
+                drawCtx.lineWidth = currentLine.thickness / activeMap.transform.scale;
+                drawCtx.lineCap = 'round';
+                drawCtx.lineJoin = 'round';
+                if (activeTool === 'erase') {
+                     drawCtx.globalCompositeOperation = 'destination-out';
+                } else {
+                     drawCtx.globalCompositeOperation = 'source-over';
+                }
+
+                drawCtx.beginPath();
+                drawCtx.moveTo(coords.x, coords.y);
+                
+                e.stopPropagation();
+                return;
+            }
+
+            // --- 2. Ruler ---
+            if (activeTool === 'ruler') {
+                rulerState.active = true;
+                rulerState.start = coords;
+                rulerState.end = coords;
+                e.stopPropagation();
+                return;
+            }
+            
+            // --- 3. Template/Pan Logic ---
+            if (activeTool === 'template') {
+                if (isDM) {
+                     placeSpellTemplate(e);
+                }
+                e.stopPropagation();
+                return;
+            }
+            
+            // Default: Pan/Select
+            if (activeTool === 'pan') {
+                if (isDM) {
+                    // DM-only Template interaction check
+                    const template = getTemplateAt(coords.x, coords.y);
+                    if (template) {
+                        selectedElement = { type: 'template', id: template.id };
+                        const handle = getResizeHandleForTemplate(template, coords.x, coords.y);
+                        canvasInteraction = {
+                            active: true,
+                            type: handle ? 'resize' : 'drag',
+                            targetId: template.id,
+                            handle: handle,
+                            startPos: coords,
+                            startDims: { ...template }
+                        };
+                        redrawDrawingCanvas();
+                        e.stopPropagation();
+                        return;
                     }
-                    break;
-                case 'pan':
-                default:
-                    if (isDM) {
-                        // DM-only Template interaction check
-                        const template = getTemplateAt(coords.x, coords.y);
-                        if (template) {
-                            selectedElement = { type: 'template', id: template.id };
-                            const handle = getResizeHandleForTemplate(template, coords.x, coords.y);
-                            canvasInteraction = {
-                                active: true,
-                                type: handle ? 'resize' : 'drag',
-                                targetId: template.id,
-                                handle: handle,
-                                startPos: coords,
-                                startDims: { ...template }
-                            };
-                            render();
-                            return;
-                        }
-                    }
-                    // Map Panning Initiation (DM ONLY)
-                    if (isDM && e.target.closest('.map-token, .fog-block, .resize-handle') === null) {
-                        isPanning = true;
-                        lastPanPoint = { x: e.clientX, y: e.clientY };
-                        document.getElementById('map-container').style.cursor = 'grabbing';
-                    }
-                    break;
+                }
+                // Map Panning Initiation (DM ONLY, only if not clicking a token/fog)
+                if (isDM && e.target.closest('.map-token, .fog-block, .resize-handle') === null) {
+                    isPanning = true;
+                    lastPanPoint = { x: e.clientX, y: e.clientY };
+                    document.getElementById('map-container').style.cursor = 'grabbing';
+                }
             }
         }
 
         function handleMapMouseMove(e) {
+            const coords = getMapCoords(e);
+
+            // 1. Template Interaction (DM Only)
             if (canvasInteraction.active && isDM) {
-                const coords = getMapCoords(e);
                 const activeMap = getActiveMap();
                 if (!activeMap) return;
                 const template = activeMap.spellTemplates.find(t => t.id === canvasInteraction.targetId);
@@ -2442,11 +2639,25 @@
                     else if (template.type === 'square') template.size = Math.max(20, Math.abs(dx)*2, Math.abs(dy)*2);
                     else if (template.type === 'cone') template.height = Math.max(20, dy);
                 }
-                renderSpellTemplates();
+                redrawDrawingCanvas();
 
+            // 2. Ruler
             } else if (rulerState.active) {
-                rulerState.end = getMapCoords(e);
-                renderRuler();
+                rulerState.end = coords;
+                redrawDrawingCanvas();
+
+            // 3. Drawing/Erasing (NEW)
+            } else if (isDrawing && isDM) {
+                if (!currentLine) return;
+                currentLine.points.push(coords);
+                
+                // Draw the line segment in real-time
+                drawCtx.lineTo(coords.x, coords.y);
+                drawCtx.stroke();
+                drawCtx.beginPath();
+                drawCtx.moveTo(coords.x, coords.y);
+
+            // 4. Panning
             } else if (isPanning && isDM) { // Check isDM here to prevent players from moving map
                 const activeMap = getActiveMap(); if (!activeMap) return; const dx = e.clientX - lastPanPoint.x; const dy = e.clientY - lastPanPoint.y; lastPanPoint = { x: e.clientX, y: e.clientY }; activeMap.transform.panX += dx; activeMap.transform.panY += dy; renderMap();
             }
@@ -2460,9 +2671,28 @@
             if (rulerState.active) {
                 rulerState.active = false;
                 setTimeout(() => {
-                    if (!rulerState.active) { clearDrawingCanvas(); renderSpellTemplates(); }
+                    if (!rulerState.active) { redrawDrawingCanvas(); }
                 }, 2000);
             }
+
+            // 3. Drawing/Erasing Finalization (NEW)
+            if (isDrawing && isDM) {
+                isDrawing = false;
+                
+                // Finalize line segment and add to map state
+                const activeMap = getActiveMap();
+                if (activeMap && currentLine && currentLine.points.length > 1) {
+                    if (!activeMap.drawing.lines) activeMap.drawing.lines = [];
+                    activeMap.drawing.lines.push(currentLine);
+                    updateDoc(vttDocRef, { maps: vttState.maps });
+                }
+                currentLine = null;
+                
+                // Reset canvas context and redraw everything
+                drawCtx.globalCompositeOperation = 'source-over';
+                redrawDrawingCanvas(); 
+            }
+
             if (isPanning) {
                 isPanning = false;
                 document.getElementById('map-container').style.cursor = 'move';
@@ -2474,31 +2704,68 @@
             if (drawCtx) drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
         }
 
-        function renderRuler() {
+        function redrawPersistentDrawing() { // NEW/MODIFIED
+            const activeMap = getActiveMap();
+            if (!activeMap || !drawCtx) return;
+
+            const lines = activeMap.drawing.lines || [];
+            const scale = activeMap.transform.scale || 1;
+
+            lines.forEach(line => {
+                drawCtx.lineWidth = (line.thickness || activeMap.drawing.thickness) / scale;
+                drawCtx.lineCap = 'round';
+                drawCtx.lineJoin = 'round';
+
+                if (line.mode === 'erase') {
+                    // Erase mode: destination-out clears everything already drawn in that spot
+                    drawCtx.globalCompositeOperation = 'destination-out';
+                    drawCtx.strokeStyle = 'rgba(0,0,0,1)'; 
+                } else {
+                    // Draw mode: source-over draws on top
+                    drawCtx.globalCompositeOperation = 'source-over';
+                    drawCtx.strokeStyle = line.color;
+                }
+
+                drawCtx.beginPath();
+                if (line.points.length > 0) {
+                    drawCtx.moveTo(line.points[0].x, line.points[0].y);
+                    for (let i = 1; i < line.points.length; i++) {
+                        drawCtx.lineTo(line.points[i].x, line.points[i].y);
+                    }
+                }
+                drawCtx.stroke();
+            });
+            
+            // Reset composite operation for templates and ruler
+            drawCtx.globalCompositeOperation = 'source-over';
+        }
+        
+        function drawRuler() { // MODIFIED to no longer clear canvas
             if (!rulerState.start || !rulerState.end) return;
-            clearDrawingCanvas();
-            renderSpellTemplates(); // Redraw templates so ruler is on top
 
             const { start, end } = rulerState;
+            const activeMap = getActiveMap();
+            if (!activeMap) return;
+
             drawCtx.beginPath();
             drawCtx.moveTo(start.x, start.y);
             drawCtx.lineTo(end.x, end.y);
             drawCtx.strokeStyle = '#ffd700';
-            drawCtx.lineWidth = 3 / getActiveMap().transform.scale;
-            drawCtx.setLineDash([10 / getActiveMap().transform.scale, 5 / getActiveMap().transform.scale]);
+            drawCtx.lineWidth = 3 / activeMap.transform.scale;
+            drawCtx.setLineDash([10 / activeMap.transform.scale, 5 / activeMap.transform.scale]);
             drawCtx.stroke();
             drawCtx.setLineDash([]);
             
             const dx = end.x - start.x;
             const dy = end.y - start.y;
             const pixelDist = Math.sqrt(dx*dx + dy*dy);
-            const gridSize = getActiveMap().grid.size || 50;
+            const gridSize = activeMap.grid.size || 50;
             const feetDist = Math.round((pixelDist / gridSize) * 5);
 
             drawCtx.fillStyle = '#ffffff';
             drawCtx.strokeStyle = '#000000';
-            drawCtx.lineWidth = 4 / getActiveMap().transform.scale;
-            drawCtx.font = `bold ${16 / getActiveMap().transform.scale}px Cinzel`;
+            drawCtx.lineWidth = 4 / activeMap.transform.scale;
+            drawCtx.font = `bold ${16 / activeMap.transform.scale}px Cinzel`;
             drawCtx.textAlign = 'center';
             const text = `${feetDist} ft`;
             drawCtx.strokeText(text, start.x + dx/2, start.y + dy/2 - 10);
@@ -2525,17 +2792,23 @@
             setActiveTool('pan');
         }
 
-        function renderSpellTemplates() {
+        function redrawDrawingCanvas() { // MASTER REDRAW
+            clearDrawingCanvas();
             const activeMap = getActiveMap();
             if (!activeMap || !drawCtx) return;
-            clearDrawingCanvas();
 
+            // 1. Draw Persistent Drawings/Erasures
+            redrawPersistentDrawing();
+
+            const scale = activeMap.transform.scale || 1;
+
+            // 2. Draw Spell Templates
             (activeMap.spellTemplates || []).forEach(template => {
                 const isSelected = selectedElement && selectedElement.type === 'template' && selectedElement.id === template.id;
                 
                 drawCtx.fillStyle = template.color;
                 drawCtx.strokeStyle = isSelected ? '#33C3FF' : '#FFD700';
-                drawCtx.lineWidth = (isSelected ? 4 : 2) / activeMap.transform.scale;
+                drawCtx.lineWidth = (isSelected ? 4 : 2) / scale;
                 
                 drawCtx.beginPath();
                 switch(template.type) {
@@ -2561,6 +2834,9 @@
                     drawResizeHandle(getResizeHandleForTemplate(template));
                 }
             });
+
+            // 3. Draw Ruler Overlay
+            drawRuler();
         }
         
         function drawResizeHandle(handle) {
@@ -2656,7 +2932,7 @@
             
             // Set input value on first render if state has a link
             if (vttState.audioLink) {
-                 urlInput.value = vttState.audioLink;
+                urlInput.value = vttState.audioLink;
             }
         }
 
@@ -2737,7 +3013,6 @@
                 const tokenId = input.dataset.tokenId;
                 const checkbox = document.querySelector(`.battle-setup-checkbox[data-token-id="${tokenId}"]`);
 
-                // Only roll if the token is selected (optional, but good UX) or just roll all available. 
                 // Rolling for all is easier for DM entry.
                 if (input) {
                     input.value = Math.floor(Math.random() * 20) + 1;
