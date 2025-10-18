@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gruvhub VTT</title>
+    <title>The Shadow of The Stony Peaks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,11 +12,13 @@
         /* Gruvhub Theme Custom CSS */
         body {
             font-family: 'Cinzel', serif;
-            background-image: url('https://i.postimg.cc/wvV3KkPX/image.png');
-            background-size: cover;
+            background-image: url('https://i.postimg.cc/mDZs980Y/Gemini-Generated-Image-4h0rp14h0rp14h0r.png');
+            background-size: contain;
             background-position: center;
             background-attachment: fixed;
             color: #e6d5b8; /* Parchment */
+            background-repeat: no-repeat;
+            background-color: #3a241d;
         }
         .gruvhub-bg {
             background-color: #5a3d2b; /* Leather Brown */
@@ -144,13 +146,14 @@
             background-size: cover;
             background-position: center;
         }
-        #grid-canvas {
+        #grid-canvas, #drawing-canvas {
             position: absolute;
             top: 0;
             left: 0;
             pointer-events: none; /* Allows clicks to go through to the map */
-            z-index: 5; /* Above map, below tokens */
         }
+         #grid-canvas { z-index: 5; }
+         #drawing-canvas { z-index: 6; }
         .map-token, .fog-block {
             z-index: 10;
         }
@@ -217,19 +220,103 @@
             pointer-events: none;
             z-index: 50;
         }
-        .effect-fireball { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,200,0,0.7) 40%, rgba(255,0,0,0.5) 80%); animation: fireball-animation 0.5s ease-out forwards; }
-        @keyframes fireball-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
-        .effect-slash { width: 80px; height: 80px; border-top: 4px solid rgba(255, 255, 255, 0.8); border-radius: 50%; animation: slash-animation 0.3s ease-out forwards; }
-        @keyframes slash-animation { 0% { transform: translate(-50%, -50%) rotate(-60deg) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) rotate(45deg) scale(1.2); opacity: 0; } }
-        .effect-heal { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(144, 238, 144, 0.5); box-shadow: 0 0 20px 10px rgba(144, 238, 144, 0.7); animation: heal-animation 0.8s ease-in-out forwards; }
-        @keyframes heal-animation { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
-        .effect-ice { width: 100px; height: 100px; background-image: radial-gradient(rgba(173, 216, 230, 0.5) 30%, transparent 31%), radial-gradient(rgba(255, 255, 255, 0.6) 30%, transparent 31%); background-size: 20px 20px, 10px 10px; background-position: 0 0, 5px 5px; border-radius: 50%; animation: ice-animation 0.7s forwards; }
-        @keyframes ice-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 80% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
-        .effect-lightning { width: 30px; height: 100px; background: linear-gradient(to bottom, transparent, #9370DB, transparent); box-shadow: 0 0 10px #9370DB, 0 0 20px #9370DB; clip-path: polygon(50% 0, 60% 20%, 40% 40%, 55% 60%, 45% 80%, 50% 100%); animation: lightning-animation 0.4s ease-out forwards; }
+        .effect-fireball { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,200,0,0.7) 40%, rgba(255,0,0,0.5) 80%); animation: fireball-animation 1s ease-out forwards; }
+        @keyframes fireball-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+        .effect-slash { width: 120px; height: 120px; border-top: 4px solid rgba(255, 255, 255, 0.8); border-radius: 50%; animation: slash-animation 0.6s ease-out forwards; }
+        @keyframes slash-animation { 0% { transform: translate(-50%, -50%) rotate(-60deg) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) rotate(45deg) scale(2); opacity: 0; } }
+        .effect-heal { width: 100px; height: 100px; border-radius: 50%; background-color: rgba(144, 238, 144, 0.5); box-shadow: 0 0 20px 10px rgba(144, 238, 144, 0.7); animation: heal-animation 1.2s ease-in-out forwards; }
+        @keyframes heal-animation { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
+        .effect-ice { width: 150px; height: 150px; background-image: radial-gradient(rgba(173, 216, 230, 0.5) 30%, transparent 31%), radial-gradient(rgba(255, 255, 255, 0.6) 30%, transparent 31%); background-size: 20px 20px, 10px 10px; background-position: 0 0, 5px 5px; border-radius: 50%; animation: ice-animation 1.2s forwards; }
+        @keyframes ice-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 80% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
+        .effect-lightning { width: 40px; height: 150px; background: linear-gradient(to bottom, transparent, #9370DB, transparent); box-shadow: 0 0 10px #9370DB, 0 0 20px #9370DB; clip-path: polygon(50% 0, 60% 20%, 40% 40%, 55% 60%, 45% 80%, 50% 100%); animation: lightning-animation 0.8s ease-out forwards; }
         @keyframes lightning-animation { 0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
-    </style>
+    
+        /* Battle System Styles */
+        #battle-screen {
+            background: url('https://i.postimg.cc/4yhFHcN9/SSP-battle.png') no-repeat center center;
+            background-size: cover;
+            z-index: 200;
+        }
+        .combatant-card {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border: 2px solid #c0a080;
+            width: 150px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .combatant-card.active-turn {
+            transform: scale(1.1);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px #ffd700;
+        }
+        .combatant-card.targetable {
+            cursor: pointer;
+            border-color: #ff4500;
+        }
+        .combatant-card.targetable:hover {
+            box-shadow: 0 0 15px #ff4500;
+            transform: scale(1.05);
+        }
+        .combatant-card.defeated {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+        .combatant-image {
+            width: 90px;
+            height: 90px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            margin-bottom: 8px;
+        }
+        .combatant-health-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #555;
+            border: 1px solid #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .combatant-health-fill {
+            height: 100%;
+            background: linear-gradient(to right, #b91c1c, #ef4444);
+            transition: width 0.5s ease-in-out;
+        }
+        .combatant-health-fill.high { background: linear-gradient(to right, #15803d, #22c55e); }
+        .combatant-health-fill.medium { background: linear-gradient(to right, #ca8a04, #eab308); }
+   </style>
 </head>
 <body class="overflow-hidden h-screen">
+    <!-- Title Screen -->
+    <div id="title-screen" class="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center hidden" style="background-image: url('https://i.postimg.cc/mDZs980Y/Gemini-Generated-Image-4h0rp14h0rp14h0r.png'); background-size: contain; background-position: center; z-index: 150; background-repeat: no-repeat; background-color: #3a241d;">
+        <div class="text-center bg-black bg-opacity-50 p-8 rounded-lg">
+            <h1 class="text-6xl font-bold text-white mb-8" style="font-family: 'Cinzel', serif;">The Shadow of The Stony Peaks</h1>
+            <button id="start-session-btn" class="gruvhub-button rounded p-4 text-2xl">Start Session</button>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="modal-backdrop flex">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-8 shadow-xl max-w-sm mx-auto flex flex-col gap-4">
+            <h2 class="text-2xl font-bold text-center text-white">Join Session</h2>
+            <p class="text-sm text-center text-gray-300">Enter a username. End it with "DM" for master controls.</p>
+            <div>
+                <label for="username-input" class="block text-xs uppercase mb-1">Username</label>
+                <input type="text" id="username-input" class="gruvhub-input w-full rounded p-2 text-lg">
+                <p id="login-error" class="text-red-400 text-xs mt-1 h-4"></p>
+            </div>
+            <button id="join-session-btn" class="gruvhub-button rounded p-3 w-full text-lg">Join</button>
+        </div>
+    </div>
 
     <!-- Main Application Container -->
     <div id="app" class="grid grid-cols-12 grid-rows-1 h-screen gap-4 p-4">
@@ -238,9 +325,14 @@
             <!-- Info Panel -->
             <div class="gruvhub-bg gruvhub-border rounded-lg p-3">
                 <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">VTT Info</h2>
-                <p class="text-xs"><strong>User ID:</strong> <span id="userIdDisplay"></span></p>
+                <p class="text-xs"><strong>Username:</strong> <span id="usernameDisplay"></span></p>
                 <p class="text-xs mt-1"><strong>Session ID:</strong> <span id="sessionIdDisplay"></span></p>
-                <p class="text-xs mt-2"><strong>Voice/Video:</strong> Use a separate app.</p>
+                 <div class="mt-2">
+                    <h3 class="text-xs font-bold uppercase">Active Users</h3>
+                    <ul id="user-list" class="text-xs mt-1 space-y-1 max-h-24 overflow-y-auto">
+                        <!-- User list will be populated here -->
+                    </ul>
+                </div>
             </div>
             
             <!-- Chat -->
@@ -291,11 +383,12 @@
             <div class="gruvhub-bg gruvhub-border rounded-lg p-3 flex flex-col flex-grow h-full">
                 <div id="map-tabs-container" class="flex items-center border-b-2 border-[#c0a080] mb-2 pb-1 overflow-x-auto">
                     <!-- Tabs will be dynamically inserted here -->
-                    <button id="add-map-btn" title="Add New Map" class="gruvhub-button rounded-md flex-shrink-0 w-8 h-8 ml-auto text-lg font-bold">+</button>
+                    <button id="add-map-btn" title="Add New Map" class="dm-controls-wrapper gruvhub-button rounded-md flex-shrink-0 w-8 h-8 ml-auto text-lg font-bold">+</button>
                 </div>
                 <div id="map-container" class="map-container flex-grow relative">
                     <div id="map-content">
                         <canvas id="grid-canvas"></canvas>
+                        <canvas id="drawing-canvas"></canvas>
                         <!-- Tokens and Fog will be added here by JS -->
                     </div>
                 </div>
@@ -313,66 +406,111 @@
 
                  <!-- Controls Tab Content -->
                  <div id="controls-tab-content" class="flex flex-col gap-3 text-sm h-full overflow-y-auto pr-2">
-                     <!-- Map Controls -->
-                     <div class="flex flex-col gap-2">
-                         <label for="preset-map-select" class="text-xs font-bold uppercase">Preset Maps (for active map)</label>
-                         <select id="preset-map-select" class="gruvhub-input w-full rounded p-2 text-xs"></select>
-                         
-                         <label for="map-url-input" class="text-xs font-bold uppercase mt-1">Set Active Map from URL</label>
-                         <input type="text" id="map-url-input" placeholder="Paste map image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
-                         <button id="change-map-btn" class="gruvhub-button rounded p-2">Set Map</button>
-
-                         <label for="new-map-url-input" class="text-xs font-bold uppercase mt-1">Add Map to Presets</label>
-                         <input type="text" id="new-map-url-input" placeholder="Paste map image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
-                         <button id="add-preset-map-btn" class="gruvhub-button rounded p-2">Add to List</button>
+                     <!-- DM Controls Wrapper -->
+                     <div class="dm-controls-wrapper flex flex-col gap-3">
                          <div class="border-t border-[#c0a080] my-2"></div>
-                     </div>
-                     <!-- Grid Controls -->
-                     <div class="flex flex-col gap-2">
-                        <h3 class="font-bold text-gray-300">Active Map & Grid Controls</h3>
-                        <div class="flex items-center justify-between">
-                            <label for="grid-toggle" class="text-xs font-bold uppercase">Show Grid</label>
-                            <input type="checkbox" id="grid-toggle" class="gruvhub-input">
-                        </div>
-                        <label for="grid-size-input" class="text-xs font-bold uppercase mt-1">Grid Size (<span id="grid-size-display">50</span>px)</label>
-                        <input type="range" id="grid-size-input" min="10" max="200" value="50" class="w-full">
-                        <div class="flex items-center gap-2">
-                             <label for="grid-color-input" class="text-xs font-bold uppercase">Grid Color</label>
-                             <input type="color" id="grid-color-input" value="#FFFFFF" class="p-0 h-7 w-10 rounded border-none bg-transparent">
-                        </div>
-                        <button id="reset-view-btn" class="gruvhub-button rounded p-2 mt-1">Reset Pan/Zoom</button>
+                         <h3 class="font-bold text-gray-300">Battle</h3>
+                         <button id="start-battle-btn" class="gruvhub-button bg-red-900 hover:bg-red-800">Start Battle</button>
                          <div class="border-t border-[#c0a080] my-2"></div>
-                     </div>
-                     <button id="add-fog-btn" class="gruvhub-button rounded p-2">Add Fog Block</button>
-                     <button id="clear-all-btn" class="bg-red-800 hover:bg-red-700 text-white rounded p-2 gruvhub-button mt-1">Clear All Data</button>
-                     <div class="border-t border-[#c0a080] my-2"></div>
+                          <div class="flex flex-col gap-2">
+                              <label for="preset-map-select" class="text-xs font-bold uppercase">Preset Maps (for active map)</label>
+                              <select id="preset-map-select" class="gruvhub-input w-full rounded p-2 text-xs"></select>
+                            
+                              <label for="map-url-input" class="text-xs font-bold uppercase mt-1">Set Active Map from URL</label>
+                              <input type="text" id="map-url-input" placeholder="Paste map image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
+                              <button id="change-map-btn" class="gruvhub-button rounded p-2">Set Map</button>
 
-                     <!-- Spell Effects -->
-                       <div id="spell-effects-panel" class="flex flex-col gap-2">
-                           <h3 class="font-bold text-gray-300">Spell & Attack Effects</h3>
-                           <div class="grid grid-cols-3 gap-1">
-                               <button data-effect="fireball" class="effect-btn gruvhub-button text-xs p-1">Fireball</button>
-                               <button data-effect="slash" class="effect-btn gruvhub-button text-xs p-1">Slash</button>
-                               <button data-effect="heal" class="effect-btn gruvhub-button text-xs p-1">Heal</button>
-                               <button data-effect="ice" class="effect-btn gruvhub-button text-xs p-1">Ice</button>
-                               <button data-effect="lightning" class="effect-btn gruvhub-button text-xs p-1">Lightning</button>
-                           </div>
-                       </div>
-                       <div class="border-t border-[#c0a080] my-2"></div>
-
-                     <!-- Token Creation -->
-                       <div class="flex flex-col gap-2">
-                           <h3 class="font-bold text-gray-300">Token Creation</h3>
-                            <input type="text" id="token-name-input" placeholder="Token Name..." class="gruvhub-input w-full rounded p-2 text-xs">
-                            <input type="text" id="token-image-url-input" placeholder="Token Image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
-                             <div class="flex gap-1 mt-1">
-                                <input type="color" id="token-color-input" value="#ff0000" class="p-0 h-9 w-10 rounded border-none bg-transparent" title="Fallback color if no image">
-                                <button id="add-token-btn" class="gruvhub-button rounded p-2 flex-grow">Add Token</button>
+                              <label for="new-map-url-input" class="text-xs font-bold uppercase mt-1">Add Map to Presets</label>
+                              <input type="text" id="new-map-url-input" placeholder="Paste map image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
+                              <button id="add-preset-map-btn" class="gruvhub-button rounded p-2">Add to List</button>
+                              <div class="border-t border-[#c0a080] my-2"></div>
+                          </div>
+                          <div class="flex flex-col gap-2">
+                             <h3 class="font-bold text-gray-300">Active Map & Grid Controls</h3>
+                             <div class="flex items-center justify-between">
+                                 <label for="grid-toggle" class="text-xs font-bold uppercase">Show Grid</label>
+                                 <input type="checkbox" id="grid-toggle" class="gruvhub-input">
                              </div>
-                       </div>
-                       <div class="border-t border-[#c0a080] my-2"></div>
+                             <label for="grid-size-input" class="text-xs font-bold uppercase mt-1">Grid Size (<span id="grid-size-display">50</span>px)</label>
+                             <input type="range" id="grid-size-input" min="10" max="200" value="50" class="w-full">
+                             <div class="flex items-center gap-2">
+                                  <label for="grid-color-input" class="text-xs font-bold uppercase">Grid Color</label>
+                                  <input type="color" id="grid-color-input" value="#FFFFFF" class="p-0 h-7 w-10 rounded border-none bg-transparent">
+                             </div>
+                             <button id="reset-view-btn" class="gruvhub-button rounded p-2 mt-1">Reset Pan/Zoom</button>
+                              <div class="border-t border-[#c0a080] my-2"></div>
+                          </div>
+                          <button id="add-fog-btn" class="gruvhub-button rounded p-2">Add Fog Block</button>
+                         
+                          <div class="border-t border-[#c0a080] my-2"></div>
+                          <h3 class="font-bold text-gray-300">Session Management</h3>
+                          <div class="grid grid-cols-2 gap-2 mt-1">
+                               <button id="sync-data-btn" class="bg-blue-800 hover:bg-blue-700 text-white rounded p-2 gruvhub-button">Sync to Cloud</button>
+                               <button id="clear-all-btn" class="bg-red-800 hover:bg-red-700 text-white rounded p-2 gruvhub-button">Clear Data</button>
+                          </div>
+                          <div class="grid grid-cols-2 gap-2 mt-1">
+                               <button id="save-data-file-btn" class="bg-green-800 hover:bg-green-700 text-white rounded p-2 gruvhub-button">Save to File</button>
+                               <label for="load-data-file-input" class="bg-purple-800 hover:bg-purple-700 text-white rounded p-2 gruvhub-button text-center cursor-pointer text-xs leading-5">Load from File</label>
+                               <input type="file" id="load-data-file-input" class="hidden" accept=".json">
+                          </div>
+                          <div class="border-t border-[#c0a080] my-2"></div>
 
-                     <!-- Selected Token Controls -->
+
+                          <div id="spell-effects-panel" class="flex flex-col gap-2">
+                                   <h3 class="font-bold text-gray-300">Spell & Attack Effects</h3>
+                                   <div class="grid grid-cols-3 gap-1">
+                                       <button data-effect="fireball" class="effect-btn gruvhub-button text-xs p-1">Fireball</button>
+                                       <button data-effect="slash" class="effect-btn gruvhub-button text-xs p-1">Slash</button>
+                                       <button data-effect="heal" class="effect-btn gruvhub-button text-xs p-1">Heal</button>
+                                       <button data-effect="ice" class="effect-btn gruvhub-button text-xs p-1">Ice</button>
+                                       <button data-effect="lightning" class="effect-btn gruvhub-button text-xs p-1">Lightning</button>
+                                   </div>
+                               </div>
+                                <div class="border-t border-[#c0a080] my-2"></div>
+                               
+                          <div id="spell-templates-panel" class="flex flex-col gap-2">
+                               <h3 class="font-bold text-gray-300">Spell Templates</h3>
+                               <div class="grid grid-cols-3 gap-1">
+                                   <button data-template="circle" class="template-btn gruvhub-button text-xs p-1">20' Circle</button>
+                                   <button data-template="cone" class="template-btn gruvhub-button text-xs p-1">15' Cone</button>
+                                   <button data-template="square" class="template-btn gruvhub-button text-xs p-1">30' Square</button>
+                               </div>
+                               <button id="clear-templates-btn" class="gruvhub-button rounded p-2 mt-1 text-xs">Clear Templates</button>
+                          </div>
+                          <div id="template-controls-panel" class="hidden flex-col gap-2 mt-2">
+                               <h3 class="font-bold text-gray-300">Selected Template</h3>
+                               <div class="flex items-center gap-2">
+                                   <label for="template-color-input" class="text-xs font-bold uppercase">Color</label>
+                                   <input type="color" id="template-color-input" value="#ff8800" class="p-0 h-7 w-10 rounded border-none bg-transparent">
+                               </div>
+                          </div>
+                          <div class="border-t border-[#c0a080] my-2"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <h3 class="font-bold text-gray-300">Token Bank</h3>
+                                <div id="token-bank-container" class="grid grid-cols-4 gap-2">
+                                    <!-- Preset tokens will be rendered here by JS -->
+                                </div>
+                            </div>
+                             <div class="border-t border-[#c0a080] my-2"></div>
+                              <div class="flex flex-col gap-2">
+                                  <h3 class="font-bold text-gray-300">Token Creation</h3>
+                                   <input type="text" id="token-name-input" placeholder="Token Name..." class="gruvhub-input w-full rounded p-2 text-xs">
+                                   <input type="text" id="token-image-url-input" placeholder="Token Image URL..." class="gruvhub-input w-full rounded p-2 text-xs">
+                                   <div class="flex gap-1 mt-1">
+                                       <input type="color" id="token-color-input" value="#ff0000" class="p-0 h-9 w-10 rounded border-none bg-transparent" title="Fallback color if no image">
+                                       <button id="add-token-btn" class="gruvhub-button rounded p-2 flex-grow">Add Token</button>
+                                   </div>
+                              </div>
+                               <div class="border-t border-[#c0a080] my-2"></div>
+                     </div>
+                     <!-- End DM Controls Wrapper -->
+                     <div class="flex flex-col gap-2">
+                         <h3 class="font-bold text-gray-300">Map Tools</h3>
+                         <button id="ruler-tool-btn" class="gruvhub-button rounded p-2">Ruler</button>
+                     </div>
+                     <div class="border-t border-[#c0a080] my-2"></div>
+                    
                      <div id="token-controls-panel">
                          <h3 class="font-bold text-gray-300 mb-2">Status Effects (No Token)</h3>
                          <div id="status-effects-container" class="grid grid-cols-4 gap-2 opacity-50 pointer-events-none">
@@ -400,6 +538,30 @@
              </div>
         </div>
     </div>
+    
+    <!-- Battle Screen -->
+    <div id="battle-screen" class="fixed top-0 left-0 w-full h-full flex-col p-8 hidden">
+        <div class="absolute top-4 right-4 dm-controls-wrapper hidden">
+             <button id="end-battle-btn" class="gruvhub-button bg-red-800 hover:bg-red-700">End Battle</button>
+        </div>
+        <div id="battle-turn-order" class="text-center text-white text-lg mb-4">Turn Order...</div>
+        <div class="flex-grow flex justify-between items-center">
+            <!-- Enemy Team -->
+            <div id="enemy-team" class="flex flex-col gap-4 items-start"></div>
+            <!-- Player Team -->
+            <div id="player-team" class="flex flex-col gap-4 items-end"></div>
+        </div>
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-4 mt-4 grid grid-cols-3 gap-4 h-40">
+            <div id="battle-log" class="col-span-2 overflow-y-auto text-sm pr-2"></div>
+            <div id="battle-action-menu" class="relative">
+                <!-- Main actions and abilities will be rendered here by JS -->
+            </div>
+        </div>
+        <div id="battle-end-message" class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+            <h2 class="text-6xl font-bold text-white"></h2>
+        </div>
+    </div>
+
 
     <!-- Modal for confirmation -->
     <div id="confirmation-modal" class="modal-backdrop hidden">
@@ -413,9 +575,24 @@
         </div>
     </div>
     
+    <!-- Battle Setup Modal -->
+    <div id="battle-setup-modal" class="modal-backdrop hidden">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl w-full max-w-lg mx-auto flex flex-col">
+            <h3 class="text-xl font-bold text-white mb-4">Setup Battle</h3>
+            <p class="text-sm text-gray-300 mb-4">Select tokens for the battle. Unassigned tokens are enemies by default.</p>
+            <div id="battle-setup-token-list" class="flex-grow space-y-2 overflow-y-auto max-h-96 pr-2 mb-4">
+                <!-- Token list will be populated here -->
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="battle-setup-cancel-btn" class="gruvhub-button rounded px-4 py-2">Cancel</button>
+                <button id="begin-combat-btn" class="bg-green-700 hover:bg-green-600 text-white rounded px-4 py-2 gruvhub-button">Begin Combat</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Stat Block Modal -->
     <div id="stat-block-modal" class="modal-backdrop hidden">
-        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl w-full max-w-md mx-auto">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl w-full max-w-md mx-auto overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-4">
                  <h3 class="text-xl font-bold text-white" id="stat-block-name">Token Name</h3>
                  <button id="stat-block-close-btn" class="text-2xl text-[#c0a080] hover:text-white">&times;</button>
@@ -439,7 +616,29 @@
                     <label for="stat-block-notes" class="block text-xs uppercase">Notes</label>
                     <textarea id="stat-block-notes" rows="3" class="gruvhub-input w-full rounded p-2"></textarea>
                 </div>
-                 <div class="text-right">
+                <div id="stat-block-owner-wrapper">
+                    <label for="stat-block-owner" class="block text-xs uppercase">Owner</label>
+                    <select id="stat-block-owner" class="gruvhub-input w-full rounded p-2"></select>
+                </div>
+                 <div class="border-t border-[#c0a080] my-2"></div>
+                 <div id="stat-block-abilities-wrapper">
+                      <h4 class="font-bold text-gray-300 mb-2">Abilities</h4>
+                      <div id="stat-block-abilities-list" class="space-y-2"></div>
+                      <div class="mt-2 p-2 border border-[#c0a080] rounded">
+                           <input type="text" id="ability-name" placeholder="Ability Name" class="gruvhub-input w-full text-xs p-1 mb-1">
+                           <select id="ability-type" class="gruvhub-input w-full text-xs p-1 mb-1">
+                               <option value="attack">Attack</option>
+                               <option value="heal">Heal</option>
+                           </select>
+                           <input type="number" id="ability-hitchance" placeholder="Hit % (for attacks)" class="gruvhub-input w-full text-xs p-1 mb-1">
+                           <div class="flex gap-1">
+                               <input type="number" id="ability-damage-min" placeholder="Min Dmg/Heal" class="gruvhub-input w-1/2 text-xs p-1">
+                               <input type="number" id="ability-damage-max" placeholder="Max Dmg/Heal" class="gruvhub-input w-1/2 text-xs p-1">
+                           </div>
+                           <button id="add-ability-btn" class="gruvhub-button text-xs p-1 mt-2 w-full">Add Ability</button>
+                      </div>
+                 </div>
+                 <div class="text-right mt-4">
                     <button id="stat-block-save-btn" class="gruvhub-button rounded px-6 py-2">Save</button>
                  </div>
             </div>
@@ -452,7 +651,7 @@
         // --- Firebase Imports and Configuration ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, getDoc, collection, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // --- Global State & Constants ---
@@ -482,12 +681,30 @@
             throw new Error("Firebase init failed");
         }
 
-        let userId = 'anonymous';
+        let userId = null;
+        let isDM = false;
+        let currentUsername = '';
+        let usersCollectionRef;
+        let activeUserList = [];
         let vttState = {};
         let selectedElement = null;
         let armedEffect = null;
+        
+        // Battle State
+        let battleActionState = { step: 'main', selectedAbility: null };
+
+        // Tool State
+        let activeTool = 'pan'; // 'pan', 'ruler', 'template'
+        let rulerState = { active: false, start: null, end: null };
+        let activeTemplateShape = null;
+        let canvasInteraction = { active: false, type: null, targetId: null, handle: null, startPos: null, startDims: null };
+
+
+        // Panning State
         let isPanning = false;
         let lastPanPoint = { x: 0, y: 0 };
+        
+        let drawingCanvas, drawCtx;
         
         const STATUS_ICONS = {
             poisoned: '💀', blessed: '✨', burning: '🔥', frozen: '❄️',
@@ -504,46 +721,137 @@
                 transform: { scale: 1, panX: 0, panY: 0 },
                 tokens: [],
                 fogBlocks: [],
-                grid: { enabled: false, size: 50, color: '#FFFFFF' }
+                grid: { enabled: false, size: 50, color: '#FFFFFF' },
+                spellTemplates: []
             }],
             activeMapId: 'default-map-1',
             presetMaps: [
-                { name: 'Cavern Map', url: 'https://i.postimg.cc/VLTQNCPq/image.png' },
-                { name: 'Dungeon Map', url: 'https://i.postimg.cc/tJwS9Fns/image.png' },
-                { name: 'Forest Path', url: 'https://i.postimg.cc/9MN1Bypt/image.png' }
+                { name: 'SSP Overworld', url: 'https://i.postimg.cc/R0N8x258/SSP-overworld.png' },
+                { name: 'SSP Route 1', url: 'https://i.postimg.cc/L8rkhWgk/SSP-route1.png' },
+                { name: 'SSP Oakhaven', url: 'https://i.postimg.cc/RVhwdm7r/SSP-Oakhaven.png' },
+                { name: 'SSP Silvercreek', url: 'https://i.postimg.cc/6QrZqpXd/SSP-Silvercreek.png' },
+                { name: 'SSP Manor', url: 'https://i.postimg.cc/G9nr4drC/SSP-Manor.png' },
+                { name: 'SSP Dungeon 1', url: 'https://i.postimg.cc/QtBH5NL1/SSP-dungeon1.png' },
+                { name: 'SSP Dungeon 2', url: 'https://i.postimg.cc/7Zxh9n88/SSP-dungeon2.png' },
+                { name: 'SSP Dungeon Basement', url: 'https://i.postimg.cc/HLNLpGJH/SSP-dungeon-Basement.png' },
+                { name: 'SSP Tavern', url: 'https://i.postimg.cc/J4RRC7Tg/SSP-tavern.png' }
+            ],
+            presetTokens: [
+                { name: 'Mage', url: 'https://i.postimg.cc/Y94xdmL7/SSP-P-Mage.png' },
+                { name: 'Fighter', url: 'https://i.postimg.cc/Wzwq828s/SSP-P-Fighter.png' },
+                { name: 'Archer', url: 'https://i.postimg.cc/65HypbmN/SSP-P-Archer.png' },
+                { name: 'Healer', url: 'https://i.postimg.cc/xdmCgfT9/SSP-P-Healer.png' },
+                { name: 'Bard', url: 'https://i.postimg.cc/GtXh99zK/SSP-P-Bard.png' },
+                { name: 'Goof', url: 'https://i.postimg.cc/fT3hYHRC/SSP-P-Goof.png' },
+                { name: 'Mayor Thornton', url: 'https://i.postimg.cc/631m3XnL/SSP-N-Mayor-Thornton.png' },
+                { name: 'Pip the Bartender', url: 'https://i.postimg.cc/J7s1Q7TQ/SSP-N-Pip-the-Halfling-Bartender.png' },
+                { name: 'Linnea the Herbalist', url: 'https://i.postimg.cc/BZRJ7Wk3/SSP-N-Linnea-the-Herbalist.png' },
+                { name: 'Elara the Smith', url: 'https://i.postimg.cc/4NtsrLRp/SSP-N-Elara-the-Smith.png' },
+                { name: 'Wolves', url: 'https://i.postimg.cc/TwW4ps9g/SSP-N-Wolfs.png' },
+                { name: 'Swamp Ghouls', url: 'https://i.postimg.cc/C5Gr4f9v/SSP-N-Swamp-Ghouls.png' },
+                { name: 'Goblin', url: 'https://i.postimg.cc/qRd8xZrZ/SSP-N-Goblin.png' },
+                { name: 'Goblin Pack', url: 'https://i.postimg.cc/qM72w3PY/SSP-N-Goblin-Pack.png' },
+                { name: 'Goblin Group', url: 'https://i.postimg.cc/43c6tRDx/SSP-N-Group.png' }
             ],
             chatMessages: [],
             turnTracker: { order: [], currentIndex: -1 },
-            journalEntries: []
+            journalEntries: [],
+            battle: {
+                isActive: false,
+                combatants: [],
+                turnIndex: 0,
+                log: []
+            }
         };
         
-        // --- Initialization ---
-        function initializeAppCore() {
-            authenticateUser();
-            document.getElementById('sessionIdDisplay').textContent = appId;
-            
-            const mapContainer = document.getElementById('map-container');
-            mapContainer.addEventListener('click', (e) => {
-                if (armedEffect) { playEffect(e); } 
-                else if (e.target.id === 'map-content' || e.target.id === 'map-container') {
-                    selectedElement = null;
-                    render();
-                }
-            });
+        // --- Login and Initialization ---
+        document.getElementById('join-session-btn').addEventListener('click', handleLogin);
+        document.getElementById('username-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        
+        document.getElementById('start-session-btn').addEventListener('click', () => {
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+        });
 
-            document.getElementById('add-map-btn').addEventListener('click', handleAddMap);
-            setupMapControls();
-            setupGridControls();
-            document.getElementById('status-effects-container').addEventListener('click', handleStatusEffectClick);
-            setupStatBlockModal();
-            setupTabs();
-            setupEffectControls();
+        async function handleLogin() {
+            const usernameInput = document.getElementById('username-input');
+            const username = usernameInput.value.trim();
+            const loginError = document.getElementById('login-error');
+
+            if (!username) {
+                loginError.textContent = 'Username cannot be empty.';
+                return;
+            }
+            loginError.textContent = '';
+            
+            isDM = username.toLowerCase().endsWith('dm');
+            
+            try {
+                let userCredential;
+                if (auth.currentUser) {
+                    userCredential = { user: auth.currentUser };
+                } else if (typeof __initial_auth_token !== 'undefined') {
+                    userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    userCredential = await signInAnonymously(auth);
+                }
+
+                userId = userCredential.user.uid;
+                currentUsername = username;
+                usersCollectionRef = collection(db, `artifacts/${appId}/public/data/users`);
+                const userDocRef = doc(usersCollectionRef, userId);
+
+                await setDoc(userDocRef, {
+                    username: currentUsername,
+                    lastSeen: serverTimestamp()
+                });
+
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('title-screen').classList.remove('hidden');
+                initializeAppCore();
+
+            } catch (error) {
+                console.error("Authentication/Login failed:", error);
+                loginError.textContent = 'Could not connect to session.';
+            }
         }
 
         // --- Helper function to get the currently active map object ---
         function getActiveMap() {
             if (!vttState.activeMapId || !vttState.maps) return null;
             return vttState.maps.find(m => m.id === vttState.activeMapId);
+        }
+        
+        function playEffect(e) {
+            if (!armedEffect) return;
+            const activeMap = getActiveMap();
+            if (!activeMap) return;
+
+            const mapContainer = document.getElementById('map-container');
+            const mapContent = document.getElementById('map-content');
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+
+            const { panX, panY, scale } = activeMap.transform;
+            const mapX = (mouseX - panX) / scale;
+            const mapY = (mouseY - panY) / scale;
+            
+            const effectEl = document.createElement('div');
+            effectEl.className = `spell-effect effect-${armedEffect}`;
+            effectEl.style.left = `${mapX}px`;
+            effectEl.style.top = `${mapY}px`;
+            
+            mapContent.appendChild(effectEl);
+            
+            setTimeout(() => { effectEl.remove(); }, 1200); 
+
+            document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('map-container').style.cursor = 'move';
+            armedEffect = null;
         }
 
         function setupEffectControls() {
@@ -565,23 +873,6 @@
             });
         }
         
-        function playEffect(e) {
-            if (!armedEffect) return;
-            const mapContent = document.getElementById('map-content');
-            const rect = mapContent.getBoundingClientRect();
-            const x = (e.clientX - rect.left);
-            const y = (e.clientY - rect.top);
-            const effectEl = document.createElement('div');
-            effectEl.className = `spell-effect effect-${armedEffect}`;
-            effectEl.style.left = `${x}px`;
-            effectEl.style.top = `${y}px`;
-            mapContent.appendChild(effectEl);
-            setTimeout(() => { effectEl.remove(); }, 800);
-            document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('map-container').style.cursor = 'move';
-            armedEffect = null;
-        }
-
         function setupTabs() {
             const controlsTabBtn = document.getElementById('controls-tab-btn');
             const journalTabBtn = document.getElementById('journal-tab-btn');
@@ -605,21 +896,104 @@
             });
         }
 
-        async function authenticateUser() {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    document.getElementById('userIdDisplay').textContent = `User-${userId.substring(0, 4)}`;
-                    setupVTTListener();
+        function setupStatBlockModal() {
+            const modal = document.getElementById('stat-block-modal');
+            document.getElementById('stat-block-close-btn').addEventListener('click', hideStatBlock);
+            document.getElementById('stat-block-save-btn').addEventListener('click', saveStatBlock);
+            modal.addEventListener('click', (e) => { if(e.target === modal) hideStatBlock(); });
+            document.getElementById('add-ability-btn').addEventListener('click', addAbilityToStatBlock);
+
+        }
+        
+        function applyPermissions() {
+            const dmControlsWrappers = document.querySelectorAll('.dm-controls-wrapper');
+            const addMapBtn = document.getElementById('add-map-btn');
+            
+            dmControlsWrappers.forEach(wrapper => {
+                if (isDM) {
+                    wrapper.classList.remove('hidden');
                 } else {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined') {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) { console.error("Authentication failed:", error); }
+                    wrapper.classList.add('hidden');
                 }
+            });
+
+            if (isDM) {
+                addMapBtn.classList.remove('hidden');
+            } else {
+                addMapBtn.classList.add('hidden');
+            }
+
+            if (!isDM) {
+                document.getElementById('status-effects-container').classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function initializeAppCore() {
+            document.getElementById('sessionIdDisplay').textContent = appId;
+            document.getElementById('usernameDisplay').textContent = currentUsername;
+            
+            drawingCanvas = document.getElementById('drawing-canvas');
+            drawCtx = drawingCanvas.getContext('2d');
+
+            setInterval(() => {
+                if (userId) {
+                    const userDocRef = doc(usersCollectionRef, userId);
+                    updateDoc(userDocRef, { lastSeen: serverTimestamp() }).catch(console.error);
+                }
+            }, 15000); // Heartbeat every 15 seconds
+
+            setupVTTListener();
+            setupUsersListener();
+            setupBattleSystem();
+            
+            const mapContainer = document.getElementById('map-container');
+             mapContainer.addEventListener('mousedown', handleMapMouseDown);
+             mapContainer.addEventListener('mousemove', handleMapMouseMove);
+             window.addEventListener('mouseup', handleMapMouseUp); // Listen on window to catch mouseup outside map
+            
+             mapContainer.addEventListener('click', (e) => {
+                 if (armedEffect) { 
+                     playEffect(e);
+                     return; 
+                 } 
+                 if (activeTool === 'pan' && e.target.closest('.map-token, .fog-block') === null && !getTemplateAt(getMapCoords(e))) {
+                     selectedElement = null;
+                     document.querySelectorAll('.map-token, .fog-block').forEach(el => {
+                         el.classList.remove('selected');
+                         const handle = el.querySelector('.resize-handle');
+                         if (handle) handle.remove();
+                     });
+                     renderTokenControls();
+                     renderTemplateControls();
+                 }
+             });
+
+            document.getElementById('add-map-btn').addEventListener('click', handleAddMap);
+            setupMapControls();
+            setupGridControls();
+            document.getElementById('status-effects-container').addEventListener('click', handleStatusEffectClick);
+            setupStatBlockModal();
+            setupTabs();
+            setupEffectControls();
+            setupToolControls();
+            setupTokenBankControls();
+            applyPermissions();
+        }
+
+        // --- Listeners ---
+        function setupUsersListener() {
+            const q = query(usersCollectionRef);
+            onSnapshot(q, (snapshot) => {
+                const users = [];
+                const threshold = Date.now() - 30000;
+                snapshot.forEach((doc) => {
+                    const user = doc.data();
+                    if (user.lastSeen && user.lastSeen.toMillis() > threshold) {
+                        users.push({ id: doc.id, username: user.username });
+                    }
+                });
+                activeUserList = users;
+                renderActiveUsers(users.map(u => u.username));
             });
         }
 
@@ -627,35 +1001,16 @@
             onSnapshot(vttDocRef, (doc) => {
                 if (doc.exists()) {
                     let data = doc.data();
-                    // --- MIGRATION LOGIC for old data structure ---
+                    // Migration for older states
                     if (!data.maps || !Array.isArray(data.maps)) {
                         console.log("Old VTT state detected, migrating...");
                         const newMapId = crypto.randomUUID();
-                        const migratedMap = {
-                            id: newMapId,
-                            name: "Imported Map",
-                            url: data.mapUrl || DEFAULT_STATE.maps[0].url,
-                            width: data.mapWidth || DEFAULT_STATE.maps[0].width,
-                            height: data.mapHeight || DEFAULT_STATE.maps[0].height,
-                            transform: data.mapTransform || DEFAULT_STATE.maps[0].transform,
-                            tokens: data.tokens || [],
-                            fogBlocks: data.fogBlocks || [],
-                            grid: data.grid || DEFAULT_STATE.maps[0].grid
-                        };
-                        const migratedState = {
-                            maps: [migratedMap],
-                            activeMapId: newMapId,
-                            presetMaps: data.presetMaps || DEFAULT_STATE.presetMaps,
-                            chatMessages: data.chatMessages || [],
-                            turnTracker: data.turnTracker || DEFAULT_STATE.turnTracker,
-                            journalEntries: data.journalEntries || []
-                        };
-                        setDoc(vttDocRef, migratedState); // Overwrite with new structure
-                        return; // Wait for next snapshot with correct data
+                        const migratedMap = { id: newMapId, name: "Imported Map", url: data.mapUrl || DEFAULT_STATE.maps[0].url, width: data.mapWidth || 1200, height: data.mapHeight || 800, transform: data.mapTransform || { scale: 1, panX: 0, panY: 0 }, tokens: data.tokens || [], fogBlocks: data.fogBlocks || [], grid: data.grid || { enabled: false, size: 50, color: '#FFFFFF' }, spellTemplates: [] };
+                        const migratedState = { ...DEFAULT_STATE, maps: [migratedMap], activeMapId: newMapId, presetMaps: data.presetMaps || DEFAULT_STATE.presetMaps, chatMessages: data.chatMessages || [], turnTracker: data.turnTracker || DEFAULT_STATE.turnTracker, journalEntries: data.journalEntries || [] };
+                        setDoc(vttDocRef, migratedState);
+                        return;
                     }
-                    
                     vttState = { ...DEFAULT_STATE, ...data };
-                    
                     if (!vttState.activeMapId || !vttState.maps.find(m => m.id === vttState.activeMapId)) {
                         vttState.activeMapId = vttState.maps.length > 0 ? vttState.maps[0].id : null;
                     }
@@ -670,52 +1025,61 @@
         }
         
         // --- Render Functions ---
+        function renderActiveUsers(users) {
+            const userListEl = document.getElementById('user-list');
+            userListEl.innerHTML = '';
+            if (users.length <= 1) {
+                userListEl.innerHTML = '<li>Just you!</li>';
+            } else {
+                users.sort().forEach(username => {
+                    const li = document.createElement('li');
+                    li.textContent = username;
+                    userListEl.appendChild(li);
+                });
+            }
+        }
+        
         function render() {
-            renderMapTabs();
-            renderMap();
-            renderGridControls();
-            renderPresetMaps();
-            renderTokensAndFog();
-            renderChat();
-            renderTurnTracker();
-            renderJournal();
-            renderTokenControls();
+            const isBattleActive = vttState.battle && vttState.battle.isActive;
+            document.getElementById('app').style.display = isBattleActive ? 'none' : 'grid';
+            document.getElementById('battle-screen').style.display = isBattleActive ? 'flex' : 'none';
+
+            if (isBattleActive) {
+                renderBattleScreen();
+            } else {
+                // Hide battle end message when not in battle
+                document.getElementById('battle-end-message').classList.add('hidden');
+                renderTokenBank();
+                renderMapTabs();
+                renderMap();
+                renderGridControls();
+                renderPresetMaps();
+                renderTokensAndFog();
+                renderChat();
+                renderTurnTracker();
+                renderJournal();
+                renderTokenControls();
+                renderTemplateControls();
+                renderSpellTemplates();
+            }
         }
         
         function renderMapTabs() {
             const tabsContainer = document.getElementById('map-tabs-container');
-            // Clear existing tabs except for the add button
             tabsContainer.querySelectorAll('.map-tab').forEach(tab => tab.remove());
-            
             (vttState.maps || []).forEach(map => {
                 const tab = document.createElement('button');
                 tab.className = 'map-tab';
                 tab.textContent = map.name;
-                if (map.id === vttState.activeMapId) {
-                    tab.classList.add('active');
-                }
-                tab.addEventListener('click', () => {
-                    if (vttState.activeMapId !== map.id) {
-                         updateDoc(vttDocRef, { activeMapId: map.id });
-                    }
-                });
-
+                if (map.id === vttState.activeMapId) tab.classList.add('active');
+                tab.addEventListener('click', () => { if (vttState.activeMapId !== map.id) updateDoc(vttDocRef, { activeMapId: map.id }); });
                 const deleteBtn = document.createElement('span');
                 deleteBtn.className = 'map-tab-delete';
                 deleteBtn.innerHTML = '&times;';
                 deleteBtn.title = 'Delete Map';
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    handleDeleteMap(map.id);
-                });
-
-                // Hide the delete button if there is only one map left
-                if ((vttState.maps || []).length <= 1) {
-                    deleteBtn.style.display = 'none';
-                }
-
+                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteMap(map.id); });
+                if ((vttState.maps || []).length <= 1 || !isDM) deleteBtn.style.display = 'none';
                 tab.appendChild(deleteBtn);
-                // Insert before the add button
                 tabsContainer.insertBefore(tab, document.getElementById('add-map-btn'));
             });
         }
@@ -723,58 +1087,39 @@
         function renderMap() {
             const mapContent = document.getElementById('map-content');
             const activeMap = getActiveMap();
-
             if (!activeMap) {
                 mapContent.style.backgroundImage = `url('https://placehold.co/1200x800/3a241d/e6d5b8?text=No+Map+Selected')`;
                 mapContent.style.width = `100%`;
                 mapContent.style.height = `100%`;
                 mapContent.style.transform = '';
-                drawGrid(); // Will clear the grid
+                drawGrid();
                 return;
             }
-            
             const { url, width, height, transform } = activeMap;
             mapContent.style.backgroundImage = `url('${url}')`;
             mapContent.style.width = `${width}px`;
             mapContent.style.height = `${height}px`;
+            drawingCanvas.width = width;
+            drawingCanvas.height = height;
             mapContent.style.transform = `translate(${transform.panX}px, ${transform.panY}px) scale(${transform.scale})`;
             drawGrid();
+            renderSpellTemplates();
         }
 
         function drawGrid() {
             const canvas = document.getElementById('grid-canvas');
             const ctx = canvas.getContext('2d');
             const activeMap = getActiveMap();
-            
-            if (!activeMap) {
-                canvas.width = 0;
-                canvas.height = 0;
-                ctx.clearRect(0,0,0,0);
-                return;
-            }
-
+            if (!activeMap) { canvas.width = 0; canvas.height = 0; ctx.clearRect(0,0,0,0); return; }
             const { enabled, size, color } = activeMap.grid;
             canvas.width = activeMap.width;
             canvas.height = activeMap.height;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             if (!enabled || size <= 0) return;
-
             ctx.strokeStyle = color + '80';
             ctx.lineWidth = 1 / (activeMap.transform.scale || 1);
-
-            for (let x = 0; x < canvas.width; x += size) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            for (let y = 0; y < canvas.height; y += size) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
+            for (let x = 0; x < canvas.width; x += size) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+            for (let y = 0; y < canvas.height; y += size) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
         }
         
         function renderPresetMaps() {
@@ -782,15 +1127,27 @@
             const activeMap = getActiveMap();
             selectEl.innerHTML = '<option value="">-- Select a Preset Map --</option>';
             if (!activeMap) return;
-            
             (vttState.presetMaps || []).forEach(map => {
                 const option = document.createElement('option');
                 option.value = map.url;
                 option.textContent = map.name;
-                if (map.url === activeMap.url) {
-                    option.selected = true;
-                }
+                if (map.url === activeMap.url) option.selected = true;
                 selectEl.appendChild(option);
+            });
+        }
+
+        function renderTokenBank() {
+            const container = document.getElementById('token-bank-container');
+            container.innerHTML = '';
+            const presets = vttState.presetTokens || [];
+            presets.forEach(token => {
+                const tokenEl = document.createElement('div');
+                tokenEl.className = 'w-12 h-12 bg-cover bg-center rounded-md cursor-pointer border-2 border-transparent hover:border-[#ffd700]';
+                tokenEl.style.backgroundImage = `url('${token.url}')`;
+                tokenEl.title = `Add ${token.name}`;
+                tokenEl.dataset.name = token.name;
+                tokenEl.dataset.url = token.url;
+                container.appendChild(tokenEl);
             });
         }
 
@@ -811,39 +1168,35 @@
                 tokenEl.style.backgroundImage = token.imageUrl ? `url('${token.imageUrl}')` : 'none';
                 tokenEl.style.backgroundColor = token.imageUrl ? 'transparent' : token.color;
                 tokenEl.textContent = token.imageUrl ? '' : token.name;
-                
+                tokenEl.title = `${token.name}\nHP: ${token.hp || 0}/${token.maxHp || 0}\nAC: ${token.ac || 0}`;
+
                 tokenEl.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (armedEffect) { playEffect(e); return; }
-                    selectedElement = { type: 'token', id: token.id };
-                    showStatBlock(token);
-                    render();
+                    if (isDM || token.ownedBy === userId) {
+                        if (armedEffect) { playEffect(e); return; }
+                        if (selectedElement && selectedElement.id === token.id) { showStatBlock(token); return; }
+                        selectedElement = { type: 'token', id: token.id };
+                        document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); });
+                        tokenEl.classList.add('selected');
+                        addResizeHandles(tokenEl, token, 'token');
+                        renderTokenControls();
+                        showStatBlock(token);
+                    }
                 });
 
-                if (selectedElement && selectedElement.type === 'token' && selectedElement.id === token.id) {
-                    tokenEl.classList.add('selected');
-                    addResizeHandles(tokenEl, token, 'token');
-                }
-                
+                if (selectedElement && selectedElement.type === 'token' && selectedElement.id === token.id) { tokenEl.classList.add('selected'); addResizeHandles(tokenEl, token, 'token'); }
                 const statusContainer = document.createElement('div');
                 statusContainer.className = 'absolute top-0 left-0 w-full h-full';
-                (token.statusEffects || []).forEach((status, index) => {
-                    const statusEl = document.createElement('div');
-                    statusEl.className = 'status-effect-icon';
-                    statusEl.textContent = STATUS_ICONS[status] || '?';
-                    const angle = (index / (token.statusEffects.length || 1)) * 2 * Math.PI;
-                    statusEl.style.left = `calc(${50 + 45 * Math.cos(angle)}% - 8px)`;
-                    statusEl.style.top = `calc(${50 + 45 * Math.sin(angle)}% - 8px)`;
-                    statusContainer.appendChild(statusEl);
-                });
+                (token.statusEffects || []).forEach((status, index) => { const statusEl = document.createElement('div'); statusEl.className = 'status-effect-icon'; statusEl.textContent = STATUS_ICONS[status] || '?'; const angle = (index / (token.statusEffects.length || 1)) * 2 * Math.PI; statusEl.style.left = `calc(${50 + 45 * Math.cos(angle)}% - 8px)`; statusEl.style.top = `calc(${50 + 45 * Math.sin(angle)}% - 8px)`; statusContainer.appendChild(statusEl); });
                 tokenEl.appendChild(statusContainer);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.className = 'absolute -top-1 -right-1 text-white bg-black bg-opacity-50 rounded-full h-4 w-4 flex items-center justify-center text-xs z-20';
-                deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteToken(token.id); };
-                tokenEl.appendChild(deleteBtn);
-                
+                if (isDM) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.className = 'absolute -top-1 -right-1 text-white bg-black bg-opacity-50 rounded-full h-4 w-4 flex items-center justify-center text-xs z-20';
+                    deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteToken(token.id); };
+                    tokenEl.appendChild(deleteBtn);
+                }
+                if (token.maxHp > 0) { const healthBarContainer = document.createElement('div'); healthBarContainer.style.cssText = 'position: absolute; bottom: -10px; left: 0; width: 100%; height: 6px; background-color: #b91c1c; border-radius: 3px; overflow: hidden; border: 1px solid #450a0a;'; const healthBar = document.createElement('div'); const healthPercentage = Math.max(0, Math.min(100, (token.hp / token.maxHp) * 100)); healthBar.style.cssText = `width: ${healthPercentage}%; height: 100%; background-color: #16a34a; transition: width 0.3s ease;`; healthBarContainer.appendChild(healthBar); tokenEl.appendChild(healthBarContainer); }
                 mapContent.appendChild(tokenEl);
                 makeDraggable(tokenEl, token.id, 'token');
             });
@@ -856,65 +1209,107 @@
                 fogEl.style.top = `${block.y}px`;
                 fogEl.style.width = `${block.width}px`;
                 fogEl.style.height = `${block.height}px`;
-                fogEl.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (armedEffect) { playEffect(e); return; }
-                    selectedElement = { type: 'fog', id: block.id };
-                    render();
-                });
-                fogEl.addEventListener('contextmenu', (e) => { e.preventDefault(); handleDeleteFogBlock(block.id); });
-                if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) {
-                    fogEl.classList.add('selected');
-                    addResizeHandles(fogEl, block, 'fog');
-                }
+                fogEl.addEventListener('click', (e) => { e.stopPropagation(); if (!isDM) return; if (armedEffect) { playEffect(e); return; } if (selectedElement && selectedElement.id === block.id) return; selectedElement = { type: 'fog', id: block.id }; document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); }); fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); renderTokenControls(); });
+                fogEl.addEventListener('contextmenu', (e) => { e.preventDefault(); if (isDM) handleDeleteFogBlock(block.id); });
+                if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) { fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); }
                 mapContent.appendChild(fogEl);
                 makeDraggable(fogEl, block.id, 'fog');
             });
         }
-
-        function renderChat() {
-            const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML = '';
-            (vttState.chatMessages || []).forEach(msg => {
-                const p = document.createElement('p');
-                p.className = 'text-sm';
-                const senderDisplay = `<strong>${msg.sender}:</strong>`;
-                p.innerHTML = msg.type === 'roll' ? `${senderDisplay} <span class="text-yellow-400 font-bold">${msg.text}</span>` : `${senderDisplay} ${msg.text}`;
-                chatMessages.appendChild(p);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
         
+        function renderChat() {
+            const chatMessagesContainer = document.getElementById('chat-messages');
+            const shouldScroll = chatMessagesContainer.scrollTop + chatMessagesContainer.clientHeight >= chatMessagesContainer.scrollHeight - 20;
+            chatMessagesContainer.innerHTML = '';
+            (vttState.chatMessages || []).forEach(message => {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'text-sm break-words';
+                if (message.type === 'roll') {
+                    msgEl.innerHTML = `<span class="italic text-yellow-300">${message.sender} ${message.text}</span>`;
+                } else if (message.type === 'system') {
+                    msgEl.innerHTML = `<span class="italic text-gray-400">${message.text}</span>`;
+                } else {
+                    msgEl.innerHTML = `<strong class="text-[#c0a080]">${message.sender}:</strong> <span class="text-gray-200">${message.text}</span>`;
+                }
+                chatMessagesContainer.appendChild(msgEl);
+            });
+            if (shouldScroll) {
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            }
+        }
+
         function renderTurnTracker() {
-            const listEl = document.getElementById('turn-tracker-list');
-            listEl.innerHTML = '';
+            const trackerList = document.getElementById('turn-tracker-list');
+            trackerList.innerHTML = '';
             const { order = [], currentIndex = -1 } = vttState.turnTracker || {};
+            if (order.length === 0) {
+                trackerList.innerHTML = '<p class="text-xs text-gray-400 text-center">Empty</p>';
+                return;
+            }
             order.forEach((name, index) => {
                 const itemEl = document.createElement('div');
-                const isActive = index === currentIndex;
-                itemEl.className = `p-1.5 rounded text-sm flex justify-between items-center transition-all duration-200 ${isActive ? 'bg-[#b8860b] text-white font-bold' : ''}`;
-                itemEl.textContent = `${isActive ? '» ' : ''}${index + 1}. ${name}`;
-                const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.className = `hover:text-red-200 ml-2 ${isActive ? 'text-white' : 'text-red-400'}`;
-                deleteBtn.onclick = () => handleDeleteFromTracker(index);
-                itemEl.appendChild(deleteBtn);
-                listEl.appendChild(itemEl);
+                itemEl.className = 'flex justify-between items-center p-1 rounded text-sm transition-colors duration-200';
+                if (index === currentIndex) {
+                    itemEl.classList.add('bg-[#b8860b]', 'text-white');
+                } else {
+                    itemEl.classList.add('hover:bg-[#5a3d2b]');
+                }
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = name;
+                itemEl.appendChild(nameSpan);
+
+                if (isDM) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.className = 'text-red-400 hover:text-red-200 font-bold px-1';
+                    deleteBtn.title = 'Remove from tracker';
+                    deleteBtn.onclick = () => handleDeleteFromTracker(index);
+                    itemEl.appendChild(deleteBtn);
+                }
+                trackerList.appendChild(itemEl);
             });
         }
-
+        
         function renderJournal() {
-            const listEl = document.getElementById('journal-list');
-            listEl.innerHTML = '';
-            (vttState.journalEntries || []).slice().reverse().forEach(entry => {
+            const journalList = document.getElementById('journal-list');
+            journalList.innerHTML = '';
+            const entries = vttState.journalEntries || [];
+            if (entries.length === 0) {
+                journalList.innerHTML = '<p class="text-xs text-gray-400 text-center">No entries yet.</p>';
+                return;
+            }
+            [...entries].reverse().forEach(entry => {
                 const entryEl = document.createElement('div');
-                entryEl.className = 'gruvhub-border bg-[#4a2c2a] rounded p-2';
-                const isImageUrl = entry.content.match(/\.(jpeg|jpg|gif|png)$/) != null;
-                const contentHTML = isImageUrl ? `<img src="${entry.content}" class="max-w-full h-auto rounded mt-1">` : `<p class="text-xs whitespace-pre-wrap">${entry.content}</p>`;
-                entryEl.innerHTML = `<div class="flex justify-between items-center"><h3 class="font-bold text-gray-200">${entry.title}</h3><button data-id="${entry.id}" class="delete-journal-btn text-red-400 hover:text-red-200">&times;</button></div>${contentHTML}`;
-                listEl.appendChild(entryEl);
+                entryEl.className = 'gruvhub-border p-2 rounded bg-[#3a241d] text-xs';
+                
+                const header = document.createElement('div');
+                header.className = 'flex justify-between items-center mb-1';
+                
+                const title = document.createElement('h4');
+                title.className = 'font-bold text-base text-gray-200';
+                title.textContent = entry.title;
+                header.appendChild(title);
+
+                if (isDM) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.className = 'text-red-400 hover:text-red-200 font-bold text-lg';
+                    deleteBtn.onclick = () => handleDeleteJournal(entry.id);
+                    header.appendChild(deleteBtn);
+                }
+                
+                entryEl.appendChild(header);
+
+                const contentEl = document.createElement('div');
+                contentEl.className = 'text-gray-300 whitespace-pre-wrap break-words';
+                if (entry.content.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                    contentEl.innerHTML = `<img src="${entry.content}" alt="${entry.title}" class="max-w-full rounded mt-1">`;
+                } else {
+                    contentEl.textContent = entry.content;
+                }
+                entryEl.appendChild(contentEl);
+                journalList.appendChild(entryEl);
             });
-            document.querySelectorAll('.delete-journal-btn').forEach(btn => btn.addEventListener('click', () => handleDeleteJournal(btn.dataset.id)));
         }
 
         function renderTokenControls() {
@@ -923,126 +1318,31 @@
             const title = panel.querySelector('h3');
             const activeMap = getActiveMap();
             const token = activeMap && selectedElement && selectedElement.type === 'token' ? (activeMap.tokens || []).find(t => t.id === selectedElement.id) : null;
-
-            if (token) {
+            if (token && isDM) {
                 title.textContent = `Status: ${token.name}`;
                 container.classList.remove('opacity-50', 'pointer-events-none');
-                document.querySelectorAll('.status-effect-btn').forEach(btn => {
-                    btn.disabled = false;
-                    btn.classList.toggle('active', (token.statusEffects || []).includes(btn.dataset.status));
-                });
+                document.querySelectorAll('.status-effect-btn').forEach(btn => { btn.disabled = false; btn.classList.toggle('active', (token.statusEffects || []).includes(btn.dataset.status)); });
             } else {
                 title.textContent = 'Status (No Token)';
                 container.classList.add('opacity-50', 'pointer-events-none');
-                document.querySelectorAll('.status-effect-btn').forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.remove('active');
-                });
+                document.querySelectorAll('.status-effect-btn').forEach(btn => { btn.disabled = true; btn.classList.remove('active'); });
             }
         }
         
         // --- Event Handlers & Logic ---
-        function getImageDimensions(url) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-                img.onerror = (err) => reject(err);
-                img.src = url;
-            });
-        }
-
-        async function updateActiveMapImage(url) {
-            const activeMap = getActiveMap();
-            if (!activeMap) return;
-             try {
-                const { width, height } = await getImageDimensions(url);
-                const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url, width, height} : m);
-                updateDoc(vttDocRef, { maps: updatedMaps });
-            } catch (error) {
-                console.error("Failed to load map image:", error);
-                const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url: 'https://placehold.co/1200x800/c00/fff?text=Error', width: 1200, height: 800} : m);
-                updateDoc(vttDocRef, { maps: updatedMaps });
-            }
-        }
-
-        document.getElementById('preset-map-select').addEventListener('change', (e) => {
-            const url = e.target.value;
-            if (url) updateActiveMapImage(url);
-        });
-
-        document.getElementById('add-preset-map-btn').addEventListener('click', () => {
-            const urlInput = document.getElementById('new-map-url-input');
-            const newUrl = urlInput.value.trim();
-            if (newUrl) {
-                const name = prompt("Enter a name for this map:", `Custom Map ${(vttState.presetMaps || []).length + 1}`);
-                if (name) {
-                    const newMap = { name: name, url: newUrl };
-                    const updatedPresetMaps = [...(vttState.presetMaps || []), newMap];
-                    updateDoc(vttDocRef, { presetMaps: updatedPresetMaps });
-                    urlInput.value = '';
-                }
-            }
-        });
-
-        document.getElementById('change-map-btn').addEventListener('click', () => {
-            const url = document.getElementById('map-url-input').value.trim();
-            if (url) updateActiveMapImage(url);
-        });
-
-        document.getElementById('add-token-btn').addEventListener('click', () => {
-            const activeMap = getActiveMap();
-            if (!activeMap) return;
-            const name = document.getElementById('token-name-input').value;
-            if (name) {
-                const newToken = {
-                    id: crypto.randomUUID(), name,
-                    color: document.getElementById('token-color-input').value,
-                    imageUrl: document.getElementById('token-image-url-input').value,
-                    x: activeMap.width / 2, y: activeMap.height / 2,
-                    width: activeMap.grid.size || 50, height: activeMap.grid.size || 50, 
-                    statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: ''
-                };
-                activeMap.tokens.push(newToken);
-                updateDoc(vttDocRef, { maps: vttState.maps });
-                document.getElementById('token-name-input').value = '';
-                document.getElementById('token-image-url-input').value = '';
-            }
-        });
+        function getImageDimensions(url) { return new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight }); img.onerror = (err) => reject(err); img.src = url; }); }
+        async function updateActiveMapImage(url) { const activeMap = getActiveMap(); if (!activeMap) return; try { const { width, height } = await getImageDimensions(url); const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url, width, height} : m); updateDoc(vttDocRef, { maps: updatedMaps }); } catch (error) { console.error("Failed to load map image:", error); const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url: 'https://placehold.co/1200x800/c00/fff?text=Error', width: 1200, height: 800} : m); updateDoc(vttDocRef, { maps: updatedMaps }); } }
+        document.getElementById('preset-map-select').addEventListener('change', (e) => { const url = e.target.value; if (url) updateActiveMapImage(url); });
+        document.getElementById('add-preset-map-btn').addEventListener('click', () => { const urlInput = document.getElementById('new-map-url-input'); const newUrl = urlInput.value.trim(); if (newUrl) { const name = prompt("Enter a name for this map:", `Custom Map ${(vttState.presetMaps || []).length + 1}`); if (name) { const newMap = { name: name, url: newUrl }; const updatedPresetMaps = [...(vttState.presetMaps || []), newMap]; updateDoc(vttDocRef, { presetMaps: updatedPresetMaps }); urlInput.value = ''; } } });
+        document.getElementById('change-map-btn').addEventListener('click', () => { const url = document.getElementById('map-url-input').value.trim(); if (url) updateActiveMapImage(url); });
+        document.getElementById('add-token-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const name = document.getElementById('token-name-input').value; if (name) { const newToken = { id: crypto.randomUUID(), name, color: document.getElementById('token-color-input').value, imageUrl: document.getElementById('token-image-url-input').value, x: activeMap.width / 2, y: activeMap.height / 2, width: activeMap.grid.size || 50, height: activeMap.grid.size || 50, statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: '', ownedBy: 'dm', abilities: [] }; activeMap.tokens.push(newToken); updateDoc(vttDocRef, { maps: vttState.maps }); document.getElementById('token-name-input').value = ''; document.getElementById('token-image-url-input').value = ''; } });
+        document.getElementById('add-fog-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const newBlock = { id: crypto.randomUUID(), x: 50, y: 50, width: 200, height: 200 }; activeMap.fogBlocks.push(newBlock); updateDoc(vttDocRef, { maps: vttState.maps }); });
+        document.getElementById('clear-all-btn').addEventListener('click', () => { showModal( "Clear All Data?", "This will reset the entire session.", () => setDoc(vttDocRef, DEFAULT_STATE) ); });
+        function handleDeleteToken(tokenId) { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.tokens = (activeMap.tokens || []).filter(t => t.id !== tokenId); updateDoc(vttDocRef, { maps: vttState.maps }); }
+        function handleDeleteFogBlock(blockId) { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.fogBlocks = (activeMap.fogBlocks || []).filter(b => b.id !== blockId); updateDoc(vttDocRef, { maps: vttState.maps }); }
         
-        document.getElementById('add-fog-btn').addEventListener('click', () => {
-            const activeMap = getActiveMap();
-            if (!activeMap) return;
-            const newBlock = { id: crypto.randomUUID(), x: 50, y: 50, width: 200, height: 200 };
-            activeMap.fogBlocks.push(newBlock);
-            updateDoc(vttDocRef, { maps: vttState.maps });
-        });
+        function sendChatMessage(text, type = 'message') { if (!text) return; const senderName = type === 'system' ? 'System' : currentUsername; const newMessage = { id: crypto.randomUUID(), sender: senderName, text, type, timestamp: Date.now() }; const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100); updateDoc(vttDocRef, { chatMessages: updatedMessages }); }
         
-        document.getElementById('clear-all-btn').addEventListener('click', () => {
-            showModal( "Clear All Data?", "This will reset the entire session.", () => setDoc(vttDocRef, DEFAULT_STATE) );
-        });
-
-        function handleDeleteToken(tokenId) {
-            const activeMap = getActiveMap();
-            if (!activeMap) return;
-            activeMap.tokens = (activeMap.tokens || []).filter(t => t.id !== tokenId);
-            updateDoc(vttDocRef, { maps: vttState.maps });
-        }
-        
-        function handleDeleteFogBlock(blockId) {
-            const activeMap = getActiveMap();
-            if (!activeMap) return;
-            activeMap.fogBlocks = (activeMap.fogBlocks || []).filter(b => b.id !== blockId);
-            updateDoc(vttDocRef, { maps: vttState.maps });
-        }
-
-        // --- Chat & Dice, Turn Tracker, Journal (Unchanged) ---
-        function sendChatMessage(text, type = 'message') {
-            if (!text) return;
-            const senderName = `User-${userId.substring(0,4)}`;
-            const newMessage = { id: crypto.randomUUID(), sender: senderName, text, type, timestamp: Date.now() };
-            const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100);
-            updateDoc(vttDocRef, { chatMessages: updatedMessages });
-        }
         document.getElementById('clear-chat-btn').addEventListener('click', () => showModal("Clear Chat Log?", "Are you sure?", () => updateDoc(vttDocRef, { chatMessages: [] }) ));
         document.getElementById('send-chat').addEventListener('click', () => { const input = document.getElementById('chat-input'); sendChatMessage(input.value); input.value = ''; });
         document.getElementById('chat-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-chat').click(); });
@@ -1054,237 +1354,964 @@
         function handleDeleteFromTracker(indexToDelete) { const tracker = vttState.turnTracker; const newOrder = tracker.order.filter((_, index) => index !== indexToDelete); let newCurrentIndex = tracker.currentIndex; if (indexToDelete < newCurrentIndex) newCurrentIndex--; else if (indexToDelete === newCurrentIndex && newCurrentIndex >= newOrder.length) { newCurrentIndex = newOrder.length > 0 ? 0 : -1; } if(newCurrentIndex < 0 && newOrder.length > 0) newCurrentIndex = 0; updateDoc(vttDocRef, { turnTracker: { order: newOrder, currentIndex: newCurrentIndex } }); }
         document.getElementById('add-journal-btn').addEventListener('click', () => { const title = document.getElementById('journal-title-input'); const content = document.getElementById('journal-content-input'); if (title.value && content.value) { const newEntry = { id: crypto.randomUUID(), title: title.value, content: content.value }; const updatedJournal = [...(vttState.journalEntries || []), newEntry]; updateDoc(vttDocRef, { journalEntries: updatedJournal }); title.value = ''; content.value = ''; } });
         function handleDeleteJournal(entryId) { const updatedJournal = (vttState.journalEntries || []).filter(e => e.id !== entryId); updateDoc(vttDocRef, { journalEntries: updatedJournal }); }
-
-        // --- Status Effects ---
-        function handleStatusEffectClick(e) {
-            if (e.target.matches('.status-effect-btn')) {
-                const activeMap = getActiveMap();
-                if (!activeMap || !selectedElement || selectedElement.type !== 'token') return;
-                const tokenIndex = (activeMap.tokens || []).findIndex(t => t.id === selectedElement.id);
-                if (tokenIndex === -1) return;
-                const token = activeMap.tokens[tokenIndex];
-                const effects = new Set(token.statusEffects || []);
-                const status = e.target.dataset.status;
-                if (effects.has(status)) effects.delete(status);
-                else effects.add(status);
-                token.statusEffects = Array.from(effects);
-                updateDoc(vttDocRef, { maps: vttState.maps });
-            }
-        }
+        function handleStatusEffectClick(e) { if (e.target.matches('.status-effect-btn')) { const activeMap = getActiveMap(); if (!activeMap || !selectedElement || selectedElement.type !== 'token' || !isDM) return; const tokenIndex = (activeMap.tokens || []).findIndex(t => t.id === selectedElement.id); if (tokenIndex === -1) return; const token = activeMap.tokens[tokenIndex]; const effects = new Set(token.statusEffects || []); const status = e.target.dataset.status; if (effects.has(status)) effects.delete(status); else effects.add(status); token.statusEffects = Array.from(effects); updateDoc(vttDocRef, { maps: vttState.maps }); } }
         
         // --- Modal & Stat Block Logic ---
         function showModal(title, text, onConfirm) {
             const modal = document.getElementById('confirmation-modal');
             modal.querySelector('#modal-title').textContent = title;
             modal.querySelector('#modal-text').textContent = text;
-            modal.classList.remove('hidden');
+
             const confirmBtn = modal.querySelector('#modal-confirm-btn');
             const cancelBtn = modal.querySelector('#modal-cancel-btn');
-            const confirmHandler = () => { onConfirm(); hideModal(); };
-            const cancelHandler = () => hideModal();
-            const hideModal = () => { modal.classList.add('hidden'); confirmBtn.removeEventListener('click', confirmHandler); cancelBtn.removeEventListener('click', cancelHandler); }
-            confirmBtn.addEventListener('click', confirmHandler);
-            cancelBtn.addEventListener('click', cancelHandler);
-        }
-        function setupStatBlockModal() {
-            const modal = document.getElementById('stat-block-modal');
-            document.getElementById('stat-block-close-btn').addEventListener('click', hideStatBlock);
-            document.getElementById('stat-block-save-btn').addEventListener('click', saveStatBlock);
-            modal.addEventListener('click', (e) => { if(e.target.id === 'stat-block-modal') hideStatBlock(); });
+
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+            const hideModal = () => modal.classList.add('hidden');
+
+            newConfirmBtn.addEventListener('click', () => {
+                onConfirm();
+                hideModal();
+            }, { once: true });
+
+            newCancelBtn.addEventListener('click', hideModal, { once: true });
+
+            modal.classList.remove('hidden');
         }
         function showStatBlock(token) {
             const modal = document.getElementById('stat-block-modal');
             modal.dataset.tokenId = token.id;
             document.getElementById('stat-block-name').textContent = token.name;
-            ['hp', 'maxHp', 'ac', 'notes'].forEach(id => { document.getElementById(`stat-block-${id}`).value = token[id] || (id === 'notes' ? '' : 0); });
+            ['hp', 'max-hp', 'ac', 'notes'].forEach(id => {
+                 const el = document.getElementById(`stat-block-${id}`);
+                 if(el) {
+                      const key = id.replace('-','');
+                      el.value = token[key] || (key === 'notes' ? '' : 0);
+                      el.disabled = !isDM;
+                 }
+            });
+
+            const ownerWrapper = document.getElementById('stat-block-owner-wrapper');
+            const ownerSelect = document.getElementById('stat-block-owner');
+            if (isDM) {
+                ownerWrapper.classList.remove('hidden');
+                ownerSelect.innerHTML = '<option value="dm">DM (Unassigned)</option>';
+                activeUserList.forEach(user => {
+                    if (!user.username.toLowerCase().endsWith('dm')) {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.username;
+                        if (token.ownedBy === user.id) option.selected = true;
+                        ownerSelect.appendChild(option);
+                    }
+                });
+                if(token.ownedBy === 'dm') ownerSelect.value = 'dm';
+            } else {
+                ownerWrapper.classList.add('hidden');
+            }
+            
+            document.getElementById('stat-block-abilities-wrapper').style.display = isDM ? 'block' : 'none';
+            renderAbilitiesInStatBlock(token.abilities || []);
+
+            document.getElementById('stat-block-save-btn').classList.toggle('hidden', !isDM);
             modal.classList.remove('hidden');
         }
+
         function hideStatBlock() { document.getElementById('stat-block-modal').classList.add('hidden'); }
+        
         function saveStatBlock() {
-            const activeMap = getActiveMap();
+            const activeMapId = getActiveMap()?.id;
             const tokenId = document.getElementById('stat-block-modal').dataset.tokenId;
-            if (!activeMap || !tokenId) return;
-            const tokenIndex = activeMap.tokens.findIndex(t => t.id === tokenId);
-            if (tokenIndex === -1) return;
-            const token = activeMap.tokens[tokenIndex];
-            token.hp = parseInt(document.getElementById('stat-block-hp').value, 10);
-            token.maxHp = parseInt(document.getElementById('stat-block-max-hp').value, 10);
-            token.ac = parseInt(document.getElementById('stat-block-ac').value, 10);
-            token.notes = document.getElementById('stat-block-notes').value;
-            updateDoc(vttDocRef, { maps: vttState.maps });
+            if (!isDM || !activeMapId || !tokenId) return;
+            const updatedMaps = JSON.parse(JSON.stringify(vttState.maps));
+            const mapToUpdate = updatedMaps.find(m => m.id === activeMapId);
+            if (!mapToUpdate) return;
+            const tokenToUpdate = (mapToUpdate.tokens || []).find(t => t.id === tokenId);
+            if (!tokenToUpdate) return;
+            tokenToUpdate.hp = parseInt(document.getElementById('stat-block-hp').value, 10) || 0;
+            tokenToUpdate.maxHp = parseInt(document.getElementById('stat-block-max-hp').value, 10) || 0;
+            tokenToUpdate.ac = parseInt(document.getElementById('stat-block-ac').value, 10) || 0;
+            tokenToUpdate.notes = document.getElementById('stat-block-notes').value;
+            tokenToUpdate.ownedBy = document.getElementById('stat-block-owner').value;
+            updateDoc(vttDocRef, { maps: updatedMaps });
             hideStatBlock();
         }
 
-        // --- Map Controls: Pan, Zoom, Grid, Tabs ---
-        function handleAddMap() {
-            // Replaced prompt with automatic naming to avoid browser blocking issues.
-            const name = `Map ${(vttState.maps || []).length + 1}`;
-            const newMapId = crypto.randomUUID();
-            const newMap = {
-                ...DEFAULT_STATE.maps[0], // Start with default values
-                id: newMapId,
-                name: name,
-                tokens: [],
-                fogBlocks: [],
-                url: 'https://placehold.co/1200x800/5a3d2b/e6d5b8?text=New+Map', // Default for a new map
-                transform: { scale: 1, panX: 0, panY: 0 }, // Ensure it starts at a default view
-            };
-            const updatedMaps = [...(vttState.maps || []), newMap];
-            updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newMapId });
-        }
-        function handleDeleteMap(mapId) {
-            if (vttState.maps.length <= 1) {
-                console.warn("Cannot delete the last map."); // Replaced alert with a console warning.
-                return;
-            }
-            showModal("Delete Map?", "Are you sure you want to delete this map and all its tokens? This cannot be undone.", () => {
-                const updatedMaps = vttState.maps.filter(m => m.id !== mapId);
-                let newActiveId = vttState.activeMapId;
-                if (newActiveId === mapId) {
-                    newActiveId = updatedMaps[0]?.id || null;
-                }
-                updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newActiveId });
-            });
-        }
-        function setupMapControls() {
-            const mapContainer = document.getElementById('map-container');
-            mapContainer.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                const { scale, panX, panY } = activeMap.transform;
-                const rect = mapContainer.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-                const mapMouseX = (mouseX - panX) / scale;
-                const mapMouseY = (mouseY - panY) / scale;
-                const newScale = Math.max(0.1, Math.min(5, scale * (e.deltaY > 0 ? 0.9 : 1.1)));
-                activeMap.transform.panX = mouseX - mapMouseX * newScale;
-                activeMap.transform.panY = mouseY - mapMouseY * newScale;
-                activeMap.transform.scale = newScale;
-                updateDoc(vttDocRef, { maps: vttState.maps });
-            });
-            mapContainer.addEventListener('mousedown', (e) => {
-                if (armedEffect || e.button !== 0) return;
-                isPanning = true;
-                lastPanPoint = { x: e.clientX, y: e.clientY };
-                mapContainer.style.cursor = 'grabbing';
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (!isPanning) return;
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                const dx = e.clientX - lastPanPoint.x;
-                const dy = e.clientY - lastPanPoint.y;
-                lastPanPoint = { x: e.clientX, y: e.clientY };
-                activeMap.transform.panX += dx;
-                activeMap.transform.panY += dy;
-                renderMap(); // Smooth local render
-            });
-            window.addEventListener('mouseup', () => {
-                if (isPanning) {
-                    isPanning = false;
-                    mapContainer.style.cursor = 'move';
-                    updateDoc(vttDocRef, { maps: vttState.maps }); // Final DB update
-                }
-            });
-            document.getElementById('reset-view-btn').addEventListener('click', () => {
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                activeMap.transform = { scale: 1, panX: 0, panY: 0 };
-                updateDoc(vttDocRef, { maps: vttState.maps });
-            });
-        }
-        function setupGridControls() {
-            const updateGrid = (prop, value) => {
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                activeMap.grid[prop] = value;
-                updateDoc(vttDocRef, { maps: vttState.maps });
-            };
-            document.getElementById('grid-toggle').addEventListener('change', (e) => updateGrid('enabled', e.target.checked));
-            document.getElementById('grid-size-input').addEventListener('input', (e) => { document.getElementById('grid-size-display').textContent = e.target.value; });
-            document.getElementById('grid-size-input').addEventListener('change', (e) => updateGrid('size', parseInt(e.target.value, 10)));
-            document.getElementById('grid-color-input').addEventListener('input', (e) => updateGrid('color', e.target.value));
-        }
-        function renderGridControls() {
-            const activeMap = getActiveMap();
-            const enabled = activeMap ? activeMap.grid.enabled : false;
-            const size = activeMap ? activeMap.grid.size : 50;
-            const color = activeMap ? activeMap.grid.color : '#FFFFFF';
-            document.getElementById('grid-toggle').checked = enabled;
-            document.getElementById('grid-size-input').value = size;
-            document.getElementById('grid-size-display').textContent = size;
-            document.getElementById('grid-color-input').value = color;
-        }
+        // --- Map Controls & Tools ---
+        function handleAddMap() { const name = `Map ${(vttState.maps || []).length + 1}`; const newMapId = crypto.randomUUID(); const newMap = { ...DEFAULT_STATE.maps[0], id: newMapId, name: name, tokens: [], fogBlocks: [], spellTemplates: [], url: 'https://placehold.co/1200x800/5a3d2b/e6d5b8?text=New+Map', transform: { scale: 1, panX: 0, panY: 0 }, }; const updatedMaps = [...(vttState.maps || []), newMap]; updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newMapId }); }
+        function handleDeleteMap(mapId) { if (vttState.maps.length <= 1) { console.warn("Cannot delete the last map."); return; } showModal("Delete Map?", "Are you sure you want to delete this map and all its tokens? This cannot be undone.", () => { const updatedMaps = vttState.maps.filter(m => m.id !== mapId); let newActiveId = vttState.activeMapId; if (newActiveId === mapId) { newActiveId = updatedMaps[0]?.id || null; } updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newActiveId }); }); }
+        function setupMapControls() { const mapContainer = document.getElementById('map-container'); mapContainer.addEventListener('wheel', (e) => { e.preventDefault(); const activeMap = getActiveMap(); if (!activeMap) return; const { scale, panX, panY } = activeMap.transform; const rect = mapContainer.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top; const mapMouseX = (mouseX - panX) / scale; const mapMouseY = (mouseY - panY) / scale; const newScale = Math.max(0.1, Math.min(5, scale * (e.deltaY > 0 ? 0.9 : 1.1))); activeMap.transform.panX = mouseX - mapMouseX * newScale; activeMap.transform.panY = mouseY - mapMouseY * newScale; activeMap.transform.scale = newScale; updateDoc(vttDocRef, { maps: vttState.maps }); }); document.getElementById('reset-view-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.transform = { scale: 1, panX: 0, panY: 0 }; updateDoc(vttDocRef, { maps: vttState.maps }); }); }
+        function setupGridControls() { const updateGrid = (prop, value) => { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.grid[prop] = value; updateDoc(vttDocRef, { maps: vttState.maps }); }; document.getElementById('grid-toggle').addEventListener('change', (e) => updateGrid('enabled', e.target.checked)); document.getElementById('grid-size-input').addEventListener('input', (e) => { document.getElementById('grid-size-display').textContent = e.target.value; }); document.getElementById('grid-size-input').addEventListener('change', (e) => updateGrid('size', parseInt(e.target.value, 10))); document.getElementById('grid-color-input').addEventListener('input', (e) => updateGrid('color', e.target.value)); }
+        function renderGridControls() { const activeMap = getActiveMap(); const enabled = activeMap ? activeMap.grid.enabled : false; const size = activeMap ? activeMap.grid.size : 50; const color = activeMap ? activeMap.grid.color : '#FFFFFF'; document.getElementById('grid-toggle').checked = enabled; document.getElementById('grid-size-input').value = size; document.getElementById('grid-size-display').textContent = size; document.getElementById('grid-color-input').value = color; }
 
         // --- Draggable & Resizable Logic ---
-        function makeDraggable(element, id, type) {
-            let initialPos = { top: 0, left: 0 };
-            element.onmousedown = (e) => {
-                if (e.button !== 0) return;
-                e.preventDefault(); e.stopPropagation();
-                initialPos = { top: element.offsetTop, left: element.offsetLeft };
-                window.onmousemove = (dragEvent) => {
-                    dragEvent.preventDefault();
-                    const activeMap = getActiveMap();
-                    if (!activeMap) return;
-                    const { scale } = activeMap.transform;
-                    element.style.left = (initialPos.left += dragEvent.movementX / scale) + "px";
-                    element.style.top = (initialPos.top += dragEvent.movementY / scale) + "px";
-                };
-                window.onmouseup = () => {
-                    window.onmouseup = null; window.onmousemove = null;
-                    const activeMap = getActiveMap();
-                    if (!activeMap) return;
-                    const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks;
-                    const itemIndex = dataArray.findIndex(item => item.id === id);
-                    if (itemIndex > -1) {
-                        dataArray[itemIndex].x = parseFloat(element.style.left);
-                        dataArray[itemIndex].y = parseFloat(element.style.top);
-                        updateDoc(vttDocRef, { maps: vttState.maps });
-                    }
-                };
-            };
+        function makeDraggable(element, id, type) { 
+            const item = (getActiveMap()?.[type === 'token' ? 'tokens' : 'fogBlocks'] || []).find(i => i.id === id);
+            let initialPos = { top: 0, left: 0 }; 
+            element.onmousedown = (e) => { 
+                if (activeTool !== 'pan') return;
+                if (!isDM && (!item || type !== 'token' || item.ownedBy !== userId)) return;
+                if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); initialPos = { top: element.offsetTop, left: element.offsetLeft }; window.onmousemove = (dragEvent) => { dragEvent.preventDefault(); const activeMap = getActiveMap(); if (!activeMap) return; const { scale } = activeMap.transform; element.style.left = (initialPos.left += dragEvent.movementX / scale) + "px"; element.style.top = (initialPos.top += dragEvent.movementY / scale) + "px"; }; window.onmouseup = () => { window.onmouseup = null; window.onmousemove = null; const activeMap = getActiveMap(); if (!activeMap) return; const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks; const itemIndex = dataArray.findIndex(item => item.id === id); if (itemIndex > -1) { dataArray[itemIndex].x = parseFloat(element.style.left); dataArray[itemIndex].y = parseFloat(element.style.top); updateDoc(vttDocRef, { maps: vttState.maps }); } }; }; 
         }
         function addResizeHandles(element, data, type) {
-            const handle = document.createElement('div');
-            handle.className = 'resize-handle br';
-            element.appendChild(handle);
-            handle.addEventListener('mousedown', (e) => initResize(e, element, data, type));
+            if (!isDM && (type !== 'token' || data.ownedBy !== userId)) return;
+            const handle = document.createElement('div'); handle.className = 'resize-handle br'; element.appendChild(handle); handle.addEventListener('mousedown', (e) => initResize(e, element, data, type)); 
         }
-        function initResize(e, element, data, type) {
-            e.preventDefault(); e.stopPropagation();
-            const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
-            const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
-            const doResize = (moveEvent) => {
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                const { scale } = activeMap.transform;
-                let newWidth = startWidth + moveEvent.movementX / scale;
-                let newHeight = startHeight + moveEvent.movementY / scale;
-                if (type === 'token') { newHeight = newWidth / (startWidth / startHeight); }
-                element.style.width = Math.max(20, newWidth) + 'px';
-                element.style.height = Math.max(20, newHeight) + 'px';
-            };
-            const stopResize = () => {
-                document.removeEventListener('mousemove', doResize);
-                document.removeEventListener('mouseup', stopResize);
-                const activeMap = getActiveMap();
-                if (!activeMap) return;
-                const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks;
-                const itemIndex = dataArray.findIndex(item => item.id === data.id);
-                if (itemIndex > -1) {
-                    dataArray[itemIndex].width = parseInt(element.style.width, 10);
-                    dataArray[itemIndex].height = parseInt(element.style.height, 10);
-                    updateDoc(vttDocRef, { maps: vttState.maps });
-                }
-            };
-            document.addEventListener('mousemove', doResize);
-            document.addEventListener('mouseup', stopResize, { once: true });
+        function initResize(e, element, data, type) { e.preventDefault(); e.stopPropagation(); const startX = e.clientX; const startY = e.clientY; const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10); const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10); const doResize = (moveEvent) => { const activeMap = getActiveMap(); if (!activeMap) return; const { scale } = activeMap.transform; const deltaX = moveEvent.clientX - startX; const deltaY = moveEvent.clientY - startY; let newWidth = startWidth + deltaX / scale; let newHeight = startHeight + deltaY / scale; if (type === 'token') { const aspectRatio = startWidth / startHeight; newHeight = newWidth / aspectRatio; } element.style.width = Math.max(20, newWidth) + 'px'; element.style.height = Math.max(20, newHeight) + 'px'; }; const stopResize = () => { document.removeEventListener('mousemove', doResize); document.removeEventListener('mouseup', stopResize); const activeMap = getActiveMap(); if (!activeMap) return; const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks; const itemIndex = dataArray.findIndex(item => item.id === data.id); if (itemIndex > -1) { dataArray[itemIndex].width = parseInt(element.style.width, 10); dataArray[itemIndex].height = parseInt(element.style.height, 10); updateDoc(vttDocRef, { maps: vttState.maps }); } }; document.addEventListener('mousemove', doResize); document.addEventListener('mouseup', stopResize, { once: true }); }
+        
+        // --- Measurement and Template Tools ---
+        function getMapCoords(e) {
+            const activeMap = getActiveMap();
+            if (!activeMap) return {x: 0, y: 0};
+            const mapContainer = document.getElementById('map-container');
+            const rect = mapContainer.getBoundingClientRect();
+            const { panX, panY, scale } = activeMap.transform;
+            const x = (e.clientX - rect.left - panX) / scale;
+            const y = (e.clientY - rect.top - panY) / scale;
+            return { x, y };
         }
 
-        initializeAppCore();
+        function setupTokenBankControls() {
+            document.getElementById('token-bank-container').addEventListener('click', (e) => {
+                if (e.target.dataset.url) {
+                    const { name, url } = e.target.dataset;
+                    addTokenFromPreset(name, url);
+                }
+            });
+        }
+
+        function addTokenFromPreset(name, imageUrl) {
+            const activeMap = getActiveMap();
+            if (!activeMap) return;
+            const newToken = {
+                id: crypto.randomUUID(),
+                name,
+                color: '#ff0000', // fallback color
+                imageUrl,
+                x: activeMap.width / 2,
+                y: activeMap.height / 2,
+                width: activeMap.grid.size || 50,
+                height: activeMap.grid.size || 50,
+                statusEffects: [],
+                hp: 10,
+                maxHp: 10,
+                ac: 10,
+                notes: '',
+                ownedBy: 'dm',
+                abilities: []
+            };
+            if (!activeMap.tokens) activeMap.tokens = [];
+            activeMap.tokens.push(newToken);
+            updateDoc(vttDocRef, { maps: vttState.maps });
+            sendChatMessage(`${currentUsername} added a ${name} token to the map.`, 'system');
+        }
+
+        function setupToolControls() {
+            document.getElementById('sync-data-btn').addEventListener('click', () => {
+                setDoc(vttDocRef, vttState).then(() => {
+                    const btn = document.getElementById('sync-data-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Synced!';
+                    btn.classList.add('bg-green-700');
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('bg-green-700');
+                    }, 1500);
+                }).catch(console.error);
+            });
+            
+            document.getElementById('save-data-file-btn').addEventListener('click', saveDataToFile);
+            document.getElementById('load-data-file-input').addEventListener('change', loadDataFromFile);
+
+            document.getElementById('ruler-tool-btn').addEventListener('click', () => {
+                if (activeTool === 'ruler') {
+                    setActiveTool('pan');
+                } else {
+                    setActiveTool('ruler');
+                }
+            });
+            document.getElementById('spell-templates-panel').addEventListener('click', (e) => {
+                if(e.target.matches('.template-btn')) {
+                    const shape = e.target.dataset.template;
+                    if (activeTemplateShape === shape) {
+                        setActiveTool('pan');
+                    } else {
+                        activeTemplateShape = shape;
+                        setActiveTool('template');
+                    }
+                }
+            });
+            document.getElementById('clear-templates-btn').addEventListener('click', () => {
+                const activeMap = getActiveMap();
+                if (!activeMap) return;
+                showModal("Clear Spell Templates?", "This will remove all templates from the current map.", () => {
+                    activeMap.spellTemplates = [];
+                    updateDoc(vttDocRef, { maps: vttState.maps });
+                });
+            });
+            document.getElementById('template-color-input').addEventListener('input', (e) => {
+                const activeMap = getActiveMap();
+                if (!activeMap || !selectedElement || selectedElement.type !== 'template') return;
+                const template = activeMap.spellTemplates.find(t => t.id === selectedElement.id);
+                if (template) {
+                    template.color = e.target.value + '80'; // Add alpha
+                    renderSpellTemplates(); // Live preview
+                }
+            });
+            document.getElementById('template-color-input').addEventListener('change', (e) => {
+                 const activeMap = getActiveMap();
+                if (!activeMap || !selectedElement || selectedElement.type !== 'template') return;
+                 const template = activeMap.spellTemplates.find(t => t.id === selectedElement.id);
+                if (template) {
+                       template.color = e.target.value + '80'; // Add alpha
+                      updateDoc(vttDocRef, { maps: vttState.maps });
+                }
+            });
+
+        }
+        
+        function saveDataToFile() {
+            if (!vttState) {
+                console.error("No data to save.");
+                sendChatMessage("There is no session data to save.", "system");
+                return;
+            }
+            
+            const dataStr = JSON.stringify(vttState, null, 2); // Pretty-print JSON
+            const dataBlob = new Blob([dataStr], {type: "application/json"});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gruvhub-vtt-save-${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadDataFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) { return; }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const loadedState = JSON.parse(e.target.result);
+                    if (loadedState && Array.isArray(loadedState.maps) && loadedState.activeMapId) {
+                        showModal(
+                            "Load Session Data?", 
+                            "This will OVERWRITE the current session with the data from the file. This will affect all connected users. Are you sure?",
+                            () => {
+                                setDoc(vttDocRef, loadedState)
+                                    .then(() => sendChatMessage("Session data successfully loaded from file.", "system"))
+                                    .catch(err => {
+                                        console.error("Error loading data to Firestore:", err);
+                                        sendChatMessage("ERROR: Could not load data to the session.", "system");
+                                    });
+                            }
+                        );
+                    } else {
+                        throw new Error("Invalid file format.");
+                    }
+                } catch (error) {
+                    console.error("Failed to load or parse file:", error);
+                    sendChatMessage(`ERROR: Failed to load file. ${error.message}`, "system");
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            
+            reader.onerror = function(e) {
+                console.error("Error reading file:", e);
+                sendChatMessage("ERROR: Could not read the selected file.", "system");
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function setActiveTool(tool) {
+            activeTool = tool;
+            
+            rulerState.active = false;
+            canvasInteraction.active = false;
+            if (tool !== 'template') activeTemplateShape = null;
+            if (tool !== 'pan') { selectedElement = null; render(); }
+
+            document.getElementById('ruler-tool-btn').classList.toggle('active', tool === 'ruler');
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.toggle('active', tool === 'template' && activeTemplateShape === btn.dataset.template);
+            });
+
+            const mapContainer = document.getElementById('map-container');
+            switch(tool) {
+                case 'ruler':
+                case 'template':
+                    mapContainer.style.cursor = 'crosshair';
+                    break;
+                case 'pan':
+                default:
+                    mapContainer.style.cursor = 'move';
+                    break;
+            }
+            clearDrawingCanvas();
+            renderSpellTemplates();
+        }
+
+        function handleMapMouseDown(e) {
+            if (e.button !== 0) return;
+            const coords = getMapCoords(e);
+
+            switch (activeTool) {
+                case 'ruler':
+                    rulerState.active = true;
+                    rulerState.start = coords;
+                    rulerState.end = coords;
+                    break;
+                case 'template':
+                    placeSpellTemplate(e);
+                    break;
+                case 'pan':
+                default:
+                    if (isDM) {
+                        const template = getTemplateAt(coords.x, coords.y);
+                        if (template) {
+                            selectedElement = { type: 'template', id: template.id };
+                            const handle = getResizeHandleForTemplate(template, coords.x, coords.y);
+                            canvasInteraction = {
+                                active: true,
+                                type: handle ? 'resize' : 'drag',
+                                targetId: template.id,
+                                handle: handle,
+                                startPos: coords,
+                                startDims: { ...template }
+                            };
+                            render();
+                            return;
+                        }
+                    }
+                    if (e.target.closest('.map-token, .fog-block, .resize-handle') === null) {
+                        isPanning = true;
+                        lastPanPoint = { x: e.clientX, y: e.clientY };
+                        document.getElementById('map-container').style.cursor = 'grabbing';
+                    }
+                    break;
+            }
+        }
+
+        function handleMapMouseMove(e) {
+            if (canvasInteraction.active && isDM) {
+                const coords = getMapCoords(e);
+                const activeMap = getActiveMap();
+                if (!activeMap) return;
+                const template = activeMap.spellTemplates.find(t => t.id === canvasInteraction.targetId);
+                if (!template) return;
+
+                if (canvasInteraction.type === 'drag') {
+                    const dx = coords.x - canvasInteraction.startPos.x;
+                    const dy = coords.y - canvasInteraction.startPos.y;
+                    template.x = canvasInteraction.startDims.x + dx;
+                    template.y = canvasInteraction.startDims.y + dy;
+                } else if (canvasInteraction.type === 'resize') {
+                    const dx = coords.x - template.x;
+                    const dy = coords.y - template.y;
+                     const newRadius = Math.sqrt(dx*dx + dy*dy);
+                     if (template.type === 'circle') template.radius = Math.max(10, newRadius);
+                     else if (template.type === 'square') template.size = Math.max(20, Math.abs(dx)*2, Math.abs(dy)*2);
+                     else if (template.type === 'cone') template.height = Math.max(20, dy);
+                }
+                renderSpellTemplates();
+
+            } else if (rulerState.active) {
+                rulerState.end = getMapCoords(e);
+                renderRuler();
+            } else if (isPanning) {
+                const activeMap = getActiveMap(); if (!activeMap) return; const dx = e.clientX - lastPanPoint.x; const dy = e.clientY - lastPanPoint.y; lastPanPoint = { x: e.clientX, y: e.clientY }; activeMap.transform.panX += dx; activeMap.transform.panY += dy; renderMap();
+            }
+        }
+
+        function handleMapMouseUp(e) {
+            if (canvasInteraction.active) {
+                canvasInteraction.active = false;
+                updateDoc(vttDocRef, { maps: vttState.maps });
+            }
+            if (rulerState.active) {
+                rulerState.active = false;
+                setTimeout(() => {
+                    if (!rulerState.active) { clearDrawingCanvas(); renderSpellTemplates(); }
+                }, 2000);
+            }
+            if (isPanning) {
+                isPanning = false;
+                 document.getElementById('map-container').style.cursor = 'move';
+                updateDoc(vttDocRef, { maps: vttState.maps });
+            }
+        }
+
+        function clearDrawingCanvas() {
+            if (drawCtx) drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        }
+
+        function renderRuler() {
+            if (!rulerState.start || !rulerState.end) return;
+            clearDrawingCanvas();
+            renderSpellTemplates(); // Redraw templates so ruler is on top
+
+            const { start, end } = rulerState;
+            drawCtx.beginPath();
+            drawCtx.moveTo(start.x, start.y);
+            drawCtx.lineTo(end.x, end.y);
+            drawCtx.strokeStyle = '#ffd700';
+            drawCtx.lineWidth = 3 / getActiveMap().transform.scale;
+            drawCtx.setLineDash([10 / getActiveMap().transform.scale, 5 / getActiveMap().transform.scale]);
+            drawCtx.stroke();
+            drawCtx.setLineDash([]);
+            
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const pixelDist = Math.sqrt(dx*dx + dy*dy);
+            const gridSize = getActiveMap().grid.size || 50;
+            const feetDist = Math.round((pixelDist / gridSize) * 5);
+
+            drawCtx.fillStyle = '#ffffff';
+            drawCtx.strokeStyle = '#000000';
+            drawCtx.lineWidth = 4 / getActiveMap().transform.scale;
+            drawCtx.font = `bold ${16 / getActiveMap().transform.scale}px Cinzel`;
+            drawCtx.textAlign = 'center';
+            const text = `${feetDist} ft`;
+            drawCtx.strokeText(text, start.x + dx/2, start.y + dy/2 - 10);
+            drawCtx.fillText(text, start.x + dx/2, start.y + dy/2 - 10);
+        }
+
+        function placeSpellTemplate(e) {
+            const activeMap = getActiveMap();
+            if (!activeMap || !isDM || !activeTemplateShape) return;
+            const { x, y } = getMapCoords(e);
+            const gridSize = activeMap.grid.size || 50;
+            
+            let newTemplate = { id: crypto.randomUUID(), type: activeTemplateShape, x, y, color: '#ff880080' };
+            
+            switch(activeTemplateShape) {
+                case 'circle': newTemplate.radius = (20 / 5) * gridSize; break;
+                case 'cone': newTemplate.height = (15 / 5) * gridSize; break;
+                case 'square': newTemplate.size = (30 / 5) * gridSize; break;
+            }
+
+            if (!activeMap.spellTemplates) activeMap.spellTemplates = [];
+            activeMap.spellTemplates.push(newTemplate);
+            updateDoc(vttDocRef, { maps: vttState.maps });
+            setActiveTool('pan');
+        }
+
+        function renderSpellTemplates() {
+            const activeMap = getActiveMap();
+            if (!activeMap || !drawCtx) return;
+            clearDrawingCanvas();
+
+            (activeMap.spellTemplates || []).forEach(template => {
+                const isSelected = selectedElement && selectedElement.type === 'template' && selectedElement.id === template.id;
+                
+                drawCtx.fillStyle = template.color;
+                drawCtx.strokeStyle = isSelected ? '#33C3FF' : '#FFD700';
+                drawCtx.lineWidth = (isSelected ? 4 : 2) / activeMap.transform.scale;
+                
+                drawCtx.beginPath();
+                switch(template.type) {
+                    case 'circle':
+                        drawCtx.arc(template.x, template.y, template.radius, 0, 2 * Math.PI);
+                        break;
+                    case 'square':
+                        drawCtx.rect(template.x - template.size/2, template.y - template.size/2, template.size, template.size);
+                        break;
+                    case 'cone':
+                        const coneHeight = template.height;
+                        const coneWidth = template.height;
+                        drawCtx.moveTo(template.x, template.y);
+                        drawCtx.lineTo(template.x - coneWidth / 2, template.y + coneHeight);
+                        drawCtx.lineTo(template.x + coneWidth / 2, template.y + coneHeight);
+                        drawCtx.closePath();
+                        break;
+                }
+                drawCtx.fill();
+                drawCtx.stroke();
+
+                if (isSelected && isDM) {
+                    drawResizeHandle(getResizeHandleForTemplate(template));
+                }
+            });
+        }
+        
+        function drawResizeHandle(handle) {
+            if (!handle) return;
+            drawCtx.fillStyle = '#33C3FF';
+            drawCtx.fillRect(handle.x - handle.size/2, handle.y - handle.size/2, handle.size, handle.size);
+        }
+
+        function getTemplateAt(x, y) {
+            const activeMap = getActiveMap();
+            if (!activeMap || !activeMap.spellTemplates) return null;
+            for (let i = activeMap.spellTemplates.length - 1; i >= 0; i--) {
+                const template = activeMap.spellTemplates[i];
+                switch(template.type) {
+                    case 'circle':
+                        const dist = Math.sqrt(Math.pow(x - template.x, 2) + Math.pow(y - template.y, 2));
+                        if (dist <= template.radius) return template;
+                        break;
+                    case 'square':
+                        if (x >= template.x - template.size/2 && x <= template.x + template.size/2 &&
+                            y >= template.y - template.size/2 && y <= template.y + template.size/2) {
+                            return template;
+                        }
+                        break;
+                    case 'cone':
+                         if (x >= template.x - template.height/2 && x <= template.x + template.height/2 &&
+                             y >= template.y && y <= template.y + template.height) {
+                               return template;
+                         }
+                        break;
+                }
+            }
+            return null;
+        }
+
+        function getResizeHandleForTemplate(template, clickX, clickY) {
+            if (!template) return null;
+            const scale = getActiveMap()?.transform.scale || 1;
+            const handleSize = 10 / scale;
+            let handlePos;
+
+            switch(template.type) {
+                case 'circle': handlePos = { x: template.x + template.radius, y: template.y }; break;
+                case 'square': handlePos = { x: template.x + template.size/2, y: template.y + template.size/2 }; break;
+                case 'cone': handlePos = { x: template.x, y: template.y + template.height }; break;
+                default: return null;
+            }
+
+            const handle = { ...handlePos, size: handleSize };
+            if (clickX === undefined) return handle;
+
+            if (clickX >= handle.x - handleSize/2 && clickX <= handle.x + handleSize/2 &&
+                clickY >= handle.y - handleSize/2 && clickY <= handle.y + handleSize/2) {
+                return handle;
+            }
+            return null;
+        }
+
+        function renderTemplateControls() {
+            const panel = document.getElementById('template-controls-panel');
+            if (isDM && selectedElement && selectedElement.type === 'template') {
+                panel.classList.remove('hidden');
+                panel.classList.add('flex');
+                const template = getActiveMap()?.spellTemplates.find(t => t.id === selectedElement.id);
+                if (template) {
+                    document.getElementById('template-color-input').value = template.color.substring(0, 7);
+                }
+            } else {
+                panel.classList.add('hidden');
+                panel.classList.remove('flex');
+            }
+        }
+        
+        // --- Battle System ---
+        function setupBattleSystem() {
+            document.getElementById('start-battle-btn').addEventListener('click', showBattleSetupModal);
+            document.getElementById('battle-setup-cancel-btn').addEventListener('click', () => document.getElementById('battle-setup-modal').classList.add('hidden'));
+            document.getElementById('begin-combat-btn').addEventListener('click', beginCombat);
+            document.getElementById('end-battle-btn').addEventListener('click', () => {
+                if(isDM) endBattle();
+            });
+            document.getElementById('battle-action-menu').addEventListener('click', handleBattleAction);
+            document.getElementById('player-team').addEventListener('click', handleTargetSelection);
+            document.getElementById('enemy-team').addEventListener('click', handleTargetSelection);
+        }
+
+        function showBattleSetupModal() {
+            const modal = document.getElementById('battle-setup-modal');
+            const tokenList = document.getElementById('battle-setup-token-list');
+            tokenList.innerHTML = '';
+            const activeMap = getActiveMap();
+            if (!activeMap || !activeMap.tokens || activeMap.tokens.length === 0) {
+                tokenList.innerHTML = '<p class="text-gray-400">No tokens on the current map.</p>';
+                modal.classList.remove('hidden');
+                return;
+            }
+            activeMap.tokens.forEach(token => {
+                const owner = activeUserList.find(u => u.id === token.ownedBy)?.username || 'Enemy';
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2 p-2 rounded hover:bg-[#6b4c4a] cursor-pointer';
+                label.innerHTML = `
+                    <input type="checkbox" data-token-id="${token.id}" class="gruvhub-input">
+                    <div class="w-8 h-8 rounded-full bg-cover bg-center" style="background-image: url('${token.imageUrl || ''}'); background-color: ${token.color};"></div>
+                    <div>
+                        <p>${token.name}</p>
+                        <p class="text-xs text-gray-400">Owner: ${owner}</p>
+                    </div>
+                `;
+                tokenList.appendChild(label);
+            });
+            modal.classList.remove('hidden');
+        }
+        
+        function beginCombat() {
+            const checkedBoxes = document.querySelectorAll('#battle-setup-token-list input:checked');
+            const combatantIds = Array.from(checkedBoxes).map(box => box.dataset.tokenId);
+            
+            if (combatantIds.length < 2) {
+                alert("Please select at least two tokens for battle.");
+                return;
+            }
+            
+            const activeMap = getActiveMap();
+            const allTokens = activeMap.tokens;
+            
+            const combatants = combatantIds.map(id => {
+                const token = allTokens.find(t => t.id === id);
+                return { ...token, currentHP: token.hp, isDefeated: false, maxHp: token.maxHp || token.hp };
+            });
+
+            // Set turn order based on combatants selected, can be customized later (e.g., initiative)
+            const turnOrder = combatants.map(c => c.name);
+
+            updateDoc(vttDocRef, {
+                battle: {
+                    isActive: true,
+                    combatants: combatants,
+                    turnIndex: 0,
+                    log: [{ text: 'The battle begins!', type: 'system' }],
+                    turnOrder: turnOrder
+                }
+            });
+            document.getElementById('battle-setup-modal').classList.add('hidden');
+        }
+        
+        function renderBattleScreen() {
+             const battle = vttState.battle;
+             if (!battle || !battle.isActive) return;
+
+             const battleDmControls = document.querySelector('#battle-screen .dm-controls-wrapper');
+             if (isDM) {
+                 battleDmControls.classList.remove('hidden');
+             } else {
+                 battleDmControls.classList.add('hidden');
+             }
+
+             const playerTeamEl = document.getElementById('player-team');
+             const enemyTeamEl = document.getElementById('enemy-team');
+             const turnOrderEl = document.getElementById('battle-turn-order');
+             const actionMenuEl = document.getElementById('battle-action-menu');
+
+             playerTeamEl.innerHTML = '';
+             enemyTeamEl.innerHTML = '';
+             
+             const currentTurnCombatant = battle.combatants[battle.turnIndex];
+             turnOrderEl.textContent = `Current Turn: ${currentTurnCombatant.name}`;
+
+             battle.combatants.forEach((c, index) => {
+                  const isPlayer = c.ownedBy !== 'dm';
+                  const teamEl = isPlayer ? playerTeamEl : enemyTeamEl;
+                  
+                  const card = document.createElement('div');
+                  card.className = 'combatant-card';
+                  card.dataset.id = c.id;
+
+                  const healthPercentage = Math.max(0, (c.currentHP / c.maxHp) * 100);
+                  const healthClass = healthPercentage > 60 ? 'high' : healthPercentage > 30 ? 'medium' : 'low';
+                  
+                  card.innerHTML = `
+                       <div>
+                           <div class="combatant-image" style="background-image: url('${c.imageUrl}'); background-color: ${c.color};"></div>
+                           <h4 class="font-bold">${c.name}</h4>
+                       </div>
+                       <div>
+                           <p class="text-xs mb-1">HP: ${c.currentHP} / ${c.maxHp}</p>
+                           <div class="combatant-health-bar">
+                               <div class="combatant-health-fill ${healthClass}" style="width: ${healthPercentage}%;"></div>
+                           </div>
+                       </div>
+                  `;
+
+                  if (index === battle.turnIndex) card.classList.add('active-turn');
+                  if (c.isDefeated) card.classList.add('defeated');
+
+                  teamEl.appendChild(card);
+             });
+             
+             renderActionMenu(actionMenuEl, currentTurnCombatant);
+             updateTargetingUI(currentTurnCombatant);
+             
+             const logEl = document.getElementById('battle-log');
+             logEl.innerHTML = (battle.log || []).slice(-10).map(entry => `<p class="mb-1">${entry.text}</p>`).join('');
+             logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // --- Battle System --- (Continued)
+        
+        function renderActionMenu(container, combatant) {
+            container.innerHTML = '';
+            const isMyTurn = (isDM || combatant.ownedBy === userId);
+
+            if (!isMyTurn) {
+                container.innerHTML = '<p class="text-center text-gray-400">Waiting for turn...</p>';
+                return;
+            }
+
+            if (battleActionState.step === 'targeting') {
+                const targetPrompt = document.createElement('div');
+                targetPrompt.className = 'text-center';
+                targetPrompt.innerHTML = `<p>Select a target for</p><p class="font-bold">${battleActionState.selectedAbility.name}</p>`;
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.className = 'gruvhub-button text-xs p-1 mt-2 w-full';
+                cancelBtn.dataset.action = 'cancel-targeting';
+                targetPrompt.appendChild(cancelBtn);
+                container.appendChild(targetPrompt);
+            } else if (battleActionState.step === 'abilities') { // Show abilities list
+                const abilitiesContainer = document.createElement('div');
+                abilitiesContainer.className = 'flex flex-col gap-2';
+                (combatant.abilities || []).forEach((ability, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'gruvhub-button p-2 text-sm';
+                    btn.textContent = ability.name;
+                    btn.dataset.action = 'select-ability';
+                    btn.dataset.abilityIndex = index;
+                    abilitiesContainer.appendChild(btn);
+                });
+                 const backBtn = document.createElement('button');
+                 backBtn.textContent = 'Back';
+                 backBtn.className = 'gruvhub-button text-xs p-1 mt-2';
+                 backBtn.dataset.action = 'show-main-menu';
+                 abilitiesContainer.appendChild(backBtn);
+                container.appendChild(abilitiesContainer);
+            } else { // Show main menu
+                container.innerHTML = `
+                    <div class="flex flex-col gap-2">
+                        <button class="gruvhub-button p-2" data-action="show-abilities">Abilities</button>
+                        <button class="gruvhub-button p-2" data-action="end-turn">End Turn</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function handleBattleAction(e) {
+            const action = e.target.dataset.action;
+            if (!action) return;
+
+            const combatant = vttState.battle.combatants[vttState.battle.turnIndex];
+            const isMyTurn = (isDM || combatant.ownedBy === userId);
+            if (!isMyTurn) return;
+
+            switch(action) {
+                case 'show-abilities':
+                    battleActionState.step = 'abilities';
+                    render();
+                    break;
+                case 'show-main-menu':
+                case 'cancel-targeting':
+                    battleActionState = { step: 'main', selectedAbility: null };
+                    render();
+                    break;
+                case 'select-ability':
+                    const abilityIndex = parseInt(e.target.dataset.abilityIndex, 10);
+                    battleActionState.selectedAbility = combatant.abilities[abilityIndex];
+                    battleActionState.step = 'targeting';
+                    render();
+                    break;
+                case 'end-turn':
+                    executeAbility(combatant, null, null); // Pass null ability to just advance turn
+                    break;
+            }
+        }
+
+        function updateTargetingUI(currentCombatant) {
+            document.querySelectorAll('.combatant-card').forEach(card => {
+                card.classList.remove('targetable');
+                if (battleActionState.step === 'targeting') {
+                    const targetId = card.dataset.id;
+                    const targetCombatant = vttState.battle.combatants.find(c => c.id === targetId);
+                    if (!targetCombatant || targetCombatant.isDefeated) return;
+                    
+                    const isTargetPlayer = targetCombatant.ownedBy !== 'dm';
+                    const isAttackerPlayer = currentCombatant.ownedBy !== 'dm';
+
+                    if (battleActionState.selectedAbility.type === 'attack' && isTargetPlayer !== isAttackerPlayer) {
+                        card.classList.add('targetable');
+                    } else if (battleActionState.selectedAbility.type === 'heal' && isTargetPlayer === isAttackerPlayer) {
+                        card.classList.add('targetable');
+                    }
+                }
+            });
+        }
+        
+        function handleTargetSelection(e) {
+            if (battleActionState.step !== 'targeting') return;
+            const card = e.target.closest('.combatant-card');
+            if (!card || !card.classList.contains('targetable')) return;
+
+            const targetId = card.dataset.id;
+            const attacker = vttState.battle.combatants[vttState.battle.turnIndex];
+            const target = vttState.battle.combatants.find(c => c.id === targetId);
+            
+            executeAbility(attacker, target, battleActionState.selectedAbility);
+        }
+
+        function executeAbility(attacker, target, ability) {
+            // Create a deep copy of the battle state to modify
+            const updatedBattle = JSON.parse(JSON.stringify(vttState.battle));
+
+            // If no ability, just advance the turn (e.g., from "End Turn" button)
+            if (ability) {
+                const currentAttacker = updatedBattle.combatants.find(c => c.id === attacker.id);
+                const currentTarget = updatedBattle.combatants.find(c => c.id === target.id);
+                let logText = '';
+
+                if (ability.type === 'attack') {
+                    const hitRoll = Math.floor(Math.random() * 100) + 1;
+                    if (hitRoll <= ability.hitChance) {
+                        const damage = Math.floor(Math.random() * (ability.damageRange[1] - ability.damageRange[0] + 1)) + ability.damageRange[0];
+                        currentTarget.currentHP = Math.max(0, currentTarget.currentHP - damage);
+                        logText = `💥 ${currentAttacker.name}'s ${ability.name} hits ${currentTarget.name} for ${damage} damage!`;
+                        if (currentTarget.currentHP <= 0) {
+                            currentTarget.isDefeated = true;
+                            logText += ` ${currentTarget.name} has been defeated!`;
+                        }
+                    } else {
+                        logText = `💨 ${currentAttacker.name}'s ${ability.name} misses ${currentTarget.name}!`;
+                    }
+                } else if (ability.type === 'heal') {
+                    const healing = Math.floor(Math.random() * (ability.healRange[1] - ability.healRange[0] + 1)) + ability.healRange[0];
+                    currentTarget.currentHP = Math.min(currentTarget.maxHp, currentTarget.currentHP + healing);
+                    logText = `✨ ${currentAttacker.name} uses ${ability.name} to heal ${currentTarget.name} for ${healing} HP.`;
+                }
+                updatedBattle.log.push({ text: logText, type: 'battle' });
+            }
+
+            // Reset action state for the next turn
+            battleActionState = { step: 'main', selectedAbility: null };
+            
+            // Check for battle end condition
+            const playerTeamDefeated = updatedBattle.combatants.filter(c => c.ownedBy !== 'dm').every(c => c.isDefeated);
+            const enemyTeamDefeated = updatedBattle.combatants.filter(c => c.ownedBy === 'dm').every(c => c.isDefeated);
+            
+            if (playerTeamDefeated || enemyTeamDefeated) {
+                const message = playerTeamDefeated ? "DEFEAT" : "VICTORY!";
+                updatedBattle.log.push({ text: `Battle over! ${message}`, type: 'system' });
+                showBattleEndMessage(message);
+                updateDoc(vttDocRef, { battle: updatedBattle }); // Save the final state before ending
+                setTimeout(endBattle, 3000);
+                return; // Stop further execution
+            }
+
+            // Advance to the next turn
+            let nextTurn = (updatedBattle.turnIndex + 1) % updatedBattle.combatants.length;
+            while(updatedBattle.combatants[nextTurn].isDefeated) {
+                nextTurn = (nextTurn + 1) % updatedBattle.combatants.length;
+            }
+            updatedBattle.turnIndex = nextTurn;
+            
+            // Send the entire updated battle state to Firestore
+            updateDoc(vttDocRef, { battle: updatedBattle });
+        }
+        
+        function endBattle() {
+            const finalCombatants = vttState.battle.combatants;
+            const updatedMaps = JSON.parse(JSON.stringify(vttState.maps));
+            
+            // Persist HP changes to the map tokens
+            finalCombatants.forEach(combatant => {
+                for (const map of updatedMaps) {
+                    const token = map.tokens.find(t => t.id === combatant.id);
+                    if (token) {
+                        token.hp = combatant.isDefeated ? 0 : combatant.currentHP;
+                        break;
+                    }
+                }
+            });
+
+            updateDoc(vttDocRef, {
+                maps: updatedMaps,
+                battle: DEFAULT_STATE.battle // Reset battle state
+            });
+        }
+        
+        function showBattleEndMessage(message) {
+            const msgContainer = document.getElementById('battle-end-message');
+            msgContainer.querySelector('h2').textContent = message;
+            msgContainer.classList.remove('hidden');
+        }
+
+        // Stat Block Abilities
+        function renderAbilitiesInStatBlock(abilities) {
+            const listEl = document.getElementById('stat-block-abilities-list');
+            listEl.innerHTML = '';
+            if (!abilities || abilities.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-gray-400 text-center">No abilities defined.</p>';
+                return;
+            }
+            abilities.forEach((ability, index) => {
+                const abilityEl = document.createElement('div');
+                abilityEl.className = 'text-xs bg-[#3a241d] p-2 rounded flex justify-between items-center';
+                const details = ability.type === 'attack' ? `${ability.hitChance}% Hit, ${ability.damageRange[0]}-${ability.damageRange[1]} Dmg` : `${ability.healRange[0]}-${ability.healRange[1]} Heal`;
+                abilityEl.innerHTML = `<div><strong>${ability.name}</strong> (${ability.type})<br><span class="text-gray-400">${details}</span></div>`;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.className = 'text-red-400 hover:text-red-200 font-bold text-lg px-1';
+                deleteBtn.onclick = () => removeAbilityFromStatBlock(index);
+                abilityEl.appendChild(deleteBtn);
+                listEl.appendChild(abilityEl);
+            });
+        }
+
+        function addAbilityToStatBlock() {
+            const tokenId = document.getElementById('stat-block-modal').dataset.tokenId;
+            if (!tokenId) return;
+
+            const name = document.getElementById('ability-name').value;
+            const type = document.getElementById('ability-type').value;
+            const hitChance = parseInt(document.getElementById('ability-hitchance').value, 10);
+            const min = parseInt(document.getElementById('ability-damage-min').value, 10);
+            const max = parseInt(document.getElementById('ability-damage-max').value, 10);
+
+            if (!name || isNaN(min) || isNaN(max)) {
+                alert("Please fill out ability name and damage/heal range.");
+                return;
+            }
+
+            const newAbility = { name, type };
+            if (type === 'attack') {
+                if (isNaN(hitChance)) { alert("Please provide a hit chance for attacks."); return; }
+                newAbility.hitChance = hitChance;
+                newAbility.damageRange = [min, max];
+            } else {
+                newAbility.healRange = [min, max];
+            }
+            
+            const map = getActiveMap();
+            const token = map.tokens.find(t => t.id === tokenId);
+            if (!token.abilities) token.abilities = [];
+            token.abilities.push(newAbility);
+
+            updateDoc(vttDocRef, { maps: vttState.maps });
+        }
+
+        function removeAbilityFromStatBlock(index) {
+            const tokenId = document.getElementById('stat-block-modal').dataset.tokenId;
+            if (!tokenId) return;
+            const map = getActiveMap();
+            const token = map.tokens.find(t => t.id === tokenId);
+            if (token && token.abilities) {
+                token.abilities.splice(index, 1);
+                updateDoc(vttDocRef, { maps: vttState.maps });
+            }
+        }
+
+
     </script>
 </body>
 </html>
