@@ -21,16 +21,19 @@
             background-color: #3a241d;
         }
         .gruvhub-bg {
-            background-color: #5a3d2b; /* Leather Brown */
-            box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;
+            background-color: rgba(90, 61, 43, 0.95); /* Slightly transparent Leather Brown */
+            box-shadow: 0 0 15px rgba(0,0,0,0.7); /* Deeper shadow for depth */
         }
         .gruvhub-border {
             border: 2px solid #c0a080; /* Tan Gold */
         }
+        /* Adjusted input text size and padding for less cramping */
         .gruvhub-input, select.gruvhub-input {
             background-color: #e6d5b8; /* Parchment */
             border: 1px solid #c0a080; /* Tan Gold */
             color: #3a241d; /* Dark Wood Brown */
+            font-size: 0.8rem; /* Smaller text inside inputs/selects */
+            padding: 0.25rem 0.5rem; /* Reduced padding */
         }
         .gruvhub-input::placeholder {
             color: #6d5d4b;
@@ -50,9 +53,10 @@
             letter-spacing: 1px;
         }
         .gruvhub-button:hover {
-            background-color: #6b4c4a;
+            background-color: #7a504a; /* Slightly lighter hover */
             color: #ffd700;
             border-color: #ffd700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5); /* Added subtle glow */
         }
         .gruvhub-button:disabled {
             background-color: #3a2c2a;
@@ -60,9 +64,10 @@
             cursor: not-allowed;
         }
         .gruvhub-button.active, .tab-btn.active, .tool-btn.active {
-            background-color: #b8860b;
+            background-color: #a07a2c; /* Richer Gold/Brown active background */
             color: #fff;
-            border-color: #ffd700;
+            border-color: #f7d04d;
+            box-shadow: 0 0 10px #f7d04d; /* Stronger glow for active state */
         }
         .map-tab {
             background-color: #4a2c2a;
@@ -124,8 +129,9 @@
         }
         .fog-block {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.85);
+            background-color: rgba(18, 12, 10, 0.9); /* Darker, mistier fog */
             border: 1px dashed #c0a080;
+            backdrop-filter: blur(2px); /* Added slight blur for mist effect */
             cursor: pointer;
         }
         /* --- Map Container Styles --- */
@@ -146,14 +152,16 @@
             background-size: cover;
             background-position: center;
         }
-        #grid-canvas, #drawing-canvas {
+        /* UPDATED CANVAS Z-INDEXES */
+        #grid-canvas, #fow-canvas, #overlay-canvas { /* ADD fow-canvas and overlay-canvas */
             position: absolute;
             top: 0;
             left: 0;
-            pointer-events: none; /* Allows clicks to go through to the map */
+            pointer-events: none;
         }
         #grid-canvas { z-index: 5; }
-        #drawing-canvas { z-index: 6; }
+        #fow-canvas { z-index: 7; background-color: transparent; } /* NEW FOW Layer */
+        #overlay-canvas { z-index: 8; } /* DM Drawing/Templates/Ruler */
         .map-token, .fog-block {
             z-index: 10;
         }
@@ -231,7 +239,7 @@
         .effect-heal { width: 100px; height: 100px; border-radius: 50%; background-color: rgba(144, 238, 144, 0.5); box-shadow: 0 0 20px 10px rgba(144, 238, 144, 0.7); animation: heal-animation 1.2s ease-in-out forwards; }
         @keyframes heal-animation { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
         .effect-ice { width: 150px; height: 150px; background-image: radial-gradient(rgba(173, 216, 230, 0.5) 30%, transparent 31%), radial-gradient(rgba(255, 255, 255, 0.6) 30%, transparent 31%); background-size: 20px 20px, 10px 10px; background-position: 0 0, 5px 5px; border-radius: 50%; animation: ice-animation 1.2s forwards; }
-        @keyframes ice-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 80% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
+        @keyframes ice-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 80% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; } 100% { opacity: 0; } }
         .effect-lightning { width: 40px; height: 150px; background: linear-gradient(to bottom, transparent, #9370DB, transparent); box-shadow: 0 0 10px #9370DB, 0 0 20px #9370DB; clip-path: polygon(50% 0, 60% 20%, 40% 40%, 55% 60%, 45% 80%, 50% 100%); animation: lightning-animation 0.8s ease-out forwards; }
         @keyframes lightning-animation { 0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
         
@@ -298,14 +306,15 @@
         }
         .combatant-health-fill.high { background: linear-gradient(to right, #15803d, #22c55e); }
         .combatant-health-fill.medium { background: linear-gradient(to right, #ca8a04, #eab308); }
+        /* Reduced font size for token bank tabs for better fit */
         .token-bank-tab {
             background-color: #4a2c2a;
             border: 1px solid #c0a080;
             border-bottom: none;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px 4px 0 0;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.7rem; 
         }
         .token-bank-tab.active {
             background-color: #6b4c4a;
@@ -413,7 +422,8 @@
                 <div id="map-container" class="map-container flex-grow relative">
                     <div id="map-content">
                         <canvas id="grid-canvas"></canvas>
-                        <canvas id="drawing-canvas"></canvas>
+                        <canvas id="fow-canvas"></canvas> <!-- NEW FOW CANVAS FOR VISION MASK -->
+                        <canvas id="overlay-canvas"></canvas> <!-- RENAMED DM DRAWING CANVAS -->
                         <!-- Tokens and Fog will be added here by JS -->
                     </div>
                 </div>
@@ -482,6 +492,12 @@
                             <button id="reset-view-btn" class="gruvhub-button rounded p-2 mt-1">Reset Pan/Zoom</button>
                             <div class="border-t border-[#c0a080] my-2"></div>
                         </div>
+                        
+                        <!-- FoW Toggle & Fog Blocks -->
+                        <div class="flex items-center justify-between">
+                            <label for="fow-toggle" class="text-xs font-bold uppercase">Enable Fog of War</label>
+                            <input type="checkbox" id="fow-toggle" class="gruvhub-input">
+                        </div>
                         <button id="add-fog-btn" class="gruvhub-button rounded p-2">Add Fog Block</button>
                         
                         <div class="border-t border-[#c0a080] my-2"></div>
@@ -541,7 +557,8 @@
                             <h3 class="font-bold text-gray-300">Selected Template</h3>
                             <div class="flex items-center gap-2">
                                 <label for="template-color-input" class="text-xs font-bold uppercase">Color</label>
-                                <input type="color" id="template-color-input" value="#ff8800" class="p-0 h-7 w-10 rounded border-none bg-transparent">
+                                <!-- Updated default color to rich gold/bronze -->
+                                <input type="color" id="template-color-input" value="#D4AF37" class="p-0 h-7 w-10 rounded border-none bg-transparent">
                             </div>
                         </div>
                         <div class="border-t border-[#c0a080] my-2"></div>
@@ -702,7 +719,7 @@
             </div>
             <!-- End Updated Header -->
             <div class="space-y-4 text-sm">
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-4 gap-4"> <!-- Changed grid to 4 columns to fit Vision -->
                     <div>
                         <label for="stat-block-hp" class="block text-xs uppercase">Current HP</label>
                         <input type="number" id="stat-block-hp" class="gruvhub-input w-full rounded p-2">
@@ -715,6 +732,12 @@
                         <label for="stat-block-ac" class="block text-xs uppercase">Armor Class</label>
                         <input type="number" id="stat-block-ac" class="gruvhub-input w-full rounded p-2">
                     </div>
+                    <!-- ADDED VISION RANGE INPUT -->
+                    <div>
+                        <label for="stat-block-vision-range" class="block text-xs uppercase">Vision (ft)</label>
+                        <input type="number" id="stat-block-vision-range" class="gruvhub-input w-full rounded p-2">
+                    </div>
+                    <!-- END ADDED VISION RANGE INPUT -->
                 </div>
                 <div>
                     <label for="stat-block-notes" class="block text-xs uppercase">Notes</label>
@@ -812,7 +835,7 @@
         let isDM = false;
         let currentUsername = '';
         let usersCollectionRef;
-        let activeUserList = [];
+        let activeUserList = []; // Initialized as empty array
         let vttState = {};
         let selectedElement = null;
         let armedEffect = null;
@@ -835,14 +858,13 @@
         // Drawing State (NEW)
         let isDrawing = false;
         let currentLine = null;
-        // The drawing color/thickness settings are now primarily stored in activeMap.drawing,
-        // but this client-side state can track the current tool's settings if not using live update
         
         // Panning State
         let isPanning = false;
         let lastPanPoint = { x: 0, y: 0 };
         
-        let drawingCanvas, drawCtx;
+        let fowCanvas, fowCtx; // NEW FOW CANVAS VARIABLES
+        let overlayCanvas, overlayCtx; // RENAMED Drawing Canvas Variables
         
         const STATUS_ICONS = {
             poisoned: '💀', blessed: '✨', burning: '🔥', frozen: '❄️',
@@ -869,6 +891,7 @@
                     color: '#ff0000',
                     thickness: 5,
                 },
+                fowEnabled: true, // NEW: FoW toggle state
             }], 
             activeMapId: 'default-map-1',
             presetMaps: [
@@ -997,10 +1020,11 @@
         // --- Helper function to get the currently active map object ---
         function getActiveMap() {
             if (!vttState.activeMapId || !vttState.maps) return null;
-            // Ensure drawing object exists for consistency
+            // Ensure drawing object and fowEnabled exist for consistency
             let activeMap = vttState.maps.find(m => m.id === vttState.activeMapId);
-            if (activeMap && !activeMap.drawing) {
-                activeMap.drawing = DEFAULT_STATE.maps[0].drawing;
+            if (activeMap) {
+                if (!activeMap.drawing) activeMap.drawing = DEFAULT_STATE.maps[0].drawing;
+                if (typeof activeMap.fowEnabled === 'undefined') activeMap.fowEnabled = true;
             }
             return activeMap;
         }
@@ -1129,8 +1153,11 @@
             document.getElementById('stop-record-btn').addEventListener('click', stopRecording);
             document.getElementById('cancel-record-btn').addEventListener('click', cancelRecording);
 
-            drawingCanvas = document.getElementById('drawing-canvas');
-            drawCtx = drawingCanvas.getContext('2d');
+            // RENAMED AND NEW CANVAS INITIALIZATION
+            overlayCanvas = document.getElementById('overlay-canvas');
+            overlayCtx = overlayCanvas.getContext('2d');
+            fowCanvas = document.getElementById('fow-canvas');
+            fowCtx = fowCanvas.getContext('2d');
 
             setInterval(() => {
                 if (userId) {
@@ -1160,7 +1187,7 @@
                         const handle = el.querySelector('.resize-handle');
                         if (handle) handle.remove();
                     });
-                    redrawDrawingCanvas(); // Deselect templates too
+                    redrawOverlayCanvas(); // Deselect templates too
                     renderTokenControls();
                     renderTemplateControls();
                 }
@@ -1280,15 +1307,16 @@
                     if (!data.maps || !Array.isArray(data.maps)) {
                         console.log("Old VTT state detected, migrating...");
                         const newMapId = crypto.randomUUID();
-                        const migratedMap = { id: newMapId, name: "Imported Map", url: data.mapUrl || DEFAULT_STATE.maps[0].url, width: data.mapWidth || 1200, height: data.mapHeight || 800, transform: data.mapTransform || { scale: 1, panX: 0, panY: 0 }, tokens: data.tokens || [], fogBlocks: data.fogBlocks || [], grid: data.grid || { enabled: false, size: 50, color: '#FFFFFF' }, spellTemplates: [], drawing: DEFAULT_STATE.maps[0].drawing };
+                        const migratedMap = { id: newMapId, name: "Imported Map", url: data.mapUrl || DEFAULT_STATE.maps[0].url, width: data.mapWidth || 1200, height: data.mapHeight || 800, transform: data.mapTransform || { scale: 1, panX: 0, panY: 0 }, tokens: data.tokens || [], fogBlocks: data.fogBlocks || [], grid: data.grid || { enabled: false, size: 50, color: '#FFFFFF' }, spellTemplates: [], drawing: DEFAULT_STATE.maps[0].drawing, fowEnabled: DEFAULT_STATE.maps[0].fowEnabled };
                         const migratedState = { ...DEFAULT_STATE, maps: [migratedMap], activeMapId: newMapId, presetMaps: data.presetMaps || DEFAULT_STATE.presetMaps, chatMessages: data.chatMessages || [], turnTracker: data.turnTracker || DEFAULT_STATE.turnTracker, journalEntries: data.journalEntries || [] };
                         setDoc(vttDocRef, migratedState);
                         return;
                     }
                     vttState = { ...DEFAULT_STATE, ...data };
-                    // Ensure drawing sub-state exists on all maps (for backward compatibility)
+                    // Ensure drawing sub-state and fowEnabled exists on all maps (for backward compatibility)
                     vttState.maps = vttState.maps.map(m => {
                         if (!m.drawing) m.drawing = DEFAULT_STATE.maps[0].drawing;
+                        if (typeof m.fowEnabled === 'undefined') m.fowEnabled = true;
                         return m;
                     });
                     // Ensure audioLink exists on state
@@ -1348,7 +1376,7 @@
                 renderJournal();
                 renderTokenControls();
                 renderTemplateControls();
-                redrawDrawingCanvas(); // Master redraw for drawing/templates/ruler
+                redrawOverlayCanvas(); // Master redraw for drawing/templates/ruler/FoW
             }
         }
         
@@ -1374,13 +1402,24 @@
 
                 if (map.id === vttState.activeMapId) tab.classList.add('active');
                 
-                // Click to switch map
-                tab.addEventListener('click', () => { if (vttState.activeMapId !== map.id) updateDoc(vttDocRef, { activeMapId: map.id }); });
+                // CHECK: Only DM can switch map tabs
+                if (isDM) {
+                    tab.addEventListener('click', () => { 
+                        if (vttState.activeMapId !== map.id) {
+                            updateDoc(vttDocRef, { activeMapId: map.id });
+                        }
+                    });
+                } else {
+                    tab.style.cursor = 'default';
+                    // Remove clickability for non-DMs
+                    tab.classList.add('opacity-70');
+                    tab.style.pointerEvents = 'none'; 
+                }
                 
                 // Right-click to rename map (DM ONLY)
                 tab.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    handleRenameMap(map.id);
+                    if (isDM) handleRenameMap(map.id);
                 });
 
                 const deleteBtn = document.createElement('span');
@@ -1415,11 +1454,16 @@
             mapContent.style.backgroundImage = `url('${url}')`;
             mapContent.style.width = `${width}px`;
             mapContent.style.height = `${height}px`;
-            drawingCanvas.width = width;
-            drawingCanvas.height = height;
+            
+            // CANVAS SIZE UPDATES
+            overlayCanvas.width = width; 
+            overlayCanvas.height = height;
+            fowCanvas.width = width; 
+            fowCanvas.height = height; 
+
             mapContent.style.transform = `translate(${transform.panX}px, ${transform.panY}px) scale(${transform.scale})`;
             drawGrid();
-            // redrawDrawingCanvas(); // Called by render()
+            // redrawOverlayCanvas(); // Called by render()
             
             // NEW: Update drawing controls UI based on active map
             const drawingControls = document.getElementById('dm-drawing-controls');
@@ -1525,7 +1569,7 @@
                         addResizeHandles(tokenEl, token, 'token');
                         renderTokenControls();
                         renderTemplateControls();
-                        redrawDrawingCanvas(); // Deselect other elements/handles
+                        redrawOverlayCanvas(); // Deselect other elements/handles
                     }
                 });
 
@@ -1541,7 +1585,7 @@
                         addResizeHandles(tokenEl, token, 'token');
                         renderTokenControls();
                         renderTemplateControls();
-                        redrawDrawingCanvas(); // Deselect other elements/handles
+                        redrawOverlayCanvas(); // Deselect other elements/handles
                         showStatBlock(token);
                     }
                 });
@@ -1571,7 +1615,7 @@
                 fogEl.style.top = `${block.y}px`;
                 fogEl.style.width = `${block.width}px`;
                 fogEl.style.height = `${block.height}px`;
-                fogEl.addEventListener('click', (e) => { e.stopPropagation(); if (!isDM) return; if (armedEffect) { playEffect(e); return; } if (selectedElement && selectedElement.id === block.id) return; selectedElement = { type: 'fog', id: block.id }; document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); }); fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); renderTokenControls(); redrawDrawingCanvas(); });
+                fogEl.addEventListener('click', (e) => { e.stopPropagation(); if (!isDM) return; if (armedEffect) { playEffect(e); return; } if (selectedElement && selectedElement.id === block.id) return; selectedElement = { type: 'fog', id: block.id }; document.querySelectorAll('.map-token, .fog-block').forEach(el => { el.classList.remove('selected'); const handle = el.querySelector('.resize-handle'); if (handle) handle.remove(); }); fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); renderTokenControls(); redrawOverlayCanvas(); });
                 fogEl.addEventListener('contextmenu', (e) => { e.preventDefault(); if (isDM) handleDeleteFogBlock(block.id); });
                 if (selectedElement && selectedElement.type === 'fog' && selectedElement.id === block.id) { fogEl.classList.add('selected'); addResizeHandles(fogEl, block, 'fog'); }
                 mapContent.appendChild(fogEl);
@@ -1712,7 +1756,7 @@
         document.getElementById('preset-map-select').addEventListener('change', (e) => { const url = e.target.value; if (url) updateActiveMapImage(url); });
         document.getElementById('add-preset-map-btn').addEventListener('click', () => { const urlInput = document.getElementById('new-map-url-input'); const newUrl = urlInput.value.trim(); if (newUrl) { const name = prompt("Enter a name for this map:", `Custom Map ${(vttState.presetMaps || []).length + 1}`); if (name) { const newMap = { name: name, url: newUrl }; const updatedPresetMaps = [...(vttState.presetMaps || []), newMap]; updateDoc(vttDocRef, { presetMaps: updatedPresetMaps }); urlInput.value = ''; } } });
         document.getElementById('change-map-btn').addEventListener('click', () => { const url = document.getElementById('map-url-input').value.trim(); if (url) updateActiveMapImage(url); });
-        document.getElementById('add-token-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const name = document.getElementById('token-name-input').value; if (name) { const newToken = { id: crypto.randomUUID(), name, color: document.getElementById('token-color-input').value, imageUrl: document.getElementById('token-image-url-input').value, x: activeMap.width / 2, y: activeMap.height / 2, width: activeMap.grid.size || 50, height: activeMap.grid.size || 50, statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: '', ownedBy: 'dm', abilities: [] }; activeMap.tokens.push(newToken); updateDoc(vttDocRef, { maps: vttState.maps }); document.getElementById('token-name-input').value = ''; document.getElementById('token-image-url-input').value = ''; } });
+        document.getElementById('add-token-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const name = document.getElementById('token-name-input').value; if (name) { const newToken = { id: crypto.randomUUID(), name, color: document.getElementById('token-color-input').value, imageUrl: document.getElementById('token-image-url-input').value, x: activeMap.width / 2, y: activeMap.height / 2, width: activeMap.grid.size || 50, height: activeMap.grid.size || 50, statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: '', ownedBy: 'dm', abilities: [], visionRange: 30 }; activeMap.tokens.push(newToken); updateDoc(vttDocRef, { maps: vttState.maps }); document.getElementById('token-name-input').value = ''; document.getElementById('token-image-url-input').value = ''; } });
         document.getElementById('add-fog-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const newBlock = { id: crypto.randomUUID(), x: 50, y: 50, width: 200, height: 200 }; activeMap.fogBlocks.push(newBlock); updateDoc(vttDocRef, { maps: vttState.maps }); });
         document.getElementById('clear-all-btn').addEventListener('click', () => { showModal( "Clear All Data?", "This will reset the entire session.", () => setDoc(vttDocRef, DEFAULT_STATE) ); });
         function handleDeleteToken(tokenId) { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.tokens = (activeMap.tokens || []).filter(t => t.id !== tokenId); updateDoc(vttDocRef, { maps: vttState.maps }); }
@@ -1776,6 +1820,13 @@
                     el.disabled = !isDM;
                 }
             });
+            
+            // NEW: Vision Range
+            const visionInput = document.getElementById('stat-block-vision-range');
+            if (visionInput) {
+                visionInput.value = token.visionRange || 0;
+                visionInput.disabled = !isDM;
+            }
 
             const ownerWrapper = document.getElementById('stat-block-owner-wrapper');
             const ownerSelect = document.getElementById('stat-block-owner');
@@ -1798,7 +1849,8 @@
                 ownerSelect.appendChild(gmpcOption);
 
                 // 3. Active Player Options
-                activeUserList.forEach(user => {
+                // FIX: Ensure activeUserList is treated as an array for safe iteration
+                (activeUserList || []).forEach(user => {
                     if (!user.username.toLowerCase().endsWith('dm')) {
                         const option = document.createElement('option');
                         option.value = user.id;
@@ -1839,6 +1891,9 @@
             tokenToUpdate.notes = document.getElementById('stat-block-notes').value;
             tokenToUpdate.ownedBy = document.getElementById('stat-block-owner').value;
             tokenToUpdate.abilities = tokenToUpdate.abilities || []; // Ensure abilities are preserved if not re-saved
+            // NEW: Save Vision Range
+            tokenToUpdate.visionRange = parseInt(document.getElementById('stat-block-vision-range').value, 10) || 0;
+            
             updateDoc(vttDocRef, { maps: updatedMaps });
             hideStatBlock();
         }
@@ -1859,6 +1914,7 @@
                 grid: { enabled: false, size: 50, color: '#FFFFFF' }, 
                 spellTemplates: [],
                 drawing: DEFAULT_STATE.maps[0].drawing, // Add drawing state
+                fowEnabled: DEFAULT_STATE.maps[0].fowEnabled,
             }; 
             const updatedMaps = [...(vttState.maps || []), newMap]; 
             updateDoc(vttDocRef, { maps: updatedMaps, activeMapId: newMapId }); 
@@ -1869,7 +1925,7 @@
                 showModal("Cannot Delete", "You must keep at least one map.", () => {});
                 return;
             } 
-            showModal("Delete Map?", "Are you sure you want to delete this map and all its tokens? This cannot be undone.", () => { 
+            showModal("Delete Map?", "This will permanently delete this map and all its tokens. This cannot be undone.", () => { 
                 const updatedMaps = vttState.maps.filter(m => m.id !== mapId); 
                 let newActiveId = vttState.activeMapId; 
                 if (newActiveId === mapId) { 
@@ -1911,17 +1967,21 @@
         }
 
         function setupGridControls() { 
-            const updateGrid = (prop, value) => { 
+            const updateMapConfig = (prop, value) => { 
                 const activeMap = getActiveMap(); 
                 if (!activeMap) return; 
-                activeMap.grid[prop] = value; 
+                activeMap[prop] = value; 
                 updateDoc(vttDocRef, { maps: vttState.maps }); 
             }; 
-            document.getElementById('grid-toggle').addEventListener('change', (e) => updateGrid('enabled', e.target.checked)); 
+            document.getElementById('grid-toggle').addEventListener('change', (e) => updateMapConfig('grid', {...getActiveMap().grid, enabled: e.target.checked})); 
             document.getElementById('grid-size-input').addEventListener('input', (e) => { document.getElementById('grid-size-display').textContent = e.target.value; }); 
-            document.getElementById('grid-size-input').addEventListener('change', (e) => updateGrid('size', parseInt(e.target.value, 10))); 
-            document.getElementById('grid-color-input').addEventListener('input', (e) => updateGrid('color', e.target.value)); 
+            document.getElementById('grid-size-input').addEventListener('change', (e) => updateMapConfig('grid', {...getActiveMap().grid, size: parseInt(e.target.value, 10)})); 
+            document.getElementById('grid-color-input').addEventListener('input', (e) => updateMapConfig('grid', {...getActiveMap().grid, color: e.target.value})); 
+            
+            // NEW: FOW Toggle setup
+            document.getElementById('fow-toggle').addEventListener('change', (e) => updateMapConfig('fowEnabled', e.target.checked));
         }
+        
         function renderGridControls() { 
             const activeMap = getActiveMap(); 
             const enabled = activeMap ? activeMap.grid.enabled : false; 
@@ -1931,18 +1991,72 @@
             document.getElementById('grid-size-input').value = size; 
             document.getElementById('grid-size-display').textContent = size; 
             document.getElementById('grid-color-input').value = color; 
+            
+            // NEW: Render FOW Toggle state
+            document.getElementById('fow-toggle').checked = activeMap ? activeMap.fowEnabled : true;
         }
         
         // --- Draggable & Resizable Logic ---
         function makeDraggable(element, id, type) { 
-            const item = (getActiveMap()?.[type === 'token' ? 'tokens' : 'fogBlocks'] || []).find(i => i.id === id);
+            const activeMap = getActiveMap();
+            const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks;
+            const itemIndex = dataArray.findIndex(i => i.id === id);
+            const item = dataArray[itemIndex];
+
             let initialPos = { top: 0, left: 0 }; 
+            
             element.onmousedown = (e) => { 
                 if (activeTool !== 'pan') return;
                 // Allow DM or the token owner (including GMPC owner) to move the token
                 if (!isDM && (!item || type !== 'token' || (item.ownedBy !== userId && item.ownedBy !== DM_PLAYER_GMPC_ID))) return;
-                if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); initialPos = { top: element.offsetTop, left: element.offsetLeft }; window.onmousemove = (dragEvent) => { dragEvent.preventDefault(); const activeMap = getActiveMap(); if (!activeMap) return; const { scale } = activeMap.transform; element.style.left = (initialPos.left += dragEvent.movementX / scale) + "px"; element.style.top = (initialPos.top += dragEvent.movementY / scale) + "px"; }; window.onmouseup = () => { window.onmouseup = null; window.onmousemove = null; const activeMap = getActiveMap(); if (!activeMap) return; const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks; const itemIndex = dataArray.findIndex(item => item.id === id); if (itemIndex > -1) { dataArray[itemIndex].x = parseFloat(element.style.left); dataArray[itemIndex].y = parseFloat(element.style.top); updateDoc(vttDocRef, { maps: vttState.maps }); } }; }; 
+                
+                if (e.button !== 0) return; 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                
+                // --- OPTIMIZED DRAG LOGIC ---
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startItemX = item.x;
+                const startItemY = item.y;
+                
+                window.onmousemove = (dragEvent) => { 
+                    dragEvent.preventDefault(); 
+                    const currentMap = getActiveMap(); 
+                    if (!currentMap) return; 
+                    const { scale } = currentMap.transform;
+                    
+                    const deltaX = dragEvent.clientX - startX;
+                    const deltaY = dragEvent.clientY - startY;
+
+                    // Calculate new position based on drag movement and map scale
+                    const newX = startItemX + (deltaX / scale);
+                    const newY = startItemY + (deltaY / scale);
+
+                    // Update local state and DOM immediately for smooth visual feedback
+                    item.x = newX;
+                    item.y = newY;
+                    element.style.left = newX + "px";
+                    element.style.top = newY + "px";
+                    
+                    // Critical: Redraw FoW immediately after token moves locally
+                    // This uses local data, avoiding the Firestore latency problem
+                    if (type === 'token') {
+                        redrawOverlayCanvas(); 
+                    }
+                }; 
+                
+                window.onmouseup = () => { 
+                    window.onmouseup = null; 
+                    window.onmousemove = null; 
+                    
+                    // Final update of the map state to Firestore (only sends once)
+                    updateDoc(vttDocRef, { maps: vttState.maps });
+                }; 
+                // --- END OPTIMIZED DRAG LOGIC ---
+            }; 
         }
+
         function addResizeHandles(element, data, type) {
             if (!isDM && (type !== 'token' || (data.ownedBy !== userId && data.ownedBy !== DM_PLAYER_GMPC_ID))) return; // Allow GMPC owner to resize
             const handle = document.createElement('div'); handle.className = 'resize-handle br'; element.appendChild(handle); handle.addEventListener('mousedown', (e) => initResize(e, element, data, type)); 
@@ -2001,7 +2115,8 @@
                 ac: 10,
                 notes: '',
                 ownedBy: 'dm',
-                abilities: []
+                abilities: [],
+                visionRange: 30, // DEFAULT: 30 feet
             };
             if (!activeMap.tokens) activeMap.tokens = [];
             activeMap.tokens.push(newToken);
@@ -2128,7 +2243,7 @@
                 const template = activeMap.spellTemplates.find(t => t.id === selectedElement.id);
                 if (template) {
                     template.color = e.target.value + '80'; // Add alpha
-                    redrawDrawingCanvas(); // Live preview
+                    redrawOverlayCanvas(); // Live preview
                 }
             });
             document.getElementById('template-color-input').addEventListener('change', (e) => {
@@ -2296,7 +2411,8 @@
                                         ...loadedMap, 
                                         id: m.id, 
                                         transform: activeMap.transform || { scale: 1, panX: 0, panY: 0 },
-                                        drawing: loadedMap.drawing || DEFAULT_STATE.maps[0].drawing // Include drawing data
+                                        drawing: loadedMap.drawing || DEFAULT_STATE.maps[0].drawing, // Include drawing data
+                                        fowEnabled: typeof loadedMap.fowEnabled === 'undefined' ? true : loadedMap.fowEnabled, // Include fowEnabled
                                     };
                                 }
                                 return m;
@@ -2527,7 +2643,7 @@
                     mapContainer.style.cursor = 'move';
                     break;
             }
-            redrawDrawingCanvas(); // Master redraw
+            redrawOverlayCanvas(); // Master redraw
         }
 
         function handleMapMouseDown(e) {
@@ -2551,18 +2667,18 @@
                 };
 
                 // Set up canvas context for drawing/erasing immediately
-                drawCtx.strokeStyle = currentLine.color;
-                drawCtx.lineWidth = currentLine.thickness / activeMap.transform.scale;
-                drawCtx.lineCap = 'round';
-                drawCtx.lineJoin = 'round';
+                overlayCtx.strokeStyle = currentLine.color;
+                overlayCtx.lineWidth = currentLine.thickness / activeMap.transform.scale;
+                overlayCtx.lineCap = 'round';
+                overlayCtx.lineJoin = 'round';
                 if (activeTool === 'erase') {
-                     drawCtx.globalCompositeOperation = 'destination-out';
+                     overlayCtx.globalCompositeOperation = 'destination-out';
                 } else {
-                     drawCtx.globalCompositeOperation = 'source-over';
+                     overlayCtx.globalCompositeOperation = 'source-over';
                 }
 
-                drawCtx.beginPath();
-                drawCtx.moveTo(coords.x, coords.y);
+                overlayCtx.beginPath();
+                overlayCtx.moveTo(coords.x, coords.y);
                 
                 e.stopPropagation();
                 return;
@@ -2602,7 +2718,7 @@
                             startPos: coords,
                             startDims: { ...template }
                         };
-                        redrawDrawingCanvas();
+                        redrawOverlayCanvas();
                         e.stopPropagation();
                         return;
                     }
@@ -2639,12 +2755,12 @@
                     else if (template.type === 'square') template.size = Math.max(20, Math.abs(dx)*2, Math.abs(dy)*2);
                     else if (template.type === 'cone') template.height = Math.max(20, dy);
                 }
-                redrawDrawingCanvas();
+                redrawOverlayCanvas();
 
             // 2. Ruler
             } else if (rulerState.active) {
                 rulerState.end = coords;
-                redrawDrawingCanvas();
+                redrawOverlayCanvas();
 
             // 3. Drawing/Erasing (NEW)
             } else if (isDrawing && isDM) {
@@ -2652,14 +2768,23 @@
                 currentLine.points.push(coords);
                 
                 // Draw the line segment in real-time
-                drawCtx.lineTo(coords.x, coords.y);
-                drawCtx.stroke();
-                drawCtx.beginPath();
-                drawCtx.moveTo(coords.x, coords.y);
+                overlayCtx.lineTo(coords.x, coords.y); 
+                overlayCtx.stroke(); 
+                overlayCtx.beginPath(); 
+                overlayCtx.moveTo(coords.x, coords.y); 
 
             // 4. Panning
             } else if (isPanning && isDM) { // Check isDM here to prevent players from moving map
-                const activeMap = getActiveMap(); if (!activeMap) return; const dx = e.clientX - lastPanPoint.x; const dy = e.clientY - lastPanPoint.y; lastPanPoint = { x: e.clientX, y: e.clientY }; activeMap.transform.panX += dx; activeMap.transform.panY += dy; renderMap();
+                const activeMap = getActiveMap(); 
+                if (!activeMap) return; 
+                const dx = e.clientX - lastPanPoint.x; 
+                const dy = e.clientY - lastPanPoint.y; 
+                lastPanPoint = { x: e.clientX, y: e.clientY }; 
+                activeMap.transform.panX += dx; 
+                activeMap.transform.panY += dy; 
+                // Don't call renderMap here, just update the map content transform property directly
+                document.getElementById('map-content').style.transform = `translate(${activeMap.transform.panX}px, ${activeMap.transform.panY}px) scale(${activeMap.transform.scale})`;
+                redrawOverlayCanvas(); // Redraw canvases (grid, fow, overlay) based on new pan/zoom state
             }
         }
 
@@ -2671,7 +2796,7 @@
             if (rulerState.active) {
                 rulerState.active = false;
                 setTimeout(() => {
-                    if (!rulerState.active) { redrawDrawingCanvas(); }
+                    if (!rulerState.active) { redrawOverlayCanvas(); }
                 }, 2000);
             }
 
@@ -2689,8 +2814,8 @@
                 currentLine = null;
                 
                 // Reset canvas context and redraw everything
-                drawCtx.globalCompositeOperation = 'source-over';
-                redrawDrawingCanvas(); 
+                overlayCtx.globalCompositeOperation = 'source-over';
+                redrawOverlayCanvas(); 
             }
 
             if (isPanning) {
@@ -2700,61 +2825,61 @@
             }
         }
 
-        function clearDrawingCanvas() {
-            if (drawCtx) drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        function clearOverlayCanvas() { // RENAMED
+            if (overlayCtx) overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         }
 
-        function redrawPersistentDrawing() { // NEW/MODIFIED
+        function redrawPersistentDrawing() { // NOW DRAWS TO overlayCtx
             const activeMap = getActiveMap();
-            if (!activeMap || !drawCtx) return;
+            if (!activeMap || !overlayCtx) return;
 
             const lines = activeMap.drawing.lines || [];
             const scale = activeMap.transform.scale || 1;
 
             lines.forEach(line => {
-                drawCtx.lineWidth = (line.thickness || activeMap.drawing.thickness) / scale;
-                drawCtx.lineCap = 'round';
-                drawCtx.lineJoin = 'round';
+                overlayCtx.lineWidth = (line.thickness || activeMap.drawing.thickness) / scale;
+                overlayCtx.lineCap = 'round';
+                overlayCtx.lineJoin = 'round';
 
                 if (line.mode === 'erase') {
                     // Erase mode: destination-out clears everything already drawn in that spot
-                    drawCtx.globalCompositeOperation = 'destination-out';
-                    drawCtx.strokeStyle = 'rgba(0,0,0,1)'; 
+                    overlayCtx.globalCompositeOperation = 'destination-out';
+                    overlayCtx.strokeStyle = 'rgba(0,0,0,1)'; 
                 } else {
                     // Draw mode: source-over draws on top
-                    drawCtx.globalCompositeOperation = 'source-over';
-                    drawCtx.strokeStyle = line.color;
+                    overlayCtx.globalCompositeOperation = 'source-over';
+                    overlayCtx.strokeStyle = line.color;
                 }
 
-                drawCtx.beginPath();
+                overlayCtx.beginPath();
                 if (line.points.length > 0) {
-                    drawCtx.moveTo(line.points[0].x, line.points[0].y);
+                    overlayCtx.moveTo(line.points[0].x, line.points[0].y);
                     for (let i = 1; i < line.points.length; i++) {
-                        drawCtx.lineTo(line.points[i].x, line.points[i].y);
+                        overlayCtx.lineTo(line.points[i].x, line.points[i].y);
                     }
                 }
-                drawCtx.stroke();
+                overlayCtx.stroke();
             });
             
             // Reset composite operation for templates and ruler
-            drawCtx.globalCompositeOperation = 'source-over';
+            overlayCtx.globalCompositeOperation = 'source-over';
         }
         
-        function drawRuler() { // MODIFIED to no longer clear canvas
+        function drawRuler() { // NOW DRAWS TO overlayCtx
             if (!rulerState.start || !rulerState.end) return;
 
             const { start, end } = rulerState;
             const activeMap = getActiveMap();
             if (!activeMap) return;
 
-            drawCtx.beginPath();
-            drawCtx.moveTo(start.x, start.y);
-            drawCtx.lineTo(end.x, end.y);
-            drawCtx.strokeStyle = '#ffd700';
-            drawCtx.lineWidth = 3 / activeMap.transform.scale;
-            drawCtx.setLineDash([10 / activeMap.transform.scale, 5 / activeMap.transform.scale]);
-            drawCtx.stroke();
-            drawCtx.setLineDash([]);
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(start.x, start.y);
+            overlayCtx.lineTo(end.x, end.y);
+            overlayCtx.strokeStyle = '#ffd700';
+            overlayCtx.lineWidth = 3 / activeMap.transform.scale;
+            overlayCtx.setLineDash([10 / activeMap.transform.scale, 5 / activeMap.transform.scale]);
+            overlayCtx.stroke();
+            overlayCtx.setLineDash([]);
             
             const dx = end.x - start.x;
             const dy = end.y - start.y;
@@ -2762,14 +2887,14 @@
             const gridSize = activeMap.grid.size || 50;
             const feetDist = Math.round((pixelDist / gridSize) * 5);
 
-            drawCtx.fillStyle = '#ffffff';
-            drawCtx.strokeStyle = '#000000';
-            drawCtx.lineWidth = 4 / activeMap.transform.scale;
-            drawCtx.font = `bold ${16 / activeMap.transform.scale}px Cinzel`;
-            drawCtx.textAlign = 'center';
+            overlayCtx.fillStyle = '#ffffff';
+            overlayCtx.strokeStyle = '#000000';
+            overlayCtx.lineWidth = 4 / activeMap.transform.scale;
+            overlayCtx.font = `bold ${16 / activeMap.transform.scale}px Cinzel`;
+            overlayCtx.textAlign = 'center';
             const text = `${feetDist} ft`;
-            drawCtx.strokeText(text, start.x + dx/2, start.y + dy/2 - 10);
-            drawCtx.fillText(text, start.x + dx/2, start.y + dy/2 - 10);
+            overlayCtx.strokeText(text, start.x + dx/2, start.y + dy/2 - 10);
+            overlayCtx.fillText(text, start.x + dx/2, start.y + dy/2 - 10);
         }
 
         function placeSpellTemplate(e) {
@@ -2778,7 +2903,7 @@
             const { x, y } = getMapCoords(e);
             const gridSize = activeMap.grid.size || 50;
             
-            let newTemplate = { id: crypto.randomUUID(), type: activeTemplateShape, x, y, color: '#ff880080' };
+            let newTemplate = { id: crypto.randomUUID(), type: activeTemplateShape, x, y, color: document.getElementById('template-color-input').value + '80' };
             
             switch(activeTemplateShape) {
                 case 'circle': newTemplate.radius = (20 / 5) * gridSize; break;
@@ -2792,57 +2917,108 @@
             setActiveTool('pan');
         }
 
-        function redrawDrawingCanvas() { // MASTER REDRAW
-            clearDrawingCanvas();
+        function drawFoW() { // NEW FoW MASKING FUNCTION
             const activeMap = getActiveMap();
-            if (!activeMap || !drawCtx) return;
+            if (!activeMap || !fowCtx) return;
 
-            // 1. Draw Persistent Drawings/Erasures
-            redrawPersistentDrawing();
+            // --- TOGGLE CHECK ---
+            if (!activeMap.fowEnabled) { 
+                fowCtx.clearRect(0, 0, fowCanvas.width, fowCanvas.height);
+                return;
+            }
+            // --- END TOGGLE CHECK ---
+
+            fowCtx.clearRect(0, 0, fowCanvas.width, fowCanvas.height);
+            const gridSize = activeMap.grid.size || 50;
+
+            // 1. Draw the initial opaque fog layer
+            fowCtx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            fowCtx.fillRect(0, 0, fowCanvas.width, fowCanvas.height);
+
+            // 2. Set composite operation to punch holes (tokens reveal)
+            fowCtx.globalCompositeOperation = 'destination-out';
+
+            (activeMap.tokens || []).forEach(token => {
+                // Tokens must be owned by the current user or be GMPC-owned to reveal vision for *this* client.
+                const isTokenVisibleToClient = isDM || token.ownedBy === userId || token.ownedBy === DM_PLAYER_GMPC_ID;
+                
+                if (isTokenVisibleToClient) {
+                    const visionRange = (token.visionRange || 0);
+                    if (visionRange > 0) {
+                        // Convert vision range (feet) to canvas pixels (5ft/grid unit)
+                        const radius = (visionRange / 5) * gridSize;
+                        
+                        // Center of the token
+                        const centerX = token.x + token.width / 2;
+                        const centerY = token.y + token.height / 2;
+
+                        fowCtx.beginPath();
+                        fowCtx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+                        fowCtx.fill();
+                    }
+                }
+            });
+
+            // 3. Reset composite operation
+            fowCtx.globalCompositeOperation = 'source-over';
+        }
+
+
+        function redrawOverlayCanvas() { // MASTER REDRAW - RENAMED
+            // 0. Update FOW layer first
+            drawFoW(); 
+
+            // 1. Clear the overlay (drawings/templates/ruler)
+            clearOverlayCanvas(); 
+            const activeMap = getActiveMap();
+            if (!activeMap || !overlayCtx) return;
 
             const scale = activeMap.transform.scale || 1;
 
-            // 2. Draw Spell Templates
+            // 2. Draw Persistent Drawings/Erasures
+            redrawPersistentDrawing();
+
+            // 3. Draw Spell Templates
             (activeMap.spellTemplates || []).forEach(template => {
                 const isSelected = selectedElement && selectedElement.type === 'template' && selectedElement.id === template.id;
                 
-                drawCtx.fillStyle = template.color;
-                drawCtx.strokeStyle = isSelected ? '#33C3FF' : '#FFD700';
-                drawCtx.lineWidth = (isSelected ? 4 : 2) / scale;
+                overlayCtx.fillStyle = template.color;
+                overlayCtx.strokeStyle = isSelected ? '#33C3FF' : '#FFD700';
+                overlayCtx.lineWidth = (isSelected ? 4 : 2) / scale;
                 
-                drawCtx.beginPath();
+                overlayCtx.beginPath();
                 switch(template.type) {
                     case 'circle':
-                        drawCtx.arc(template.x, template.y, template.radius, 0, 2 * Math.PI);
+                        overlayCtx.arc(template.x, template.y, template.radius, 0, 2 * Math.PI);
                         break;
                     case 'square':
-                        drawCtx.rect(template.x - template.size/2, template.y - template.size/2, template.size, template.size);
+                        overlayCtx.rect(template.x - template.size/2, template.y - template.size/2, template.size, template.size);
                         break;
                     case 'cone':
                         const coneHeight = template.height;
                         const coneWidth = template.height;
-                        drawCtx.moveTo(template.x, template.y);
-                        drawCtx.lineTo(template.x - coneWidth / 2, template.y + coneHeight);
-                        drawCtx.lineTo(template.x + coneWidth / 2, template.y + coneHeight);
-                        drawCtx.closePath();
+                        overlayCtx.moveTo(template.x, template.y);
+                        overlayCtx.lineTo(template.x - coneWidth / 2, template.y + coneHeight);
+                        overlayCtx.lineTo(template.x + coneWidth / 2, template.y + coneHeight);
+                        overlayCtx.closePath();
                         break;
                 }
-                drawCtx.fill();
-                drawCtx.stroke();
+                overlayCtx.fill();
+                overlayCtx.stroke();
 
                 if (isSelected && isDM) {
                     drawResizeHandle(getResizeHandleForTemplate(template));
                 }
             });
 
-            // 3. Draw Ruler Overlay
+            // 4. Draw Ruler Overlay
             drawRuler();
         }
         
         function drawResizeHandle(handle) {
             if (!handle) return;
-            drawCtx.fillStyle = '#33C3FF';
-            drawCtx.fillRect(handle.x - handle.size/2, handle.y - handle.size/2, handle.size, handle.size);
+            overlayCtx.fillStyle = '#33C3FF';
+            overlayCtx.fillRect(handle.x - handle.size/2, handle.y - handle.size/2, handle.size, handle.size);
         }
 
         function getTemplateAt(x, y) {
@@ -2986,14 +3162,14 @@
                 if (token.ownedBy === DM_PLAYER_GMPC_ID) {
                     ownerName = 'DM Player (GMPC)';
                 } else if (token.ownedBy !== 'dm') {
-                    ownerName = activeUserList.find(u => u.id === token.ownedBy)?.username || 'Player';
+                    ownerName = (activeUserList || []).find(u => u.id === token.ownedBy)?.username || 'Player';
                 }
                 const div = document.createElement('div');
                 div.className = 'flex items-center gap-2 p-2 rounded hover:bg-[#6b4c4a]';
                 // FIX: Re-adding the checkbox for selection, and cleaning up the layout.
                 div.innerHTML = `
                     <input type="checkbox" data-token-id="${token.id}" class="gruvhub-input battle-setup-checkbox">
-                    <div class="w-8 h-8 rounded-full bg-cover bg-center flex-shrink-0" style="background-image: url('${token.imageUrl || ''}'); background-color: ${token.color};"></div>
+                    <div class="w-8 h-8 rounded-full bg-cover bg-center flex-shrink-0" style="background-image: url('${token.imageUrl}'); background-color: ${token.color};"></div>
                     <div class="flex-grow min-w-0">
                         <p class="text-sm font-bold truncate">${token.name}</p>
                         <p class="text-xs text-gray-400">Owner: ${ownerName}</p>
