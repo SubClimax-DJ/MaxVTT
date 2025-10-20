@@ -35,9 +35,6 @@
             font-size: 0.8rem; /* Smaller text inside inputs/selects */
             padding: 0.25rem 0.5rem; /* Reduced padding */
         }
-        .gruvhub-input::placeholder {
-            color: #6d5d4b;
-        }
         .gruvhub-input:focus {
             outline: none;
             border-color: #ffd700; /* Gold */
@@ -216,7 +213,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
-            z-index: 100;
+            z-index: 500; /* CRITICAL FIX: Ensure modals are on top */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -232,6 +229,7 @@
             position: fixed;
             z-index: 250;
         }
+        /* Existing effects */
         .effect-fireball { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,200,0,0.7) 40%, rgba(255,0,0,0.5) 80%); animation: fireball-animation 1s ease-out forwards; }
         @keyframes fireball-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
         .effect-slash { width: 120px; height: 120px; border-top: 4px solid rgba(255, 255, 255, 0.8); border-radius: 50%; animation: slash-animation 0.6s ease-out forwards; }
@@ -242,7 +240,22 @@
         @keyframes ice-animation { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 80% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; } 100% { opacity: 0; } }
         .effect-lightning { width: 40px; height: 150px; background: linear-gradient(to bottom, transparent, #9370DB, transparent); box-shadow: 0 0 10px #9370DB, 0 0 20px #9370DB; clip-path: polygon(50% 0, 60% 20%, 40% 40%, 55% 60%, 45% 80%, 50% 100%); animation: lightning-animation 0.8s ease-out forwards; }
         @keyframes lightning-animation { 0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
-        
+        /* NEW EFFECTS */
+        .effect-drain { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, rgba(100,0,100,0.8) 0%, rgba(50,0,50,0.6) 50%); box-shadow: 0 0 15px rgba(100,0,100,0.9); animation: drain-animation 1.5s ease-in-out forwards; }
+        @keyframes drain-animation { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+        .effect-stun { width: 80px; height: 80px; background: radial-gradient(yellow, orange, transparent); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); animation: stun-animation 0.5s linear infinite alternate; }
+        @keyframes stun-animation { 0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(1.1) rotate(15deg); opacity: 1; } }
+        .effect-shield { width: 150px; height: 150px; border-radius: 50%; border: 6px solid rgba(173, 216, 230, 0.9); box-shadow: 0 0 25px rgba(173, 216, 230, 1); animation: shield-animation 1.5s ease-in-out infinite; }
+        @keyframes shield-animation { 0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; } }
+        /* NEW STATUS EFFECTS */
+        .effect-poisoned-gas { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,0,0.4) 0%, rgba(50,150,50,0.3) 50%, transparent 80%); animation: poison-gas-animation 2s linear infinite; }
+        @keyframes poison-gas-animation { 0% { transform: translate(-50%, -50%) scale(0.8); } 100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); } }
+        .effect-arcane-buff { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, rgba(135,206,250,0.6) 0%, rgba(255,0,255,0.4) 50%); animation: arcane-buff-animation 1s linear infinite alternate; }
+        @keyframes arcane-buff-animation { 0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); } 100% { transform: translate(-50%, -50%) scale(1.05) rotate(10deg); } }
+        .effect-bleed { width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 0, 0, 0.8); animation: bleed-animation 0.5s ease-in-out infinite alternate; }
+        @keyframes bleed-animation { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; } }
+
+
         /* Battle System Styles */
         #battle-screen {
             background: url('https://i.postimg.cc/4yhFHcN9/SSP-battle.png') no-repeat center center;
@@ -266,10 +279,18 @@
             flex-shrink: 0; /* Ensures the card size is respected in scrolling container */
         }
         .combatant-card.active-turn {
-            transform: scale(1.1);
+            /* FIX 1: Removed transform: scale(1.1) to stabilize layout */
             border-color: #ffd700;
-            box-shadow: 0 0 20px #ffd700;
+            box-shadow: 0 0 10px #ffd700; /* Set a base shadow */
+            /* Added flashing effect for extra clarity */
+            animation: pulse-turn 1.5s infinite alternate;
         }
+        /* FIX 2: Modified animation to only change shadow intensity, not size/scale */
+        @keyframes pulse-turn {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
+            100% { box-shadow: 0 0 20px rgba(255, 215, 0, 1.0); }
+        }
+
         .combatant-card.targetable {
             cursor: pointer;
             border-color: #ff4500;
@@ -282,6 +303,8 @@
             filter: grayscale(1);
             opacity: 0.5;
         }
+        /* REMOVED: dimming non-active player cards */
+        
         .combatant-image {
             width: 90px;
             height: 90px;
@@ -313,7 +336,6 @@
             border-bottom: none;
             padding: 2px 6px;
             border-radius: 4px 4px 0 0;
-            cursor: pointer;
             font-size: 0.7rem; 
         }
         .token-bank-tab.active {
@@ -321,7 +343,25 @@
             color: #ffd700;
             transform: translateY(1px);
         }
-
+        .status-effect-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        
+        /* NEW: Active turn indicator border */
+        .combatant-card.active-turn .combatant-image {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 8px #ffd700;
+        }
+        
+        /* NEW: Ability Grid Layout */
+        #ability-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
     </style>
 </head>
 <body class="overflow-hidden h-screen">
@@ -377,7 +417,7 @@
                     <button id="voice-clip-btn" class="gruvhub-button rounded px-2 py-2 text-sm flex-shrink-0" title="Record and send voice message">🎙️</button>
                     <!-- END NEW VOICE CLIP BUTTON -->
 
-                    <input type="text" id="chat-input" placeholder="Message..." class="gruvhub-input w-full rounded p-2 text-sm">
+                    <input type="text" id="chat-input" placeholder="Message or /roll NdS+M..." class="gruvhub-input w-full rounded p-2 text-sm">
                     <button id="send-chat" class="gruvhub-button rounded px-4 py-2 text-sm">Send</button>
                 </div>
             </div>
@@ -385,7 +425,7 @@
             <!-- Dice Roller -->
             <div class="gruvhub-bg gruvhub-border rounded-lg p-3">
                 <h2 class="text-lg font-bold text-gray-200 border-b border-[#c0a080] pb-2 mb-2">Dice</h2>
-                <div class="grid grid-cols-4 gap-2 text-xs">
+                <div id="dice-buttons-container" class="grid grid-cols-4 gap-2 text-xs"> <!-- ADDED ID -->
                     <button data-die="d4" class="dice-roll-btn gruvhub-button rounded p-2">d4</button>
                     <button data-die="d6" class="dice-roll-btn gruvhub-button rounded p-2">d6</button>
                     <button data-die="d8" class="dice-roll-btn gruvhub-button rounded p-2">d8</button>
@@ -453,6 +493,17 @@
                     <div class="dm-controls-wrapper flex flex-col gap-3">
                         <h3 class="font-bold text-gray-300">Battle</h3>
                         <button id="start-battle-btn" class="gruvhub-button bg-red-900 hover:bg-red-800">Start Battle</button>
+                        
+                        <!-- NEW: Turn Duration Control -->
+                        <div class="flex flex-col gap-1">
+                            <label for="turn-duration-input" class="text-xs font-bold uppercase">Turn Duration (sec)</label>
+                            <div class="flex gap-2 items-center">
+                                <input type="number" id="turn-duration-input" min="10" max="300" value="60" class="gruvhub-input w-20 text-xs">
+                                <button id="set-turn-duration-btn" class="gruvhub-button p-2 text-xs flex-grow">Set Default</button>
+                            </div>
+                        </div>
+                        <!-- END NEW: Turn Duration Control -->
+
                         <div class="border-t border-[#c0a080] my-2"></div>
                         <div class="flex flex-col gap-2">
                             <label for="preset-map-select" class="text-xs font-bold uppercase">Preset Maps (for active map)</label>
@@ -493,7 +544,7 @@
                             <div class="border-t border-[#c0a080] my-2"></div>
                         </div>
                         
-                        <!-- FoW Toggle & Fog Blocks -->
+                        <!-- Fog of War and Fog Blocks (Reworked to be functional) -->
                         <div class="flex items-center justify-between">
                             <label for="fow-toggle" class="text-xs font-bold uppercase">Enable Fog of War</label>
                             <input type="checkbox" id="fow-toggle" class="gruvhub-input">
@@ -520,6 +571,7 @@
                         <!-- END NEW DM Drawing Controls -->
                         
                         <div class="border-t border-[#c0a080] my-2"></div>
+                        
                         <h3 class="font-bold text-gray-300">Session Management</h3>
                         <div class="grid grid-cols-2 gap-2 mt-1">
                             <button id="sync-data-btn" class="bg-blue-800 hover:bg-blue-700 text-white rounded p-2 gruvhub-button">Sync to Cloud</button>
@@ -540,6 +592,12 @@
                                 <button data-effect="heal" class="effect-btn gruvhub-button text-xs p-1">Heal</button>
                                 <button data-effect="ice" class="effect-btn gruvhub-button text-xs p-1">Ice</button>
                                 <button data-effect="lightning" class="effect-btn gruvhub-button text-xs p-1">Lightning</button>
+                                <button data-effect="drain" class="effect-btn gruvhub-button text-xs p-1">Drain</button>
+                                <button data-effect="stun" class="effect-btn gruvhub-button text-xs p-1">Stun</button>
+                                <button data-effect="shield" class="effect-btn gruvhub-button text-xs p-1">Shield</button>
+                                <button data-effect="poisoned-gas" class="effect-btn gruvhub-button text-xs p-1">Poison</button>
+                                <button data-effect="arcane-buff" class="effect-btn gruvhub-button text-xs p-1">Buff</button>
+                                <button data-effect="bleed" class="effect-btn gruvhub-button text-xs p-1">Bleed</button>
                             </div>
                         </div>
                         <div class="border-t border-[#c0a080] my-2"></div>
@@ -588,6 +646,7 @@
                             <!-- END TOKEN FILE CONTROLS -->
                         </div>
                         <div class="border-t border-[#c0a080] my-2"></div>
+
                         <div class="flex flex-col gap-2">
                             <h3 class="font-bold text-gray-300">Token Creation</h3>
                             <input type="text" id="token-name-input" placeholder="Token Name..." class="gruvhub-input w-full rounded p-2 text-xs">
@@ -651,10 +710,13 @@
     
     <!-- Battle Screen -->
     <div id="battle-screen" class="fixed top-0 left-0 w-full h-full flex flex-col p-8 hidden">
-        <div class="absolute top-4 right-4 dm-controls-wrapper hidden">
+        <div class="absolute top-4 right-4 dm-controls-wrapper hidden flex-col gap-2">
+            <button id="resort-initiative-btn" class="gruvhub-button bg-yellow-800 hover:bg-yellow-700">Re-Sort Initiative</button>
             <button id="end-battle-btn" class="gruvhub-button bg-red-800 hover:bg-red-700">End Battle</button>
         </div>
-        <div id="battle-turn-order" class="text-center text-white text-lg mb-4">Turn Order...</div>
+        <!-- UPDATED TURN ORDER DISPLAY -->
+        <div id="battle-turn-order" class="text-center text-white text-lg mb-4 p-2 bg-black bg-opacity-50 rounded-lg">Turn Order...</div>
+        <!-- END UPDATED TURN ORDER DISPLAY -->
         
         <!-- Flex Container for Teams - min-h-0 prevents overgrowth -->
         <div class="flex-grow flex justify-between items-stretch min-h-0"> 
@@ -665,9 +727,11 @@
             <div id="player-team" class="flex flex-col gap-4 items-end overflow-y-auto pl-2 max-h-full"></div> 
         </div>
         
+        <!-- Fix: Ensure the whole action area gets minimum height (h-40) and is a flex container for its contents -->
         <div class="gruvhub-bg gruvhub-border rounded-lg p-4 mt-4 grid grid-cols-3 gap-4 h-40 flex-shrink-0">
             <div id="battle-log" class="col-span-2 overflow-y-auto text-sm pr-2"></div>
-            <div id="battle-action-menu" class="relative">
+            <!-- FIX: Added flex-grow and overflow-y-auto to the internal action container to allow scrolling -->
+            <div id="battle-action-menu" class="relative flex flex-col overflow-y-auto"> 
                 <!-- Main actions and abilities will be rendered here by JS -->
             </div>
         </div>
@@ -749,28 +813,58 @@
                 </div>
                 <div class="border-t border-[#c0a080] my-2"></div>
                 <div id="stat-block-abilities-wrapper">
-                    <h4 class="font-bold text-gray-300 mb-2">Abilities</h4>
+                    <h4 class="font-bold text-gray-300 mb-2 flex justify-between items-center">
+                        <span>Abilities</span>
+                        <!-- NEW DM ABILITY LIBRARY BUTTON -->
+                        <button id="open-ability-library-btn" class="gruvhub-button text-xs p-1">Load Preset</button>
+                    </h4>
                     <div id="stat-block-abilities-list" class="space-y-2"></div>
                     <div class="mt-2 p-2 border border-[#c0a080] rounded">
+                        <h5 class="font-bold text-gray-400 text-xs mb-1">Add Custom Ability</h5>
                         <input type="text" id="ability-name" placeholder="Ability Name" class="gruvhub-input w-full text-xs p-1 mb-1">
-                        <select type="text" id="ability-type" class="gruvhub-input w-full text-xs p-1 mb-1">
-                            <option value="attack">Attack</option>
-                            <option value="splash">Splash Attack</option>
-                            <option value="heal">Heal</option>
-                        </select>
-                        <input type="number" id="ability-hitchance" placeholder="Hit % (for attacks)" class="gruvhub-input w-full text-xs p-1 mb-1">
-                        <select type="text" id="ability-animation" class="gruvhub-input w-full text-xs p-1 mb-1">
+                        <div class="flex gap-2 mb-1">
+                            <input type="number" id="ability-level" placeholder="Lvl (1-10)" class="gruvhub-input w-1/3 text-xs p-1">
+                            <select type="number" id="ability-type" class="gruvhub-input w-2/3 text-xs p-1">
+                                <option value="attack">Attack</option>
+                                <option value="splash">Splash Attack</option>
+                                <option value="heal">Heal</option>
+                                <option value="dot">Damage over Time (DoT)</option>
+                                <option value="hot">Heal over Time (HoT)</option>
+                                <option value="status">Apply Status Effect</option>
+                            </select>
+                        </div>
+                        
+                        <input type="number" id="ability-hitchance" placeholder="Hit % (for attacks/status)" class="gruvhub-input w-full text-xs p-1 mb-1">
+                        <select id="ability-animation" class="gruvhub-input w-full text-xs p-1 mb-1">
                             <option value="">No Animation</option>
                             <option value="slash">Slash</option>
                             <option value="fireball">Fireball</option>
                             <option value="heal">Heal</option>
                             <option value="ice">Ice</option>
                             <option value="lightning">Lightning</option>
+                            <option value="drain">Drain</option>
+                            <option value="stun">Stun</option>
+                            <option value="shield">Shield</option>
+                            <option value="poisoned-gas">Poison Gas</option>
+                            <option value="arcane-buff">Arcane Buff</option>
+                            <option value="bleed">Bleed</option>
+                        </select>
+                        <select id="ability-status-select" class="gruvhub-input w-full text-xs p-1 mb-1 hidden">
+                            <option value="">-- Select Status Effect --</option>
+                            <option value="poisoned">Poisoned (💀)</option>
+                            <option value="blessed">Blessed (✨)</option>
+                            <option value="burning">Burning (🔥)</option>
+                            <option value="frozen">Frozen (❄️)</option>
+                            <option value="stunned">Stunned (😵)</option>
+                            <option value="shielded">Shielded (🛡️)</option>
+                            <option value="hidden">Hidden (👻)</option>
+                            <option value="frightened">Frightened (😨)</option>
                         </select>
                         <div class="flex gap-1">
-                            <input type="number" id="ability-damage-min" placeholder="Min Dmg/Heal" class="gruvhub-input w-1/2 text-xs p-1">
-                            <input type="number" id="ability-damage-max" placeholder="Max Dmg/Heub" class="gruvhub-input w-1/2 text-xs p-1">
+                            <input type="number" id="ability-damage-min" placeholder="Min Dmg/Heal/Tick" class="gruvhub-input w-1/2 text-xs p-1">
+                            <input type="number" id="ability-damage-max" placeholder="Max Dmg/Heal/Tick" class="gruvhub-input w-1/2 text-xs p-1">
                         </div>
+                        <input type="number" id="ability-duration" placeholder="Duration (Turns)" class="gruvhub-input w-full text-xs p-1 mt-1">
                         <button id="add-ability-btn" class="gruvhub-button text-xs p-1 mt-2 w-full">Add Ability</button>
                     </div>
                 </div>
@@ -780,6 +874,39 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEW: DM Ability Library Modal -->
+    <div id="ability-library-modal" class="modal-backdrop hidden">
+        <div class="gruvhub-bg gruvhub-border rounded-lg p-6 shadow-xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-[#c0a080] pb-2 mb-4">
+                <h3 class="text-xl font-bold text-white">DM Ability Library (Tiered)</h3>
+                <button id="ability-library-close-btn" class="text-2xl text-[#c0a080] hover:text-white">&times;</button>
+            </div>
+            
+            <div class="flex mb-4 gap-3 items-center">
+                <label class="text-xs uppercase">Filter by Level:</label>
+                <select id="ability-library-level-filter" class="gruvhub-input w-32">
+                    <option value="0">All Levels</option>
+                    <option value="1">Level 1 (Basic)</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                    <option value="4">Level 4</option>
+                    <option value="5">Level 5 (Mid-Tier)</option>
+                    <option value="6">Level 6</option>
+                    <option value="7">Level 7</option>
+                    <option value="8">Level 8</option>
+                    <option value="9">Level 9</option>
+                    <option value="10">Level 10 (Epic)</option>
+                </select>
+                <input type="text" id="ability-library-search" placeholder="Search by name..." class="gruvhub-input flex-grow">
+            </div>
+
+            <div id="ability-library-list" class="flex-grow overflow-y-auto space-y-3 pr-2">
+                <!-- Abilities will be rendered here by JS -->
+            </div>
+        </div>
+    </div>
+    <!-- END DM Ability Library Modal -->
 
     <!-- Modal for Voice Recording -->
     <div id="voice-recording-modal" class="modal-backdrop hidden">
@@ -803,11 +930,12 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // --- Global State & Constants ---
+        // FIX: Using the user's provided config for the local fallback and creating a safe variable for the auth token
         const fallbackConfig = {
             apiKey: "AIzaSyANkVaoKLvJmDqkKFJLQEKtv68qpDhHXdk",
             authDomain: "tabletop-14743.firebaseapp.com",
             projectId: "tabletop-14743",
-            storageBucket: "tabletop-14743.appspot.com",
+            storageBucket: "tabletop-14743.firebasestorage.app",
             messagingSenderId: "798645102897",
             appId: "1:798645102897:web:f7dab152a31896c779a810",
             measurementId: "G-1V3J132291"
@@ -815,6 +943,9 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-vtt-session';
         
+        // CRITICAL FIX: Safely assign __initial_auth_token to a local variable
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
         const DM_PLAYER_GMPC_ID = 'dm-player-gmpc-id'; // Unique ID for DM-controlled player characters
 
         // --- Firebase Initialization (SINGLETON) ---
@@ -848,6 +979,7 @@
 
         // Battle State
         let battleActionState = { step: 'main', selectedAbility: null };
+        let battleTimerInterval = null; // NEW: Timer interval handler
 
         // Tool State
         let activeTool = 'pan'; // 'pan', 'ruler', 'template', 'draw', 'erase'
@@ -907,48 +1039,173 @@
             ],
             presetTokens: {
                 Players: [
-                    { name: 'Mage', url: 'https://i.postimg.cc/Y94xdmL7/SSP-P-Mage.png' },
-                    { name: 'Fighter', url: 'https://i.postimg.cc/Wzwq828s/SSP-P-Fighter.png' },
-                    { name: 'Archer', url: 'https://i.postimg.cc/65HypbmN/SSP-P-Archer.png' },
-                    { name: 'Healer', url: 'https://i.postimg.cc/xdmCgfT9/SSP-P-Healer.png' },
-                    { name: 'Bard', url: 'https://i.postimg.cc/GtXh99zK/SSP-P-Bard.png' },
-                    { name: 'Goof', url: 'https://i.postimg.cc/fT3hYHRC/SSP-P-Goof.png' },
-                    // NEW PLAYERS
-                    { name: 'Monk', url: 'https://i.postimg.cc/8cZXPRKd/SSP-P-Monk.png' },
-                    { name: 'Drunk', url: 'https://i.postimg.cc/VvfH8GRr/SSP-P-Drunk.png' },
-                    { name: 'Druid', url: 'https://i.postimg.cc/Wz5YbGWg/SSP-P-Druid.png' },
-                    { name: 'Spellcaster', url: 'https://i.postimg.cc/MKsgWSg2/SSP-P-Spellcaster.png' }
+                    { name: 'Mage', url: 'https://i.postimg.cc/Y94xdmL7/SSP-P-Mage.png', abilities: [
+                        { name: 'Arcane Bolt', type: 'attack', animation: 'fireball', hitChance: 70, damageRange: [3, 8], level: 1 },
+                        { name: 'Frost Barrier', type: 'status', animation: 'shield', hitChance: 90, duration: 2, statusName: 'shielded', level: 2 },
+                        { name: 'Arcane Burn (DoT)', type: 'dot', animation: 'burning', hitChance: 60, damageRange: [4, 7], duration: 3, level: 4, statusName: 'Burning' },
+                        { name: 'Mana Shield (HoT)', type: 'hot', animation: 'arcane-buff', hitChance: 100, damageRange: [2, 4], duration: 4, level: 5, statusName: 'Mana Shield' },
+                        { name: 'Chain Lightning', type: 'splash', animation: 'lightning', hitChance: 65, damageRange: [8, 15], level: 7 },
+                        { name: 'Teleport Strike', type: 'attack', animation: 'lightning', hitChance: 85, damageRange: [12, 20], level: 8 },
+                        { name: 'Meteor', type: 'splash', animation: 'fireball', hitChance: 50, damageRange: [20, 40], level: 10 },
+                    ]},
+                    { name: 'Fighter', url: 'https://i.postimg.cc/Wzwq828s/SSP-P-Fighter.png', abilities: [
+                        { name: 'Basic Melee', type: 'attack', animation: 'slash', hitChance: 85, damageRange: [5, 10], level: 1 },
+                        { name: 'Defensive Stance', type: 'status', animation: 'shield', hitChance: 100, duration: 2, statusName: 'shielded', level: 2 },
+                        { name: 'Cleave (Splash)', type: 'splash', animation: 'slash', hitChance: 75, damageRange: [7, 12], level: 3 },
+                        { name: 'Puncture (Bleed)', type: 'dot', animation: 'bleed', hitChance: 70, damageRange: [2, 3], duration: 5, level: 4, statusName: 'Bleeding' },
+                        { name: 'Stunning Blow', type: 'status', animation: 'stun', hitChance: 50, duration: 1, statusName: 'stunned', level: 6 },
+                        { name: 'Execute', type: 'attack', animation: 'slash', hitChance: 95, damageRange: [15, 25], level: 8 },
+                    ]},
+                    { name: 'Archer', url: 'https://i.postimg.cc/65HypbmN/SSP-P-Archer.png', abilities: [
+                        { name: 'Standard Shot', type: 'attack', animation: 'slash', hitChance: 80, damageRange: [4, 9], level: 1 },
+                        { name: 'Poison Arrow', type: 'dot', animation: 'poisoned-gas', hitChance: 60, damageRange: [2, 4], duration: 3, level: 3, statusName: 'poisoned' },
+                        { name: 'Crippling Shot', type: 'dot', animation: 'bleed', hitChance: 65, damageRange: [1, 2], duration: 4, level: 3, statusName: 'Wound' },
+                        { name: 'Ice Arrow', type: 'status', animation: 'ice', hitChance: 55, duration: 2, statusName: 'frozen', level: 5 },
+                        { name: 'Volley (Splash)', type: 'splash', animation: 'slash', hitChance: 70, damageRange: [6, 11], level: 7 },
+                    ]},
+                    { name: 'Healer', url: 'https://i.postimg.cc/xdmCgfT9/SSP-P-Healer.png', abilities: [
+                        { name: 'Minor Heal', type: 'heal', animation: 'heal', healRange: [5, 10], level: 1 },
+                        { name: 'Divine Smite', type: 'attack', animation: 'shield', hitChance: 75, damageRange: [6, 12], level: 2 },
+                        { name: 'Blessing', type: 'status', animation: 'blessed', hitChance: 100, duration: 3, statusName: 'blessed', level: 2 },
+                        { name: 'Healing Aura (HoT)', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [3, 5], duration: 3, level: 4, statusName: 'Healing Aura' },
+                        { name: 'Purify (Heal)', type: 'heal', animation: 'heal', healRange: [15, 25], level: 6 },
+                    ]},
+                    { name: 'Bard', url: 'https://i.postimg.cc/GtXh99zK/SSP-P-Bard.png', abilities: [
+                        { name: 'Vicious Mockery', type: 'attack', animation: 'drain', hitChance: 70, damageRange: [1, 4], level: 1 },
+                        { name: 'Bardic Inspiration', type: 'status', animation: 'arcane-buff', hitChance: 100, duration: 2, statusName: 'blessed', level: 2 },
+                        { name: 'Shattering Note', type: 'splash', animation: 'ice', hitChance: 60, damageRange: [5, 10], level: 3 },
+                    ]},
+                    { name: 'Goof', url: 'https://i.postimg.cc/fT3hYHRC/SSP-P-Goof.png', abilities: [
+                        { name: 'Slap', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [1, 2], level: 1 },
+                        { name: 'Trip (Stun)', type: 'status', animation: 'stun', hitChance: 40, duration: 1, statusName: 'stunned', level: 2 },
+                    ]},
+                    { name: 'Spellcaster', url: 'https://i.postimg.cc/MKsgWSg2/SSP-P-Spellcaster.png', abilities: [
+                        { name: 'Magic Missile', type: 'attack', animation: 'fireball', hitChance: 100, damageRange: [1, 5], level: 1 },
+                        { name: 'Telekinetic Push', type: 'attack', animation: 'drain', hitChance: 60, damageRange: [5, 10], level: 3 },
+                    ]},
+                    { name: 'Druid', url: 'https://i.postimg.cc/Wz5YbGWg/SSP-P-Druid.png', abilities: [
+                        { name: 'Thorn Whip', type: 'attack', animation: 'slash', hitChance: 75, damageRange: [3, 6], level: 1 },
+                        { name: 'Healing Word (HoT)', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [2, 5], duration: 3, level: 3, statusName: 'Regrowth' },
+                        { name: 'Poison Spores (DoT)', type: 'dot', animation: 'poisoned-gas', hitChance: 55, damageRange: [4, 8], duration: 4, level: 5, statusName: 'Poison' },
+                    ]},
+                    { name: 'Drunk', url: 'https://i.postimg.cc/VvfH8GRr/SSP-P-Drunk.png', abilities: [
+                        { name: 'Wild Swing', type: 'attack', animation: 'slash', hitChance: 60, damageRange: [8, 14], level: 1 },
+                        { name: 'Swig Ale (HoT)', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [1, 2], duration: 10, level: 2, statusName: 'Ale Buff' },
+                        { name: 'Belch (Stun)', type: 'status', animation: 'stun', hitChance: 30, duration: 1, statusName: 'stunned', level: 3 },
+                    ]},
+                    { name: 'Monk', url: 'https://i.postimg.cc/8cZXPRKd/SSP-P-Monk.png', abilities: [
+                        { name: 'Flurry of Blows', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [2, 5], level: 1 },
+                        { name: 'Stunning Fist', type: 'status', animation: 'stun', hitChance: 60, duration: 1, statusName: 'stunned', level: 4 },
+                        { name: 'Evasion (Shield)', type: 'status', animation: 'shield', hitChance: 100, duration: 1, statusName: 'shielded', level: 5 },
+                    ]},
                 ],
                 NPCs: [
-                    { name: 'Mayor Thornton', url: 'https://i.postimg.cc/631m3XnL/SSP-N-Mayor-Thornton.png' },
-                    { name: 'Pip the Bartender', url: 'https://i.postimg.cc/J7s1Q7TQ/SSP-N-Pip_the-Halfling-Bartender.png' },
-                    { name: 'Linnea the Herbalist', url: 'https://i.postimg.cc/BZRJ7Wk3/SSP-N-Linnea-the-Herbalist.png' },
-                    { name: 'Elara the Smith', url: 'https://i.postimg.cc/4NtsrLRp/SSP-N-Elara-the-Smith.png' },
-                    // NEW NPCS
-                    { name: 'Rune', url: 'https://i.postimg.cc/vm48tXFP/SSP_N_Rune.png' },
-                    { name: 'Merchant', url: 'https://i.postimg.cc/MpKpvqsB/SSP_N_Merchant.png' },
-                    { name: 'Hags Hut', url: 'https://i.postimg.cc/BvRSYDJX/SSP_N_Hags_Hut.png' },
-                    { name: 'Gnarly Treant', url: 'https://i.postimg.cc/FKwrWchS/SSP-N-Gnarly-Treant.png' },
-                    { name: 'Bandit Leader', url: 'https://i.postimg.cc/Jz4zGMTy/SSP-N-Banditleader.png' },
-                    { name: 'Altar', url: 'https://i.postimg.cc/YSv2z8B0/SSP-N-Alter.png' },
-                    { name: 'Lich Boss', url: 'https://i.postimg.cc/KjGs2qN8/SSP-N-Lich-Boss.png' }
+                    { name: 'Mayor Thornton', url: 'https://i.postimg.cc/631m3XnL/SSP-N-Mayor-Thornton.png', abilities: [
+                        { name: 'Faint', type: 'status', animation: 'stun', hitChance: 100, duration: 1, statusName: 'stunned', level: 1 },
+                        { name: 'Bribe (Status)', type: 'status', animation: 'blessed', hitChance: 5, duration: 1, statusName: 'stunned', level: 1 },
+                    ]},
+                    { name: 'Pip the Bartender', url: 'https://i.postimg.cc/J7s1Q7TQ/SSP-N-Pip-the-Halfling-Bartender.png', abilities: [
+                        { name: 'Serve Ale (Heal)', type: 'heal', animation: 'heal', healRange: [3, 8], level: 1 },
+                        { name: 'Bar Brawl (Attack)', type: 'attack', animation: 'slash', hitChance: 70, damageRange: [4, 7], level: 2 },
+                    ]},
+                    { name: 'Linnea the Herbalist', url: 'https://i.postimg.cc/BZRJ7Wk3/SSP-N-Linnea-the-Herbalist.png', abilities: [
+                        { name: 'Minor Poison (DoT)', type: 'dot', animation: 'poisoned-gas', hitChance: 60, damageRange: [1, 2], duration: 4, level: 2, statusName: 'poisoned' },
+                        { name: 'Herbal Poultice (Heal)', type: 'heal', animation: 'heal', healRange: [8, 15], level: 3 },
+                    ]},
+                    { name: 'Elara the Smith', url: 'https://i.postimg.cc/4NtsrLRp/SSP-N-Elara-the-Smith.png', abilities: [
+                        { name: 'Hammer Strike', type: 'attack', animation: 'slash', hitChance: 70, damageRange: [10, 18], level: 3 },
+                        { name: 'Blacksmith Aura (HoT)', type: 'hot', animation: 'shield', hitChance: 100, damageRange: [1, 3], duration: 99, level: 5, statusName: 'Smith Aura' },
+                        { name: 'Weld (Heal)', type: 'heal', animation: 'heal', healRange: [8, 15], level: 4 },
+                    ]},
+                    { name: 'Rune', url: 'https://i.postimg.cc/vm48tXFP/SSP-N-Rune.png', abilities: [
+                        { name: 'Dodge', type: 'status', animation: 'hidden', hitChance: 100, duration: 1, statusName: 'hidden', level: 4 },
+                        { name: 'Sneak Attack', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [8, 15], level: 5 },
+                    ]},
+                    { name: 'Merchant', url: 'https://i.postimg.cc/MpKpvqsB/SSP-N-Merchant.png', abilities: [
+                        { name: 'Beg', type: 'status', animation: 'frightened', hitChance: 5, duration: 1, statusName: 'frightened', level: 1 },
+                    ]},
+                    { name: 'Hag\'s Hut', url: 'https://i.postimg.cc/BvRSYDJX/SSP-N-Hags-Hut.png', abilities: [
+                        { name: 'Witch Bolt', type: 'attack', animation: 'lightning', hitChance: 60, damageRange: [12, 20], level: 6 },
+                        { name: 'Curse (DoT)', type: 'dot', animation: 'drain', hitChance: 70, damageRange: [5, 10], duration: 3, level: 7, statusName: 'Cursed' },
+                    ]},
+                    { name: 'Story NPC', url: 'https://i.postimg.cc/B6cwR92C/SSP-Storyz-1.webp', abilities: [
+                        { name: 'Inspirational Speech', type: 'status', animation: 'blessed', hitChance: 100, duration: 3, statusName: 'blessed', level: 3 },
+                    ]},
+                    { name: 'Bandit Leader', url: 'https://i.postimg.cc/Jz4zGMTy/SSP-N-Banditleader.png', abilities: [
+                        { name: 'Vicious Strike', type: 'attack', animation: 'slash', hitChance: 80, damageRange: [8, 14], level: 4 },
+                        { name: 'Throw Net (Stun)', type: 'status', animation: 'stun', hitChance: 55, duration: 1, statusName: 'stunned', level: 4 },
+                        { name: 'Call Reinforcements', type: 'status', animation: 'arcane-buff', hitChance: 100, duration: 1, statusName: 'hidden', level: 5 },
+                    ]},
+                    { name: 'Altar', url: 'https://i.postimg.cc/YSv2z8B0/SSP-N-Alter.png', abilities: [
+                        { name: 'Divine Blessing', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [5, 15], duration: 99, level: 6, statusName: 'Divine Aura' },
+                    ]},
+                    { name: 'Lich Boss', url: 'https://i.postimg.cc/KjGs2qN8/SSP-N-Lich-Boss.png', abilities: [
+                        { name: 'Death Bolt', type: 'attack', animation: 'drain', hitChance: 75, damageRange: [20, 35], level: 7 },
+                        { name: 'Drain Life', type: 'dot', animation: 'drain', hitChance: 85, damageRange: [5, 10], duration: 3, level: 7, statusName: 'Draining' },
+                        { name: 'Mass Fear', type: 'status', animation: 'frightened', hitChance: 70, duration: 2, statusName: 'frightened', level: 8 },
+                        { name: 'Lich Regeneration (HoT)', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [10, 15], duration: 99, level: 9, statusName: 'Regeneration' },
+                    ]},
                 ],
                 Monsters: [
-                    { name: 'Wolves', url: 'https://i.postimg.cc/TwW4ps9g/SSP-N-Wolfs.png' },
-                    { name: 'Swamp Ghouls', url: 'https://i.postimg.cc/C5Gr4f9v/SSP-N-Swamp-Ghouls.png' },
-                    { name: 'Goblin', url: 'https://i.postimg.cc/qRd8xZrZ/SSP-N-Goblin.png' },
-                    { name: 'Goblin Pack', url: 'https://i.postimg.cc/qM72w3PY/SSP-N-Goblin-Pack.png' },
-                    { name: 'Goblin Group', url: 'https://i.postimg.cc/43c6tRDx/SSP-N-Group.png' },
-                    // NEW MONSTERS
-                    { name: 'Wolf Group', url: 'https://i.postimg.cc/Njfj5BN9/SSP_N_Wolfgroup.png' },
-                    { name: 'Ogre', url: 'https://i.postimg.cc/50vxZ0th/SSP_N_Ogre.png' },
-                    { name: 'Goblins', url: 'https://i.postimg.cc/yND6yn4M/SSP_N_Goblins.png' },
-                    { name: 'Goblin Ambush', url: 'https://i.postimg.cc/VNJsW4QH/SSP_N_goblin_ambush.png' },
-                    { name: 'Fake Treasure', url: 'https://i.postimg.cc/V6MY36NM/SSP-N-Faketreasure.png' },
-                    { name: 'Boar', url: 'https://i.postimg.cc/sgDgvsn1/SSP-N-Boar.png' },
-                    { name: 'Spider', url: 'https://i.postimg.cc/prW1HGZV/SSP-N-Spider.png' },
-                    { name: 'Dragon', url: 'https://i.postimg.cc/zvzPrtjz/SSP-N-Dragon.png' },
-                    { name: 'Orc Boss', url: 'https://i.postimg.cc/X79nJTjK/SSP-N-Orc-Boss.png' }
+                    { name: 'Wolves', url: 'https://i.postimg.cc/TwW4ps9g/SSP-N-Wolfs.png', abilities: [
+                        { name: 'Bite', type: 'attack', animation: 'slash', hitChance: 75, damageRange: [4, 7], level: 1 },
+                        { name: 'Snarl (Fear)', type: 'status', animation: 'frightened', hitChance: 60, duration: 2, statusName: 'frightened', level: 2 },
+                        { name: 'Pack Attack', type: 'attack', animation: 'slash', hitChance: 85, damageRange: [6, 10], level: 3 },
+                    ]},
+                    { name: 'Goblin', url: 'https://i.postimg.cc/qRd8xZrZ/SSP-N-Goblin.png', abilities: [
+                        { name: 'Stab', type: 'attack', animation: 'slash', hitChance: 70, damageRange: [3, 5], level: 1 },
+                        { name: 'Hide', type: 'status', animation: 'hidden', hitChance: 100, duration: 1, statusName: 'hidden', level: 1 },
+                    ]},
+                    { name: 'Goblin Pack', url: 'https://i.postimg.cc/qM72w3PY/SSP-N-Goblin-Pack.png', abilities: [
+                        { name: 'Coordinated Stab', type: 'attack', animation: 'slash', hitChance: 75, damageRange: [5, 9], level: 2 },
+                    ]},
+                    { name: 'Goblin Group', url: 'https://i.postimg.cc/43c6tRDx/SSP-N-Group.png', abilities: [
+                        { name: 'Mass Attack', type: 'splash', animation: 'slash', hitChance: 60, damageRange: [4, 8], level: 3 },
+                    ]},
+                    { name: 'Swamp Ghouls', url: 'https://i.postimg.cc/C5Gr4f9v/SSP-N-Swamp-Ghouls.png', abilities: [
+                        { name: 'Claw', type: 'attack', animation: 'slash', hitChance: 65, damageRange: [6, 11], level: 3 },
+                        { name: 'Poison Spit', type: 'dot', animation: 'poisoned-gas', hitChance: 50, damageRange: [3, 5], duration: 3, level: 4, statusName: 'poisoned' },
+                    ]},
+                    { name: 'Ogre', url: 'https://i.postimg.cc/50vxZ0th/SSP-N-Ogre.png', abilities: [
+                        { name: 'Club Smash', type: 'attack', animation: 'slash', hitChance: 60, damageRange: [15, 25], level: 5 },
+                        { name: 'Ground Stomp', type: 'splash', animation: 'stun', hitChance: 50, damageRange: [5, 10], level: 6 },
+                    ]},
+                    { name: 'Gnarly Treant', url: 'https://i.postimg.cc/FKwrWchS/SSP-N-Gnarly-Treant.png', abilities: [
+                        { name: 'Root Grab (Stun)', type: 'status', animation: 'stun', hitChance: 70, duration: 2, statusName: 'stunned', level: 4 },
+                        { name: 'Branch Lash', type: 'attack', animation: 'slash', hitChance: 85, damageRange: [10, 18], level: 5 },
+                    ]},
+                    { name: 'Boar', url: 'https://i.postimg.cc/sgDgvsn1/SSP-N-Boar.png', abilities: [
+                        { name: 'Tusk Gore', type: 'attack', animation: 'slash', hitChance: 80, damageRange: [7, 12], level: 2 },
+                    ]},
+                    { name: 'Spider', url: 'https://i.postimg.cc/prW1HGZV/SSP-N-Spider.png', abilities: [
+                        { name: 'Bite', type: 'attack', animation: 'slash', hitChance: 75, damageRange: [3, 6], level: 1 },
+                        { name: 'Web (Stun)', type: 'status', animation: 'stun', hitChance: 50, duration: 1, statusName: 'stunned', level: 3 },
+                    ]},
+                    { name: 'Fake Treasure', url: 'https://i.postimg.cc/V6MY36NM/SSP-N-Faketreasure.png', abilities: [
+                        { name: 'Surprise Bite', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [5, 15], level: 3 },
+                    ]},
+                    { name: 'Goblin Ambush', url: 'https://i.postimg.cc/VNJsW4QH/SSP-N-goblin-ambush.png', abilities: [
+                        { name: 'Coordinated Volley (Splash)', type: 'splash', animation: 'slash', hitChance: 65, damageRange: [6, 12], level: 4 },
+                    ]},
+                    { name: 'Goblins', url: 'https://i.postimg.cc/yND6yn4M/SSP-N-Goblins.png', abilities: [
+                        { name: 'Coordinated Attack', type: 'attack', animation: 'slash', hitChance: 80, damageRange: [6, 10], level: 2 },
+                    ]},
+                    { name: 'Wolf Group', url: 'https://i.postimg.cc/Njfj5BN9/SSP-N-Wolfgroup.png', abilities: [
+                        { name: 'Mass Bite', type: 'splash', animation: 'slash', hitChance: 75, damageRange: [5, 9], level: 3 },
+                    ]},
+                    { name: 'Orc Boss', url: 'https://i.postimg.cc/X79nJTjK/SSP-N-Orc-Boss.png', abilities: [
+                        { name: 'Heavy Axe', type: 'attack', animation: 'slash', hitChance: 70, damageRange: [18, 30], level: 7 },
+                        { name: 'War Cry (Buff)', type: 'status', animation: 'arcane-buff', hitChance: 100, duration: 2, statusName: 'blessed', level: 8 },
+                    ]},
+                    { name: 'Shadow Boss', url: 'https://i.postimg.cc/QdPmyn7y/SSP-N-Shadowboss.png', abilities: [
+                        { name: 'Shadow Blast', type: 'attack', animation: 'drain', hitChance: 80, damageRange: [25, 40], level: 9 },
+                        { name: 'Shadow Drain (DoT)', type: 'dot', animation: 'drain', hitChance: 90, damageRange: [8, 12], duration: 4, level: 10, statusName: 'Shadow Drain' },
+                    ]},
+                    { name: 'Dragon', url: 'https://i.postimg.cc/zvzPrtjz/SSP-N-Dragon.png', abilities: [
+                        { name: 'Fire Breath', type: 'splash', animation: 'fireball', hitChance: 85, damageRange: [30, 50], level: 10 },
+                        { name: 'Tail Whip', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [15, 25], level: 8 },
+                        { name: 'Fear Presence', type: 'status', animation: 'frightened', hitChance: 80, duration: 3, statusName: 'frightened', level: 9 },
+                    ]},
                 ]
             },
             chatMessages: [],
@@ -958,11 +1215,96 @@
                 isActive: false,
                 combatants: [],
                 turnIndex: 0,
-                log: []
+                log: [],
+                // UPDATED Timer State
+                turnTimerDuration: 60, // Seconds
+                turnTimerStartTime: null, // Firestore Timestamp when turn begins
+                turnOrder: []
             },
             audioLink: null,
         };
         
+        // --- CORE UTILITY FUNCTIONS (Moved to be defined early) ---
+        
+        function sendChatMessage(text, type = 'message') { 
+            if (!text) return; 
+            const senderName = type === 'system' ? 'System' : currentUsername; 
+            const newMessage = { id: crypto.randomUUID(), sender: senderName, text, type, timestamp: Date.now() }; 
+            const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100); 
+            updateDoc(vttDocRef, { chatMessages: updatedMessages }); 
+        }
+
+        function getImageDimensions(url) { 
+            return new Promise((resolve, reject) => { 
+                const img = new Image(); 
+                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight }); 
+                img.onerror = (err) => reject(err); 
+                img.src = url; 
+            }); 
+        }
+
+        async function updateActiveMapImage(url) { 
+            const activeMap = getActiveMap(); 
+            if (!activeMap) return; 
+            try { 
+                const { width, height } = await getImageDimensions(url); 
+                const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url, width, height} : m); 
+                updateDoc(vttDocRef, { maps: updatedMaps }); 
+            } catch (error) { 
+                console.error("Failed to load map image:", error); 
+                const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url: 'https://placehold.co/1200x800/c00/fff?text=Error', width: 1200, height: 800} : m); 
+                updateDoc(vttDocRef, { maps: updatedMaps }); 
+            } 
+        }
+
+        function handleDeleteFromTracker(indexToDelete) { 
+            const tracker = vttState.turnTracker; 
+            const newOrder = tracker.order.filter((_, index) => index !== indexToDelete); 
+            let newCurrentIndex = tracker.currentIndex; 
+            if (indexToDelete < newCurrentIndex) newCurrentIndex--; 
+            else if (indexToDelete === newCurrentIndex && newCurrentIndex >= newOrder.length) { 
+                newCurrentIndex = newOrder.length > 0 ? 0 : -1; 
+            } 
+            if(newCurrentIndex < 0 && newOrder.length > 0) newCurrentIndex = 0; 
+            updateDoc(vttDocRef, { turnTracker: { order: newOrder, currentIndex: newCurrentIndex } }); 
+        }
+
+        function handleDeleteToken(tokenId) { 
+            const activeMap = getActiveMap(); 
+            if (!activeMap) return; 
+            activeMap.tokens = (activeMap.tokens || []).filter(t => t.id !== tokenId); 
+            updateDoc(vttDocRef, { maps: vttState.maps }); 
+        }
+
+        function handleDeleteFogBlock(blockId) { 
+            const activeMap = getActiveMap(); 
+            if (!activeMap) return; 
+            activeMap.fogBlocks = (activeMap.fogBlocks || []).filter(b => b.id !== blockId); 
+            updateDoc(vttDocRef, { maps: vttState.maps }); 
+        }
+
+        function handleDeleteJournal(entryId) { 
+            const updatedJournal = (vttState.journalEntries || []).filter(e => e.id !== entryId); 
+            updateDoc(vttDocRef, { journalEntries: updatedJournal }); 
+        }
+        
+        function clearAllData() {
+            // We clone DEFAULT_STATE to ensure we don't accidentally modify the constant in memory
+            const resetState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            
+            // Perform the reset
+            setDoc(vttDocRef, resetState)
+                .then(() => {
+                    sendChatMessage("Session data successfully reset to default.", "system");
+                })
+                .catch(error => {
+                    console.error("Error clearing data:", error);
+                    sendChatMessage(`ERROR: Failed to clear session data. Details: ${error.message}`, "system");
+                });
+        }
+        // --- END CORE UTILITY FUNCTIONS ---
+
+
         // --- Login and Initialization ---
         document.getElementById('join-session-btn').addEventListener('click', handleLogin);
         document.getElementById('username-input').addEventListener('keypress', (e) => {
@@ -991,9 +1333,11 @@
                 let userCredential;
                 if (auth.currentUser) {
                     userCredential = { user: auth.currentUser };
-                } else if (typeof __initial_auth_token !== 'undefined') {
-                    userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (initialAuthToken) {
+                    // FIX: Using the safely declared local variable initialAuthToken
+                    userCredential = await signInWithCustomToken(auth, initialAuthToken);
                 } else {
+                    // This is the fallback for running from a local file (no Canvas environment)
                     userCredential = await signInAnonymously(auth);
                 }
 
@@ -1025,6 +1369,7 @@
             if (activeMap) {
                 if (!activeMap.drawing) activeMap.drawing = DEFAULT_STATE.maps[0].drawing;
                 if (typeof activeMap.fowEnabled === 'undefined') activeMap.fowEnabled = true;
+                if (!activeMap.fogBlocks) activeMap.fogBlocks = []; // Ensure fogBlocks exists
             }
             return activeMap;
         }
@@ -1058,7 +1403,7 @@
             
             mapContent.appendChild(effectEl);
             
-            setTimeout(() => { effectEl.remove(); }, 1200); 
+            setTimeout(() => { effectEl.remove(); }, 1500); // Increased duration for new effects
 
             document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('map-container').style.cursor = 'move';
@@ -1113,17 +1458,51 @@
             document.getElementById('stat-block-save-btn').addEventListener('click', saveStatBlock);
             modal.addEventListener('click', (e) => { if(e.target === modal) hideStatBlock(); });
             document.getElementById('add-ability-btn').addEventListener('click', addAbilityToStatBlock);
-            document.getElementById('ability-type').addEventListener('change', e => {
-                const type = e.target.value;
-                const hitChanceInput = document.getElementById('ability-hitchance');
-                if (type === 'attack' || type === 'splash') {
-                    hitChanceInput.style.display = 'block';
-                } else {
-                    hitChanceInput.style.display = 'none';
+            document.getElementById('open-ability-library-btn').addEventListener('click', openAbilityLibrary);
+            
+            // Toggle visibility for attack vs status/DoT fields
+            const abilityTypeSelect = document.getElementById('ability-type');
+            const hitChanceInput = document.getElementById('ability-hitchance');
+            const statusSelect = document.getElementById('ability-status-select');
+            const damageMinMax = document.querySelectorAll('#ability-damage-min, #ability-damage-max');
+            const durationInput = document.getElementById('ability-duration');
+
+            const toggleAbilityFields = (type) => {
+                const isDamageOrHeal = type === 'attack' || type === 'splash' || type === 'heal' || type === 'dot' || type === 'hot';
+                const isAttackOrStatus = type === 'attack' || type === 'splash' || type === 'status' || type === 'dot' || type === 'hot';
+                const isStatus = type === 'status';
+                const isDuration = type === 'dot' || type === 'hot' || type === 'status';
+
+                hitChanceInput.style.display = isAttackOrStatus ? 'block' : 'none';
+                
+                damageMinMax.forEach(input => input.style.display = isDamageOrHeal ? 'block' : 'none');
+                
+                statusSelect.style.display = isStatus ? 'block' : 'none';
+
+                durationInput.style.display = isDuration ? 'block' : 'none';
+                
+                // Update placeholders
+                durationInput.placeholder = 'Duration (Turns)';
+                if (type === 'dot' || type === 'hot') {
+                    hitChanceInput.placeholder = 'Hit % (Applies Effect)';
+                    damageMinMax.forEach(input => input.placeholder = 'Min/Max Tick Dmg/Heal');
+                } else if (type === 'attack' || type === 'splash') {
+                    hitChanceInput.placeholder = 'Hit % (for attacks)';
+                    damageMinMax.forEach(input => input.placeholder = 'Min/Max Dmg');
+                } else if (type === 'status') {
+                     hitChanceInput.placeholder = 'Hit % (Applies Status)';
                 }
-            });
+            };
+            abilityTypeSelect.addEventListener('change', (e) => toggleAbilityFields(e.target.value));
+            toggleAbilityFields(abilityTypeSelect.value); // Set initial state
+
+            // Library Modal Setup
+            document.getElementById('ability-library-close-btn').addEventListener('click', closeAbilityLibrary);
+            document.getElementById('ability-library-level-filter').addEventListener('change', renderAbilityLibrary);
+            document.getElementById('ability-library-search').addEventListener('input', renderAbilityLibrary);
+            document.getElementById('ability-library-list').addEventListener('click', handleAbilitySelectFromLibrary);
         }
-        
+
         function applyPermissions() {
             const dmControlsWrappers = document.querySelectorAll('.dm-controls-wrapper');
             
@@ -1142,6 +1521,22 @@
             if (!isDM) {
                 document.getElementById('status-effects-container').classList.add('opacity-50', 'pointer-events-none');
             }
+        }
+
+        function handleStatusEffectClick(e) { 
+             if (e.target.matches('.status-effect-btn')) { 
+                const activeMap = getActiveMap(); 
+                if (!activeMap || !selectedElement || selectedElement.type !== 'token' || !isDM) return; 
+                const tokenIndex = (activeMap.tokens || []).findIndex(t => t.id === selectedElement.id); 
+                if (tokenIndex === -1) return; 
+                const token = activeMap.tokens[tokenIndex]; 
+                const effects = new Set(token.statusEffects || []); 
+                const status = e.target.dataset.status; 
+                if (effects.has(status)) effects.delete(status); 
+                else effects.add(status); 
+                token.statusEffects = Array.from(effects); 
+                updateDoc(vttDocRef, { maps: vttState.maps }); 
+            } 
         }
 
         function initializeAppCore() {
@@ -1194,6 +1589,9 @@
             });
 
             document.getElementById('add-map-btn').addEventListener('click', handleAddMap);
+            // NEW: Fog Block Listener
+            document.getElementById('add-fog-btn').addEventListener('click', handleAddFogBlock); 
+
             setupMapControls();
             setupGridControls();
             setupDrawingControls(); 
@@ -1274,7 +1672,7 @@
                 }
                 // Stop microphone stream tracks immediately
                 if (mediaRecorder.stream) {
-                       mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 }
                 
                 document.getElementById('voice-recording-modal').classList.add('hidden');
@@ -1321,6 +1719,8 @@
                     });
                     // Ensure audioLink exists on state
                     if (!vttState.audioLink) vttState.audioLink = DEFAULT_STATE.audioLink;
+                    // Ensure turn duration state exists (NEW)
+                    if (typeof vttState.battle.turnTimerDuration === 'undefined') vttState.battle.turnTimerDuration = DEFAULT_STATE.battle.turnTimerDuration;
 
                     
                     if (!vttState.activeMapId || !vttState.maps.find(m => m.id === vttState.activeMapId)) {
@@ -1635,7 +2035,7 @@
                 if (message.type === 'roll') {
                     messageContent = `<span class="italic text-yellow-300">${message.sender} ${message.text}</span>`;
                 } else if (message.type === 'system') {
-                    messageContent = `<span class="italic text-gray-400">${message.text}</span>`;
+                    messageContent = `<span class="italic text-gray-400">${message.sender}: ${message.text}</span>`;
                 } else if (message.type === 'voice') {
                     // NEW: Render Voice Clip Player
                     messageContent = `<strong class="text-[#c0a080]">${message.sender} (Voice Clip):</strong> 
@@ -1749,33 +2149,6 @@
                 activeTokenFileControls.classList.remove('flex');
             }
         }
-        
-        // --- Event Handlers & Logic ---
-        function getImageDimensions(url) { return new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight }); img.onerror = (err) => reject(err); img.src = url; }); }
-        async function updateActiveMapImage(url) { const activeMap = getActiveMap(); if (!activeMap) return; try { const { width, height } = await getImageDimensions(url); const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url, width, height} : m); updateDoc(vttDocRef, { maps: updatedMaps }); } catch (error) { console.error("Failed to load map image:", error); const updatedMaps = vttState.maps.map(m => m.id === activeMap.id ? {...m, url: 'https://placehold.co/1200x800/c00/fff?text=Error', width: 1200, height: 800} : m); updateDoc(vttDocRef, { maps: updatedMaps }); } }
-        document.getElementById('preset-map-select').addEventListener('change', (e) => { const url = e.target.value; if (url) updateActiveMapImage(url); });
-        document.getElementById('add-preset-map-btn').addEventListener('click', () => { const urlInput = document.getElementById('new-map-url-input'); const newUrl = urlInput.value.trim(); if (newUrl) { const name = prompt("Enter a name for this map:", `Custom Map ${(vttState.presetMaps || []).length + 1}`); if (name) { const newMap = { name: name, url: newUrl }; const updatedPresetMaps = [...(vttState.presetMaps || []), newMap]; updateDoc(vttDocRef, { presetMaps: updatedPresetMaps }); urlInput.value = ''; } } });
-        document.getElementById('change-map-btn').addEventListener('click', () => { const url = document.getElementById('map-url-input').value.trim(); if (url) updateActiveMapImage(url); });
-        document.getElementById('add-token-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const name = document.getElementById('token-name-input').value; if (name) { const newToken = { id: crypto.randomUUID(), name, color: document.getElementById('token-color-input').value, imageUrl: document.getElementById('token-image-url-input').value, x: activeMap.width / 2, y: activeMap.height / 2, width: activeMap.grid.size || 50, height: activeMap.grid.size || 50, statusEffects: [], hp: 10, maxHp: 10, ac: 10, notes: '', ownedBy: 'dm', abilities: [], visionRange: 30 }; activeMap.tokens.push(newToken); updateDoc(vttDocRef, { maps: vttState.maps }); document.getElementById('token-name-input').value = ''; document.getElementById('token-image-url-input').value = ''; } });
-        document.getElementById('add-fog-btn').addEventListener('click', () => { const activeMap = getActiveMap(); if (!activeMap) return; const newBlock = { id: crypto.randomUUID(), x: 50, y: 50, width: 200, height: 200 }; activeMap.fogBlocks.push(newBlock); updateDoc(vttDocRef, { maps: vttState.maps }); });
-        document.getElementById('clear-all-btn').addEventListener('click', () => { showModal( "Clear All Data?", "This will reset the entire session.", () => setDoc(vttDocRef, DEFAULT_STATE) ); });
-        function handleDeleteToken(tokenId) { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.tokens = (activeMap.tokens || []).filter(t => t.id !== tokenId); updateDoc(vttDocRef, { maps: vttState.maps }); }
-        function handleDeleteFogBlock(blockId) { const activeMap = getActiveMap(); if (!activeMap) return; activeMap.fogBlocks = (activeMap.fogBlocks || []).filter(b => b.id !== blockId); updateDoc(vttDocRef, { maps: vttState.maps }); }
-        
-        function sendChatMessage(text, type = 'message') { if (!text) return; const senderName = type === 'system' ? 'System' : currentUsername; const newMessage = { id: crypto.randomUUID(), sender: senderName, text, type, timestamp: Date.now() }; const updatedMessages = [...(vttState.chatMessages || []), newMessage].slice(-100); updateDoc(vttDocRef, { chatMessages: updatedMessages }); }
-        
-        document.getElementById('clear-chat-btn').addEventListener('click', () => showModal("Clear Chat Log?", "Are you sure?", () => updateDoc(vttDocRef, { chatMessages: [] }) ));
-        document.getElementById('send-chat').addEventListener('click', () => { const input = document.getElementById('chat-input'); sendChatMessage(input.value); input.value = ''; });
-        document.getElementById('chat-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-chat').click(); });
-        document.querySelectorAll('.dice-roll-btn').forEach(btn => btn.addEventListener('click', () => { const die = btn.dataset.die; const sides = parseInt(die.substring(1)); const result = Math.floor(Math.random() * sides) + 1; sendChatMessage(`rolled a ${die}: ${result}`, 'roll'); }));
-        document.getElementById('add-to-tracker').addEventListener('click', () => { const input = document.getElementById('turn-tracker-input'); const name = input.value.trim(); if (name && !(vttState.turnTracker.order || []).includes(name)) { const newOrder = [...(vttState.turnTracker.order || []), name]; const newTracker = {...vttState.turnTracker, order: newOrder}; if(newTracker.currentIndex === -1) newTracker.currentIndex = 0; updateDoc(vttDocRef, { turnTracker: newTracker }); input.value = ''; } });
-        document.getElementById('next-turn').addEventListener('click', () => { const tracker = vttState.turnTracker; if (!tracker.order || tracker.order.length === 0) return; let nextIndex = (tracker.currentIndex + 1) % tracker.order.length; updateDoc(vttDocRef, { 'turnTracker.currentIndex': nextIndex }); });
-        document.getElementById('prev-turn').addEventListener('click', () => { const tracker = vttState.turnTracker; if (!tracker.order || tracker.order.length === 0) return; let prevIndex = tracker.currentIndex - 1; if (prevIndex < 0) prevIndex = tracker.order.length - 1; updateDoc(vttDocRef, { 'turnTracker.currentIndex': prevIndex }); });
-        document.getElementById('reset-turn').addEventListener('click', () => { const newIndex = (vttState.turnTracker.order || []).length > 0 ? 0 : -1; updateDoc(vttDocRef, { 'turnTracker.currentIndex': newIndex }); });
-        function handleDeleteFromTracker(indexToDelete) { const tracker = vttState.turnTracker; const newOrder = tracker.order.filter((_, index) => index !== indexToDelete); let newCurrentIndex = tracker.currentIndex; if (indexToDelete < newCurrentIndex) newCurrentIndex--; else if (indexToDelete === newCurrentIndex && newCurrentIndex >= newOrder.length) { newCurrentIndex = newOrder.length > 0 ? 0 : -1; } if(newCurrentIndex < 0 && newOrder.length > 0) newCurrentIndex = 0; updateDoc(vttDocRef, { turnTracker: { order: newOrder, currentIndex: newCurrentIndex } }); }
-        document.getElementById('add-journal-btn').addEventListener('click', () => { const title = document.getElementById('journal-title-input'); const content = document.getElementById('journal-content-input'); if (title.value && content.value) { const newEntry = { id: crypto.randomUUID(), title: title.value, content: content.value }; const updatedJournal = [...(vttState.journalEntries || []), newEntry]; updateDoc(vttDocRef, { journalEntries: updatedJournal }); title.value = ''; content.value = ''; } });
-        function handleDeleteJournal(entryId) { const updatedJournal = (vttState.journalEntries || []).filter(e => e.id !== entryId); updateDoc(vttDocRef, { journalEntries: updatedJournal }); }
-        function handleStatusEffectClick(e) { if (e.target.matches('.status-effect-btn')) { const activeMap = getActiveMap(); if (!activeMap || !selectedElement || selectedElement.type !== 'token' || !isDM) return; const tokenIndex = (activeMap.tokens || []).findIndex(t => t.id === selectedElement.id); if (tokenIndex === -1) return; const token = activeMap.tokens[tokenIndex]; const effects = new Set(token.statusEffects || []); const status = e.target.dataset.status; if (effects.has(status)) effects.delete(status); else effects.add(status); token.statusEffects = Array.from(effects); updateDoc(vttDocRef, { maps: vttState.maps }); } }
         
         // --- Modal & Stat Block Logic ---
         function showModal(title, text, onConfirm) {
@@ -1964,7 +2337,61 @@
                 activeMap.transform = { scale: 1, panX: 0, panY: 0 }; 
                 updateDoc(vttDocRef, { maps: vttState.maps }); 
             }); 
+            
+            // FIX: Map Preset Listener Setup
+            document.getElementById('preset-map-select').addEventListener('change', (e) => {
+                const url = e.target.value;
+                if (url) updateActiveMapImage(url);
+            });
+            
+            // FIX: Set Active Map from URL Listener Setup
+            document.getElementById('change-map-btn').addEventListener('click', () => { 
+                const url = document.getElementById('map-url-input').value.trim(); 
+                if (url) updateActiveMapImage(url); 
+            });
+
+            // NEW: Set Turn Duration Listener
+            document.getElementById('set-turn-duration-btn').addEventListener('click', () => {
+                const duration = parseInt(document.getElementById('turn-duration-input').value, 10);
+                if (isDM && !isNaN(duration) && duration >= 10) {
+                     updateDoc(vttDocRef, { 'battle.turnTimerDuration': duration });
+                     sendChatMessage(`Turn duration set to ${duration} seconds.`, 'system');
+                } else {
+                    sendChatMessage("Invalid turn duration. Must be a number >= 10.", 'system');
+                }
+            });
         }
+
+        function handleAddFogBlock() {
+            if (!isDM) return;
+            const activeMap = getActiveMap();
+            if (!activeMap) {
+                sendChatMessage("Cannot add fog: No active map.", "system");
+                return;
+            }
+
+            const newBlock = {
+                id: crypto.randomUUID(),
+                x: activeMap.width / 2 - 100, // Center the block
+                y: activeMap.height / 2 - 100,
+                width: 200,
+                height: 200,
+            };
+
+            // Add new block to the beginning of the array so it's easily selectable/manipulatable
+            activeMap.fogBlocks.unshift(newBlock); 
+            
+            // Set it as selected to immediately show resize handles
+            selectedElement = { type: 'fog', id: newBlock.id };
+
+            updateDoc(vttDocRef, { maps: vttState.maps })
+                .then(() => sendChatMessage("Added new fog block.", "system"))
+                .catch(err => {
+                    console.error("Error adding fog block:", err);
+                    sendChatMessage("ERROR: Failed to add fog block.", "system");
+                });
+        }
+
 
         function setupGridControls() { 
             const updateMapConfig = (prop, value) => { 
@@ -1994,6 +2421,9 @@
             
             // NEW: Render FOW Toggle state
             document.getElementById('fow-toggle').checked = activeMap ? activeMap.fowEnabled : true;
+
+            // NEW: Render Turn Duration in Controls
+            document.getElementById('turn-duration-input').value = vttState.battle?.turnTimerDuration || DEFAULT_STATE.battle.turnTimerDuration;
         }
         
         // --- Draggable & Resizable Logic ---
@@ -2040,9 +2470,8 @@
                     element.style.top = newY + "px";
                     
                     // Critical: Redraw FoW immediately after token moves locally
-                    // This uses local data, avoiding the Firestore latency problem
-                    if (type === 'token') {
-                        redrawOverlayCanvas(); 
+                    if (type === 'token' || type === 'fog') { // Fog blocks also need real-time redraw of fog overlay
+                         redrawOverlayCanvas(); 
                     }
                 }; 
                 
@@ -2061,7 +2490,9 @@
             if (!isDM && (type !== 'token' || (data.ownedBy !== userId && data.ownedBy !== DM_PLAYER_GMPC_ID))) return; // Allow GMPC owner to resize
             const handle = document.createElement('div'); handle.className = 'resize-handle br'; element.appendChild(handle); handle.addEventListener('mousedown', (e) => initResize(e, element, data, type)); 
         }
-        function initResize(e, element, data, type) { e.preventDefault(); e.stopPropagation(); const startX = e.clientX; const startY = e.clientY; const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10); const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10); const doResize = (moveEvent) => { const activeMap = getActiveMap(); if (!activeMap) return; const { scale } = activeMap.transform; const deltaX = moveEvent.clientX - startX; const deltaY = moveEvent.clientY - startY; let newWidth = startWidth + deltaX / scale; let newHeight = startHeight + deltaY / scale; if (type === 'token') { const aspectRatio = startWidth / startHeight; newHeight = newWidth / aspectRatio; } element.style.width = Math.max(20, newWidth) + 'px'; element.style.height = Math.max(20, newHeight) + 'px'; }; const stopResize = () => { document.removeEventListener('mousemove', doResize); document.removeEventListener('mouseup', stopResize); const activeMap = getActiveMap(); if (!activeMap) return; const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks; const itemIndex = dataArray.findIndex(item => item.id === data.id); if (itemIndex > -1) { dataArray[itemIndex].width = parseInt(element.style.width, 10); dataArray[itemIndex].height = parseInt(element.style.height, 10); updateDoc(vttDocRef, { maps: vttState.maps }); } }; document.addEventListener('mousemove', doResize); document.addEventListener('mouseup', stopResize, { once: true }); }
+        function initResize(e, element, data, type) { e.preventDefault(); e.stopPropagation(); const startX = e.clientX; const startY = e.clientY; const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10); const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10); const doResize = (moveEvent) => { const activeMap = getActiveMap(); if (!activeMap) return; const { scale } = activeMap.transform; const deltaX = moveEvent.clientX - startX; const deltaY = moveEvent.clientY - startY; let newWidth = startWidth + deltaX / scale; let newHeight = startHeight + deltaY / scale; if (type === 'token') { const aspectRatio = startWidth / startHeight; newHeight = newWidth / aspectRatio; } element.style.width = Math.max(20, newWidth) + 'px'; element.style.height = Math.max(20, newHeight) + 'px'; 
+        if (type === 'token' || type === 'fog') { redrawOverlayCanvas(); } // Live redraw during resize
+        }; const stopResize = () => { document.removeEventListener('mousemove', doResize); document.removeEventListener('mouseup', stopResize); const activeMap = getActiveMap(); if (!activeMap) return; const dataArray = type === 'token' ? activeMap.tokens : activeMap.fogBlocks; const itemIndex = dataArray.findIndex(item => item.id === data.id); if (itemIndex > -1) { dataArray[itemIndex].width = parseInt(element.style.width, 10); dataArray[itemIndex].height = parseInt(element.style.height, 10); updateDoc(vttDocRef, { maps: vttState.maps }); } }; document.addEventListener('mousemove', doResize); document.addEventListener('mouseup', stopResize, { once: true }); }
         
         // --- Measurement and Template Tools ---
         function getMapCoords(e) {
@@ -2100,23 +2531,26 @@
         function addTokenFromPreset(name, imageUrl) {
             const activeMap = getActiveMap();
             if (!activeMap) return;
+            // Find the full token data in the presets to get abilities, etc.
+            const presetToken = vttState.presetTokens[activeTokenCategory]?.find(t => t.name === name) || {};
+
             const newToken = {
                 id: crypto.randomUUID(),
                 name,
-                color: '#ff0000', // fallback color
+                color: presetToken.color || '#ff0000', // fallback color
                 imageUrl,
                 x: activeMap.width / 2,
                 y: activeMap.height / 2,
                 width: activeMap.grid.size || 50,
                 height: activeMap.grid.size || 50,
                 statusEffects: [],
-                hp: 10,
-                maxHp: 10,
-                ac: 10,
-                notes: '',
+                hp: presetToken.hp || 10,
+                maxHp: presetToken.maxHp || 10,
+                ac: presetToken.ac || 10,
+                notes: presetToken.notes || '',
                 ownedBy: 'dm',
-                abilities: [],
-                visionRange: 30, // DEFAULT: 30 feet
+                abilities: presetToken.abilities || [],
+                visionRange: presetToken.visionRange || 30, // DEFAULT: 30 feet
             };
             if (!activeMap.tokens) activeMap.tokens = [];
             activeMap.tokens.push(newToken);
@@ -2125,8 +2559,6 @@
         }
 
         function setupDrawingControls() { 
-            // 1. Tool selection (Pencil/Eraser/Ruler) - Handled in setupToolControls now for unified UX
-            
             // 2. Color Input (DM-Only)
             const colorInput = document.getElementById('drawing-color-input');
             colorInput.addEventListener('input', (e) => {
@@ -2178,6 +2610,45 @@
             }
         }
 
+        // --- NEW: Dice Roll Handler ---
+        function handleDiceRoll(input) {
+            const rollRegex = /(^\/roll |^\/r )(?<expression>\d+d\d+([\+\-]\d+)?)/i;
+            const match = input.match(rollRegex);
+
+            if (!match) return false;
+
+            const expression = match.groups.expression;
+            const parts = expression.split(/d|\+|-/);
+            
+            const numDice = parseInt(parts[0]) || 1;
+            const numSides = parseInt(parts[1]) || 20;
+            let modifier = 0;
+            
+            // Check for modifier (it's the third part, if it exists)
+            const modMatch = expression.match(/[\+\-]\d+/);
+            if (modMatch) {
+                modifier = parseInt(modMatch[0]);
+            }
+            
+            let total = 0;
+            const rolls = [];
+            
+            for (let i = 0; i < numDice; i++) {
+                const roll = Math.floor(Math.random() * numSides) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+
+            const totalWithMod = total + modifier;
+            const modDisplay = modifier > 0 ? ` + ${modifier}` : (modifier < 0 ? ` - ${Math.abs(modifier)}` : '');
+            
+            const resultText = `rolled ${numDice}d${numSides}${modDisplay}: (${rolls.join(' + ')}${modDisplay}) = **${totalWithMod}** (Natural Roll: ${total})`;
+            
+            sendChatMessage(resultText, 'roll');
+            return true;
+        }
+
+
         function setupToolControls() {
             // --- File Controls ---
             document.getElementById('sync-data-btn').addEventListener('click', () => {
@@ -2193,6 +2664,11 @@
                 }).catch(console.error);
             });
             
+            // FIX: Updated Clear All button handler
+            document.getElementById('clear-all-btn').addEventListener('click', () => { 
+                showModal("Clear All Data?", "This will reset the entire session to its initial state, deleting all maps, tokens, and journal entries. Are you sure?", clearAllData); 
+            });
+
             document.getElementById('save-data-file-btn').addEventListener('click', saveDataToFile);
             document.getElementById('load-data-file-input').addEventListener('change', loadDataFromFile);
 
@@ -2255,6 +2731,63 @@
                         updateDoc(vttDocRef, { maps: vttState.maps });
                 }
             });
+
+            // --- UPDATED Chat Listener to handle /roll syntax ---
+            document.getElementById('send-chat').addEventListener('click', () => { 
+                const input = document.getElementById('chat-input'); 
+                const messageText = input.value.trim();
+
+                if (!messageText) return;
+
+                const isRoll = handleDiceRoll(messageText);
+
+                if (!isRoll) {
+                    sendChatMessage(messageText);
+                }
+                
+                input.value = ''; 
+            });
+            document.getElementById('chat-input').addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') document.getElementById('send-chat').click(); 
+            });
+            // --- END UPDATED Chat Listener ---
+            
+            document.getElementById('clear-chat-btn').addEventListener('click', () => showModal("Clear Chat Log?", "Are you sure?", () => updateDoc(vttDocRef, { chatMessages: [] }) ));
+            document.querySelectorAll('.dice-roll-btn').forEach(btn => btn.addEventListener('click', () => { 
+                const die = btn.dataset.die; 
+                const sides = parseInt(die.substring(1)); 
+                const result = Math.floor(Math.random() * sides) + 1; 
+                sendChatMessage(`rolled a ${die}: **${result}**`, 'roll'); 
+            }));
+            document.getElementById('add-to-tracker').addEventListener('click', () => { 
+                const input = document.getElementById('turn-tracker-input'); 
+                const name = input.value.trim(); 
+                if (name && !(vttState.turnTracker.order || []).includes(name)) { 
+                    const newOrder = [...(vttState.turnTracker.order || []), name]; 
+                    const newTracker = {...vttState.turnTracker, order: newOrder}; 
+                    if(newTracker.currentIndex === -1) newTracker.currentIndex = 0; 
+                    updateDoc(vttDocRef, { turnTracker: newTracker }); 
+                    input.value = ''; 
+                } 
+            });
+            document.getElementById('next-turn').addEventListener('click', () => { 
+                const tracker = vttState.turnTracker; 
+                if (!tracker.order || tracker.order.length === 0) return; 
+                let nextIndex = (tracker.currentIndex + 1) % tracker.order.length; 
+                updateDoc(vttDocRef, { 'turnTracker.currentIndex': nextIndex }); 
+            });
+            document.getElementById('prev-turn').addEventListener('click', () => { 
+                const tracker = vttState.turnTracker; 
+                if (!tracker.order || tracker.order.length === 0) return; 
+                let prevIndex = tracker.currentIndex - 1; 
+                if (prevIndex < 0) prevIndex = tracker.order.length - 1; 
+                updateDoc(vttDocRef, { 'turnTracker.currentIndex': prevIndex }); 
+            });
+            document.getElementById('reset-turn').addEventListener('click', () => { 
+                const newIndex = (vttState.turnTracker.order || []).length > 0 ? 0 : -1; 
+                updateDoc(vttDocRef, { 'turnTracker.currentIndex': newIndex }); 
+            });
+
 
         }
         
@@ -3139,12 +3672,16 @@
             document.getElementById('battle-setup-cancel-btn').addEventListener('click', () => document.getElementById('battle-setup-modal').classList.add('hidden'));
             document.getElementById('begin-combat-btn').addEventListener('click', beginCombat);
             document.getElementById('roll-initiative-btn').addEventListener('click', rollInitiative);
+            
+            // FIX 1: Change 'End Battle' button to call the correct end function
             document.getElementById('end-battle-btn').addEventListener('click', () => {
-                if(isDM) endBattle();
+                if(isDM) showModal("End Battle?", "Are you sure you want to end combat? Tokens HP will be saved.", endBattle); 
             });
+            
             document.getElementById('battle-action-menu').addEventListener('click', handleBattleAction);
             document.getElementById('player-team').addEventListener('click', handleTargetSelection);
             document.getElementById('enemy-team').addEventListener('click', handleTargetSelection);
+            document.getElementById('resort-initiative-btn').addEventListener('click', resortInitiative); // NEW DM BUTTON
         }
 
         function showBattleSetupModal() {
@@ -3220,7 +3757,7 @@
             combatantData.sort((a, b) => b.initiative - a.initiative);
 
             const combatants = combatantData.map(data => {
-                return { ...data.token, currentHP: data.token.hp, isDefeated: false, maxHp: data.token.maxHp || data.token.hp, initiative: data.initiative };
+                return { ...data.token, currentHP: data.token.hp, isDefeated: false, maxHp: data.token.maxHp || data.token.hp, initiative: data.initiative, activeEffects: [], needsProcessing: true };
             });
             
             const turnOrder = combatants.map(c => c.name);
@@ -3231,12 +3768,91 @@
                     combatants: combatants,
                     turnIndex: 0,
                     log: [{ text: 'The battle begins!', type: 'system' }],
-                    turnOrder: turnOrder
+                    turnOrder: turnOrder,
+                    turnTimerStartTime: serverTimestamp(), // START TIMER HERE
+                    turnTimerDuration: vttState.battle.turnTimerDuration
                 }
             });
             document.getElementById('battle-setup-modal').classList.add('hidden');
         }
         
+        // NEW DM TOOL: Re-sort initiative
+        function resortInitiative() {
+            showModal("Re-Sort Initiative?", "Are you sure you want to re-sort the remaining combatants by initiative score? This action cannot be undone.", () => {
+                const battle = JSON.parse(JSON.stringify(vttState.battle));
+
+                // Filter out defeated combatants and re-sort
+                const activeCombatants = battle.combatants.filter(c => !c.isDefeated);
+                
+                // Get the combatant's original token data (which has the initiative value)
+                activeCombatants.sort((a, b) => b.initiative - a.initiative);
+
+                // Merge back with defeated combatants (putting defeated at the end of the list)
+                const defeatedCombatants = battle.combatants.filter(c => c.isDefeated);
+                battle.combatants = [...activeCombatants, ...defeatedCombatants];
+                
+                battle.turnOrder = battle.combatants.map(c => c.name);
+                battle.turnIndex = 0;
+                battle.turnTimerStartTime = serverTimestamp();
+                battle.log.push({ text: 'Initiative was re-sorted by the DM.', type: 'system' });
+                
+                // FIX 2: Save the ENTIRE updated battle object back to Firestore
+                updateDoc(vttDocRef, { battle: battle });
+             });
+        }
+
+        // NEW: Turn start logic to handle DoT/HoT and status effects
+        // FIX 3: This logic is now only called once by executeAbility when the turn advances, 
+        // ensuring DoT/HoT happens once per turn, not every second.
+        function processTurnStart(combatant, updatedBattle) {
+            let logTexts = [];
+            let newEffects = [];
+            let isStunned = false;
+
+            // Use spread operator to create a shallow copy before modifying or iterating
+            [...(combatant.activeEffects || [])].forEach(effect => {
+                let effectLog = '';
+                
+                // 1. Check for stun/skip turn
+                if (effect.name === 'stunned') {
+                    isStunned = true;
+                    effectLog += `${combatant.name} is stunned and skips their turn.`;
+                }
+
+                // 2. Apply DoT/HoT damage/healing
+                if (effect.type === 'dot' || effect.type === 'hot') {
+                    const amount = Math.floor(Math.random() * (effect.damageRange[1] - effect.damageRange[0] + 1)) + effect.damageRange[0];
+                    if (effect.type === 'dot') {
+                        combatant.currentHP = Math.max(0, combatant.currentHP - amount);
+                        effectLog += `🔥 ${combatant.name} takes ${amount} damage from ${effect.name}.`;
+                    } else {
+                        combatant.currentHP = Math.min(combatant.maxHp, combatant.currentHP + amount);
+                        effectLog += `✨ ${combatant.name} heals ${amount} HP from ${effect.name}.`;
+                    }
+                }
+                
+                // 3. Decrease duration and check for expiration
+                effect.duration--;
+                if (effect.duration > 0) {
+                    newEffects.push(effect);
+                } else {
+                    effectLog += ` ${effect.name} wears off.`;
+                }
+                
+                if (effectLog) updatedBattle.log.push({ text: effectLog, type: 'battle' });
+            });
+
+            combatant.activeEffects = newEffects;
+            
+            // Check for defeat after damage
+            if (combatant.currentHP <= 0) {
+                combatant.isDefeated = true;
+                updatedBattle.log.push({ text: `${combatant.name} has been defeated by a lingering effect!`, type: 'battle' });
+            }
+            
+            return isStunned;
+        }
+
         function renderBattleScreen() {
              const battle = vttState.battle;
              if (!battle || !battle.isActive) return;
@@ -3244,9 +3860,44 @@
              const battleDmControls = document.querySelector('#battle-screen .dm-controls-wrapper');
              if (isDM) {
                  battleDmControls.classList.remove('hidden');
+                 battleDmControls.style.display = 'flex';
              } else {
                  battleDmControls.classList.add('hidden');
+                 battleDmControls.style.display = 'none';
              }
+             
+             // --- START TURN PROCESSING FOR DM ONLY (DoT/HoT logic moved here) ---
+             // Note: This block runs every time the Firestore state updates, which includes once per turn.
+             const currentTurnCombatant = battle.combatants[battle.turnIndex];
+             
+             if (isDM && battle.turnTimerStartTime && battle.turnTimerStartTime.toMillis) {
+                 const updatedBattleForProcessing = JSON.parse(JSON.stringify(battle));
+                 const combatantForProcessing = updatedBattleForProcessing.combatants[battle.turnIndex];
+                 
+                 // Use a flag to track if effects have been processed for the current turn.
+                 // This ensures the processing happens when the turn *first* lands on the combatant 
+                 // (i.e., when turnIndex changes), and not repeatedly by the timer or other updates.
+                 if (combatantForProcessing.needsProcessing !== false) {
+                     const isStunned = processTurnStart(combatantForProcessing, updatedBattleForProcessing);
+
+                     // Set the flag to false so it doesn't process again on the same turnIndex
+                     updatedBattleForProcessing.combatants[battle.turnIndex].needsProcessing = false;
+
+                     if (isStunned) {
+                         // Apply the processed state, then immediately advance turn via executeAbility (null ability)
+                         updateDoc(vttDocRef, { battle: updatedBattleForProcessing })
+                             .then(() => executeAbility(currentTurnCombatant, null, null));
+                         return; // Skip rendering/waiting for action this client loop while the turn is automatically ending
+                     }
+
+                     // Save any necessary DoT/HoT damage back to Firestore
+                     if (updatedBattleForProcessing.log.length > battle.log.length) {
+                          updateDoc(vttDocRef, { battle: updatedBattleForProcessing });
+                     }
+                 }
+             }
+             // --- END TURN PROCESSING ---
+
 
              const playerTeamEl = document.getElementById('player-team');
              const enemyTeamEl = document.getElementById('enemy-team');
@@ -3256,8 +3907,46 @@
              playerTeamEl.innerHTML = '';
              enemyTeamEl.innerHTML = '';
              
-             const currentTurnCombatant = battle.combatants[battle.turnIndex];
-             turnOrderEl.textContent = `Current Turn: ${currentTurnCombatant.name}`;
+             let turnStatusHtml = `Current Turn: <strong>${currentTurnCombatant.name}</strong>`;
+
+             // --- TIMER LOGIC (Client-Side Update) ---
+             if (battle.turnTimerStartTime && battle.turnTimerDuration > 0) {
+                 let remainingSeconds = battle.turnTimerDuration;
+
+                 if (battle.turnTimerStartTime.toMillis) {
+                     const startTime = battle.turnTimerStartTime.toMillis();
+                     const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                     remainingSeconds = battle.turnTimerDuration - elapsedSeconds;
+                 }
+                 
+                 const minutes = Math.floor(Math.max(0, remainingSeconds) / 60);
+                 const seconds = Math.abs(Math.max(0, remainingSeconds)) % 60; // Use max(0, remainingSeconds)
+
+                 const timerDisplay = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                 turnStatusHtml += ` <span class="text-3xl font-bold ${remainingSeconds <= 10 ? 'text-red-400' : 'text-yellow-300'} ml-4">(${timerDisplay})</span>`;
+
+                 if (remainingSeconds <= 0 && isDM) {
+                     // Auto-end turn if time runs out (only DM executes the change to avoid race condition)
+                     executeAbility(currentTurnCombatant, null, null); 
+                     return; 
+                 }
+                 
+                 // Clear existing interval and set a new one if necessary
+                 if (!battleTimerInterval) {
+                     clearInterval(battleTimerInterval);
+                     battleTimerInterval = setInterval(() => {
+                         // Force a client-side render to update the time display every second
+                         render(); 
+                     }, 1000);
+                 }
+             } else if (battleTimerInterval) {
+                 clearInterval(battleTimerInterval);
+                 battleTimerInterval = null;
+             }
+             // --- END TIMER LOGIC ---
+
+             turnOrderEl.innerHTML = turnStatusHtml; // Use innerHTML for formatting
 
              battle.combatants.forEach((c, index) => {
                  // Determine team: Player Team if ownedBy is NOT 'dm'
@@ -3271,6 +3960,13 @@
                  const healthPercentage = Math.max(0, (c.currentHP / c.maxHp) * 100);
                  const healthClass = healthPercentage > 60 ? 'high' : healthPercentage > 30 ? 'medium' : 'low';
                  
+                 // Render active status effects icons
+                 const effectIcons = (c.activeEffects || []).map(e => {
+                     const icon = STATUS_ICONS[e.name] || '?';
+                     const durationText = e.duration ? `(${e.duration}T)` : '';
+                     return `<span title="${e.name} ${durationText}" class="text-lg">${icon}</span>`;
+                 }).join('');
+
                  card.innerHTML = `
                              <div>
                                  <div class="combatant-image" style="background-image: url('${c.imageUrl}'); background-color: ${c.color};"></div>
@@ -3281,6 +3977,7 @@
                                  <div class="combatant-health-bar">
                                      <div class="combatant-health-fill ${healthClass}" style="width: ${healthPercentage}%;"></div>
                                  </div>
+                                 <div class="status-effect-box flex justify-center gap-1">${effectIcons}</div>
                              </div>
                              `;
 
@@ -3303,16 +4000,36 @@
         function renderActionMenu(container, combatant) {
             container.innerHTML = '';
             const isMyTurn = (isDM || combatant.ownedBy === userId || combatant.ownedBy === DM_PLAYER_GMPC_ID);
+            const isStunned = (combatant.activeEffects || []).some(e => e.name === 'stunned');
 
-            if (!isMyTurn) {
-                container.innerHTML = '<p class="text-center text-gray-400">Waiting for turn...</p>';
+            if (!isMyTurn || isStunned) {
+                container.innerHTML = `<p class="text-center text-gray-400">Waiting for turn...</p>${isStunned ? '<p class="text-center text-red-400 font-bold mt-1">STUNNED!</p>' : ''}`;
                 return;
             }
 
             if (battleActionState.step === 'targeting') {
+                const ability = battleActionState.selectedAbility;
+                
+                let details = '';
+                if (ability.type === 'attack' || ability.type === 'splash') {
+                    details = `Dmg: ${ability.damageRange[0]}-${ability.damageRange[1]} (${ability.hitChance}% chance)`;
+                } else if (ability.type === 'heal') {
+                    details = `Heal: ${ability.healRange[0]}-${ability.healRange[1]}`;
+                } else if (ability.type === 'dot' || ability.type === 'hot') {
+                    const dmg = ability.damageRange[0] === ability.damageRange[1] ? ability.damageRange[0] : `${ability.damageRange[0]}-${ability.damageRange[1]}`;
+                    const type = ability.type === 'dot' ? 'Dmg/T' : 'Heal/T';
+                    details = `Tick: ${dmg} ${type} (${ability.duration}T)`;
+                } else if (ability.type === 'status') {
+                    details = `Applies **${ability.statusName}** (${ability.duration}T) (${ability.hitChance}% chance)`;
+                }
+
                 const targetPrompt = document.createElement('div');
-                targetPrompt.className = 'text-center';
-                targetPrompt.innerHTML = `<p>Select a target for</p><p class="font-bold">${battleActionState.selectedAbility.name}</p>`;
+                targetPrompt.className = 'text-center flex-shrink-0';
+                targetPrompt.innerHTML = `
+                    <p class="text-xs text-yellow-400">SELECT TARGET</p>
+                    <p class="font-bold text-base">${ability.name}</p>
+                    <p class="text-xs text-gray-300 mt-1">${details}</p>
+                `;
                 const cancelBtn = document.createElement('button');
                 cancelBtn.textContent = 'Cancel';
                 cancelBtn.className = 'gruvhub-button text-xs p-1 mt-2 w-full';
@@ -3320,22 +4037,29 @@
                 targetPrompt.appendChild(cancelBtn);
                 container.appendChild(targetPrompt);
             } else if (battleActionState.step === 'abilities') { // Show abilities list
-                const abilitiesContainer = document.createElement('div');
-                abilitiesContainer.className = 'flex flex-col gap-2';
+                // Inner container for abilities only
+                const abilitiesGrid = document.createElement('div');
+                abilitiesGrid.id = 'ability-buttons-grid'; // Use the dedicated grid ID
+                abilitiesGrid.className = 'grid grid-cols-4 gap-2 w-full flex-grow overflow-y-auto pr-1'; 
+                
                 (combatant.abilities || []).forEach((ability, index) => {
                     const btn = document.createElement('button');
-                    btn.className = 'gruvhub-button p-2 text-sm';
+                    btn.className = 'gruvhub-button p-2 text-sm truncate';
                     btn.textContent = ability.name;
+                    btn.title = ability.name; // Use title for full name on hover
                     btn.dataset.action = 'select-ability';
                     btn.dataset.abilityIndex = index;
-                    abilitiesContainer.appendChild(btn);
+                    abilitiesGrid.appendChild(btn);
                 });
+                
                 const backBtn = document.createElement('button');
                 backBtn.textContent = 'Back';
-                backBtn.className = 'gruvhub-button text-xs p-1 mt-2';
+                backBtn.className = 'gruvhub-button text-xs p-1 mt-2 flex-shrink-0 col-span-4'; 
                 backBtn.dataset.action = 'show-main-menu';
-                abilitiesContainer.appendChild(backBtn);
-                container.appendChild(abilitiesContainer);
+                
+                // Append the entire grid and the back button to the main container
+                container.appendChild(abilitiesGrid);
+                container.appendChild(backBtn);
             } else { // Show main menu
                 container.innerHTML = `
                     <div class="flex flex-col gap-2">
@@ -3387,12 +4111,15 @@
                     // A token is on the Player Team if ownedBy is NOT 'dm'
                     const isTargetPlayer = targetCombatant.ownedBy !== 'dm';
                     const isAttackerPlayer = currentCombatant.ownedBy !== 'dm';
+                    const abilityType = battleActionState.selectedAbility.type;
 
-                    if (battleActionState.selectedAbility.type === 'attack' || battleActionState.selectedAbility.type === 'splash') {
+                    if (abilityType === 'attack' || abilityType === 'splash' || abilityType === 'dot' || abilityType === 'status') {
+                        // Attacks/DoT/Status target enemies (opposite team)
                         if (isTargetPlayer !== isAttackerPlayer) {
                             card.classList.add('targetable');
                         }
-                    } else if (battleActionState.selectedAbility.type === 'heal') {
+                    } else if (abilityType === 'heal' || abilityType === 'hot') {
+                        // Heals/HoT target allies (same team)
                         if (isTargetPlayer === isAttackerPlayer) {
                             card.classList.add('targetable');
                         }
@@ -3424,61 +4151,100 @@
             effectEl.style.top = `${rect.top + rect.height / 2}px`;
             
             document.body.appendChild(effectEl);
-            setTimeout(() => { effectEl.remove(); }, 1200);
+            setTimeout(() => { effectEl.remove(); }, 1500); // Increased duration
         }
 
 
         function executeAbility(attacker, target, ability) {
             const updatedBattle = JSON.parse(JSON.stringify(vttState.battle));
+            const attackerCombatant = updatedBattle.combatants.find(c => c.id === attacker.id);
 
             if (ability) {
-                const currentAttacker = updatedBattle.combatants.find(c => c.id === attacker.id);
-                const currentTarget = updatedBattle.combatants.find(c => c.id === target.id);
+                const targetCombatant = updatedBattle.combatants.find(c => c.id === target.id);
                 let logText = '';
                 
+                // Base chance to hit for attacks/status/DoT/HoT
+                const hitRoll = Math.floor(Math.random() * 100) + 1;
+                const isHit = ability.type === 'heal' || ability.type === 'hot' || hitRoll <= (ability.hitChance || 100);
+
                 if (ability.type === 'attack' || ability.type === 'splash') {
-                    const hitRoll = Math.floor(Math.random() * 100) + 1;
-                    if (hitRoll <= ability.hitChance) {
+                    if (isHit) {
                         const damage = Math.floor(Math.random() * (ability.damageRange[1] - ability.damageRange[0] + 1)) + ability.damageRange[0];
-                        currentTarget.currentHP = Math.max(0, currentTarget.currentHP - damage);
-                        if(ability.animation) playBattleAnimation(currentTarget.id, ability.animation);
-                        logText = `💥 ${currentAttacker.name}'s ${ability.name} hits ${currentTarget.name} for ${damage} damage!`;
-                        if (currentTarget.currentHP <= 0) {
-                            currentTarget.isDefeated = true;
-                            logText += ` ${currentTarget.name} has been defeated!`;
-                        }
+                        targetCombatant.currentHP = Math.max(0, targetCombatant.currentHP - damage);
+                        if(ability.animation) playBattleAnimation(targetCombatant.id, ability.animation);
+                        logText = `💥 ${attackerCombatant.name}'s ${ability.name} hits ${targetCombatant.name} for ${damage} damage!`;
                         
                         // Handle splash damage
                         if (ability.type === 'splash') {
                             const splashDamage = Math.floor(damage / 2);
-                            const targetIsPlayer = currentTarget.ownedBy !== 'dm';
-                            updatedBattle.combatants.forEach((secondaryTarget, index) => {
+                            const targetIsPlayer = targetCombatant.ownedBy !== 'dm';
+                            updatedBattle.combatants.forEach((secondaryTarget) => {
                                 const secondaryIsPlayer = secondaryTarget.ownedBy !== 'dm';
-                                if (secondaryTarget.id !== currentTarget.id && !secondaryTarget.isDefeated && secondaryIsPlayer === targetIsPlayer) {
+                                if (secondaryTarget.id !== targetCombatant.id && !secondaryTarget.isDefeated && secondaryIsPlayer === targetIsPlayer) {
                                     secondaryTarget.currentHP = Math.max(0, secondaryTarget.currentHP - splashDamage);
                                     if(ability.animation) setTimeout(() => playBattleAnimation(secondaryTarget.id, ability.animation), 200);
                                     logText += ` ${secondaryTarget.name} takes ${splashDamage} splash damage.`;
-                                    if (secondaryTarget.currentHP <= 0) {
-                                        secondaryTarget.isDefeated = true;
-                                        logText += ` ${secondaryTarget.name} is defeated by the splash!`;
-                                    }
+                                    if (secondaryTarget.currentHP <= 0) secondaryTarget.isDefeated = true;
                                 }
                             });
                         }
                     } else {
-                        logText = `💨 ${currentAttacker.name}'s ${ability.name} misses ${currentTarget.name}!`;
+                        logText = `💨 ${attackerCombatant.name}'s ${ability.name} misses ${targetCombatant.name}!`;
                     }
                 } else if (ability.type === 'heal') {
                     const healing = Math.floor(Math.random() * (ability.healRange[1] - ability.healRange[0] + 1)) + ability.healRange[0];
-                    currentTarget.currentHP = Math.min(currentTarget.maxHp, currentTarget.currentHP + healing);
-                    if(ability.animation) playBattleAnimation(currentTarget.id, ability.animation);
-                    logText = `✨ ${currentAttacker.name} uses ${ability.name} to heal ${currentTarget.name} for ${healing} HP.`;
+                    targetCombatant.currentHP = Math.min(targetCombatant.maxHp, targetCombatant.currentHP + healing);
+                    if(ability.animation) playBattleAnimation(targetCombatant.id, ability.animation);
+                    logText = `✨ ${attackerCombatant.name} uses ${ability.name} to heal ${targetCombatant.name} for ${healing} HP.`;
+                } else if (ability.type === 'dot' || ability.type === 'hot' || ability.type === 'status') {
+                    if (isHit) {
+                        // Status/DoT/HoT application logic
+                        const effectName = ability.statusName || ability.name;
+                        const duration = ability.duration || 1;
+                        
+                        let existingEffectIndex = (targetCombatant.activeEffects || []).findIndex(e => e.name === effectName);
+
+                        if (existingEffectIndex !== -1) {
+                            // If effect already exists, refresh duration
+                            targetCombatant.activeEffects[existingEffectIndex].duration = duration;
+                        } else {
+                            // Apply new effect
+                            const newEffect = {
+                                name: effectName,
+                                type: ability.type,
+                                duration: duration,
+                                damageRange: ability.damageRange || [0, 0], // used for dot/hot tick
+                            };
+                            if (!targetCombatant.activeEffects) targetCombatant.activeEffects = [];
+                            targetCombatant.activeEffects.push(newEffect);
+                        }
+
+                        if(ability.animation) playBattleAnimation(targetCombatant.id, ability.animation);
+                        
+                        logText = `✅ ${attackerCombatant.name}'s ${ability.name} applies **${effectName}** to ${targetCombatant.name} for ${duration} turns!`;
+
+                    } else {
+                         logText = `💨 ${attackerCombatant.name}'s ${ability.name} fails to apply its effect on ${targetCombatant.name}.`;
+                    }
                 }
+
+                // Check for defeat after direct damage
+                if (targetCombatant.currentHP <= 0) {
+                    targetCombatant.isDefeated = true;
+                    logText += ` ${targetCombatant.name} has been defeated!`;
+                }
+                
                 updatedBattle.log.push({ text: logText, type: 'battle' });
+            } else {
+                 // Only log end turn if it was an active turn, not an auto-advance due to stun/defeat processing
+                 if (!attackerCombatant.isDefeated && !(attackerCombatant.activeEffects || []).some(e => e.name === 'stunned')) {
+                      updatedBattle.log.push({ text: `${attackerCombatant.name} ends their turn.`, type: 'system' });
+                 }
             }
 
             battleActionState = { step: 'main', selectedAbility: null };
             
+            // Check win/loss condition after turn resolution
             const playerTeamDefeated = updatedBattle.combatants.filter(c => c.ownedBy !== 'dm').every(c => c.isDefeated);
             const enemyTeamDefeated = updatedBattle.combatants.filter(c => c.ownedBy === 'dm').every(c => c.isDefeated);
             
@@ -3491,16 +4257,23 @@
                 return;
             }
 
-            let nextTurn = (updatedBattle.turnIndex + 1) % updatedBattle.combatants.length;
-            while(updatedBattle.combatants[nextTurn].isDefeated) {
-                nextTurn = (nextTurn + 1) % updatedBattle.combatants.length;
+            // Reset turn processing flag for the combatant whose turn is coming up
+            const nextIndex = (updatedBattle.turnIndex + 1) % updatedBattle.combatants.length;
+            updatedBattle.combatants[nextIndex].needsProcessing = true;
+
+            // Advance turn, skipping defeated characters
+            let newNextIndex = nextIndex;
+            while(updatedBattle.combatants[newNextIndex].isDefeated) {
+                newNextIndex = (newNextIndex + 1) % updatedBattle.combatants.length;
             }
-            updatedBattle.turnIndex = nextTurn;
-            
+            updatedBattle.turnIndex = newNextIndex;
+            updatedBattle.turnTimerStartTime = serverTimestamp(); // Reset timer stamp
+
             updateDoc(vttDocRef, { battle: updatedBattle });
         }
         
         function endBattle() {
+            // FIX 1: This is the actual function to end the battle and save final HP/clear state.
             const finalCombatants = vttState.battle.combatants;
             const updatedMaps = JSON.parse(JSON.stringify(vttState.maps));
             
@@ -3509,6 +4282,8 @@
                     const token = map.tokens.find(t => t.id === combatant.id);
                     if (token) {
                         token.hp = combatant.isDefeated ? 0 : combatant.currentHP;
+                        // Clear battle effects/stats on token before saving back
+                        token.activeEffects = [];
                         break;
                     }
                 }
@@ -3518,6 +4293,11 @@
                 maps: updatedMaps,
                 battle: DEFAULT_STATE.battle 
             });
+
+            if (battleTimerInterval) { // Clear client-side interval
+                clearInterval(battleTimerInterval);
+                battleTimerInterval = null;
+            }
         }
         
         function showBattleEndMessage(message) {
@@ -3537,9 +4317,22 @@
             abilities.forEach((ability, index) => {
                 const abilityEl = document.createElement('div');
                 abilityEl.className = 'text-xs bg-[#3a241d] p-2 rounded flex justify-between items-center';
-                const details = ability.type === 'heal' 
-                    ? `${ability.healRange[0]}-${ability.healRange[1]} Heal`
-                    : `${ability.hitChance}% Hit, ${ability.damageRange[0]}-${ability.damageRange[1]} Dmg`;
+                
+                let details = '';
+                const levelDisplay = `L${ability.level || 1}`; // Ensure level defaults if missing
+
+                if (ability.type === 'attack' || ability.type === 'splash') {
+                    details = `${levelDisplay}, ${ability.hitChance}% Hit, ${ability.damageRange[0]}-${ability.damageRange[1]} Dmg`;
+                } else if (ability.type === 'heal') {
+                    details = `${levelDisplay}, ${ability.healRange[0]}-${ability.healRange[1]} Heal`;
+                } else if (ability.type === 'dot' || ability.type === 'hot') {
+                    const dmg = ability.damageRange[0] === ability.damageRange[1] ? ability.damageRange[0] : `${ability.damageRange[0]}-${ability.damageRange[1]}`;
+                    const type = ability.type === 'dot' ? 'DoT' : 'HoT';
+                    details = `${levelDisplay}, ${ability.hitChance}% Hit, ${dmg} ${type} (${ability.duration}T)`;
+                } else if (ability.type === 'status') {
+                     details = `${levelDisplay}, ${ability.hitChance}% Hit, Applies ${ability.statusName} (${ability.duration}T)`;
+                }
+
                 abilityEl.innerHTML = `<div><strong>${ability.name}</strong> (${ability.type})<br><span class="text-gray-400">${details}</span></div>`;
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = '&times;';
@@ -3556,23 +4349,42 @@
 
             const name = document.getElementById('ability-name').value;
             const type = document.getElementById('ability-type').value;
+            const level = parseInt(document.getElementById('ability-level').value, 10) || 1; // NEW: Get Level
             const hitChance = parseInt(document.getElementById('ability-hitchance').value, 10);
             const min = parseInt(document.getElementById('ability-damage-min').value, 10);
             const max = parseInt(document.getElementById('ability-damage-max').value, 10);
             const animation = document.getElementById('ability-animation').value;
-
+            const duration = parseInt(document.getElementById('ability-duration').value, 10);
+            const statusName = document.getElementById('ability-status-select').value;
+            
             if (!name || isNaN(min) || isNaN(max)) {
-                showModal("Input Error", "Please fill out ability name and damage/heal range.", ()=>{});
+                showModal("Input Error", "Please fill out ability name and tick damage/heal range.", ()=>{});
                 return;
             }
+            if ((type === 'dot' || type === 'hot' || type === 'status') && (!duration || isNaN(duration) || duration < 1)) {
+                 showModal("Input Error", "Duration must be 1 turn or more for continuous effects.", ()=>{});
+                 return;
+            }
+            if (type === 'status' && !statusName) {
+                 showModal("Input Error", "Please select a status effect.", ()=>{});
+                 return;
+            }
 
-            const newAbility = { name, type, animation: animation || null };
+
+            const newAbility = { name, type, animation: animation || null, hitChance: hitChance || 100, level };
+            
             if (type === 'attack' || type === 'splash') {
-                if (isNaN(hitChance)) { showModal("Input Error", "Please provide a hit chance for attacks.", ()=>{}); return; }
-                newAbility.hitChance = hitChance;
-                newAbility.damageRange = [min, max];
-            } else { // heal
-                newAbility.healRange = [min, max];
+                 newAbility.damageRange = [min, max];
+            } else if (type === 'heal') {
+                 newAbility.healRange = [min, max];
+            } else if (type === 'dot' || type === 'hot') {
+                 newAbility.damageRange = [min, max];
+                 newAbility.duration = duration;
+                 newAbility.statusName = name; // Use ability name as status effect name for DoT/HoT
+            } else if (type === 'status') {
+                 newAbility.statusName = statusName;
+                 newAbility.duration = duration;
+                 newAbility.hitChance = hitChance || 100;
             }
             
             const map = getActiveMap();
@@ -3594,6 +4406,123 @@
             }
         }
 
+        // --- NEW DM ABILITY LIBRARY LOGIC ---
+
+        function getAllAbilities() {
+            const abilities = [];
+            Object.values(DEFAULT_STATE.presetTokens).forEach(category => {
+                category.forEach(token => {
+                    (token.abilities || []).forEach(ability => {
+                        // Ensure a unique ID (by stringifying the object) before adding to list
+                        abilities.push({...ability, sourceToken: token.name, uid: JSON.stringify(ability)});
+                    });
+                });
+            });
+            // Filter unique abilities
+            const seen = new Set();
+            return abilities.filter(ability => {
+                const isDuplicate = seen.has(ability.uid);
+                seen.add(ability.uid);
+                return !isDuplicate;
+            }).sort((a, b) => (a.level || 1) - (b.level || 1));
+        }
+
+        function openAbilityLibrary() {
+            document.getElementById('ability-library-modal').classList.remove('hidden');
+            renderAbilityLibrary();
+        }
+
+        function closeAbilityLibrary() {
+            document.getElementById('ability-library-modal').classList.add('hidden');
+        }
+
+        function renderAbilityLibrary() {
+            const libraryList = document.getElementById('ability-library-list');
+            const levelFilter = parseInt(document.getElementById('ability-library-level-filter').value, 10);
+            const searchInput = document.getElementById('ability-library-search').value.toLowerCase();
+            libraryList.innerHTML = '';
+
+            const allAbilities = getAllAbilities();
+
+            const filteredAbilities = allAbilities.filter(ability => {
+                const passesLevel = levelFilter === 0 || (ability.level || 1) === levelFilter;
+                const passesSearch = ability.name.toLowerCase().includes(searchInput) || ability.type.toLowerCase().includes(searchInput);
+                return passesLevel && passesSearch;
+            });
+
+            if (filteredAbilities.length === 0) {
+                libraryList.innerHTML = '<p class="text-gray-400 text-center p-4">No abilities found matching the filter.</p>';
+                return;
+            }
+
+            filteredAbilities.forEach(ability => {
+                const abilityEl = document.createElement('div');
+                // Store the full JSON string on the element for easy retrieval
+                abilityEl.dataset.abilityData = JSON.stringify(ability);
+                abilityEl.className = 'gruvhub-bg gruvhub-border p-3 rounded-lg flex justify-between items-center cursor-pointer hover:border-yellow-400 transition-all';
+                
+                let details = '';
+                if (ability.type === 'attack' || ability.type === 'splash') {
+                    details = `Hit: ${ability.hitChance}%, Dmg: ${ability.damageRange[0]}-${ability.damageRange[1]}`;
+                } else if (ability.type === 'heal') {
+                    details = `Heal: ${ability.healRange[0]}-${ability.healRange[1]}`;
+                } else if (ability.type === 'dot' || ability.type === 'hot') {
+                    const dmg = ability.damageRange[0] === ability.damageRange[1] ? ability.damageRange[0] : `${ability.damageRange[0]}-${ability.damageRange[1]}`;
+                    const type = ability.type === 'dot' ? 'DoT' : 'HoT';
+                    details = `${ability.hitChance}% Hit, ${dmg} ${type} (${ability.duration}T)`;
+                } else if (ability.type === 'status') {
+                    details = `${ability.hitChance}% Hit, Status: ${ability.statusName} (${ability.duration}T)`;
+                }
+
+                abilityEl.innerHTML = `
+                    <div>
+                        <strong class="text-white text-base">${ability.name}</strong> 
+                        <span class="text-xs ml-2 py-0.5 px-2 rounded-full bg-blue-800 text-white">${ability.type.toUpperCase()}</span>
+                        <p class="text-sm text-gray-300 mt-1">${details}</p>
+                        <p class="text-xs text-gray-500 mt-1">Source: ${ability.sourceToken}</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-yellow-300">L${ability.level || 1}</span>
+                        <button class="gruvhub-button text-xs py-1 px-3 mt-1" data-action="add-ability">Add</button>
+                    </div>
+                `;
+                libraryList.appendChild(abilityEl);
+            });
+        }
+
+        function handleAbilitySelectFromLibrary(e) {
+            // Check if the click was directly on the 'Add' button
+            if (e.target.dataset.action === 'add-ability') {
+                // Find the closest ancestor element where the ability JSON is stored
+                const abilityEl = e.target.closest('[data-ability-data]'); 
+                if (!abilityEl) return;
+
+                // FIX: Retrieve JSON from dataset and parse
+                const abilityData = JSON.parse(abilityEl.dataset.abilityData);
+
+                const tokenId = document.getElementById('stat-block-modal').dataset.tokenId;
+                if (!tokenId) return;
+
+                // Remove temporary keys used for unique identification
+                delete abilityData.uid;
+                delete abilityData.sourceToken;
+                
+                // Add the ability to the selected token
+                const map = getActiveMap();
+                const token = map.tokens.find(t => t.id === tokenId);
+                if (!token.abilities) token.abilities = [];
+                token.abilities.push(abilityData);
+
+                updateDoc(vttDocRef, { maps: vttState.maps })
+                    .then(() => {
+                        // Keep stat block open, but close the library
+                        closeAbilityLibrary(); 
+                        // Re-open stat block to show the newly added ability
+                        showStatBlock(token);
+                    });
+            }
+        }
+        // --- END NEW DM ABILITY LIBRARY LOGIC ---
 
     </script>
 </body>
