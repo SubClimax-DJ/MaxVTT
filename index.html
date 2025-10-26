@@ -1144,6 +1144,14 @@
                         { name: 'Drain Life', type: 'dot', animation: 'drain', hitChance: 85, damageRange: [5, 10], duration: 3, level: 7, statusName: 'Draining' },
                         { name: 'Mass Fear', type: 'status', animation: 'frightened', hitChance: 70, duration: 2, statusName: 'frightened', level: 8 },
                         { name: 'Lich Regeneration (HoT)', type: 'hot', animation: 'heal', hitChance: 100, damageRange: [10, 15], duration: 99, level: 9, statusName: 'Regeneration' },
+                        { name: 'Frost Nova', type: 'splash', animation: 'ice', hitChance: 65, damageRange: [10, 15], level: 8, statusName: 'frozen', duration: 1 }, // NEW ABILITY
+                    ]},
+                    // NEW TOKEN: Wandering Mystic
+                    { name: 'Wandering Mystic', url: 'https://i.postimg.cc/k4jRzYJg/SSP-N-Mystic.png', abilities: [
+                        { name: 'Scry', type: 'status', animation: 'blessed', hitChance: 100, duration: 3, statusName: 'blessed', level: 1 },
+                        { name: 'Curse', type: 'status', animation: 'drain', hitChance: 70, duration: 3, statusName: 'frightened', level: 2 },
+                        { name: 'Sleep', type: 'status', animation: 'stun', hitChance: 60, duration: 2, statusName: 'stunned', level: 3 },
+                        { name: 'Poison Cloud', type: 'splash', animation: 'poisoned-gas', hitChance: 65, damageRange: [0, 0], level: 4, statusName: 'poisoned', duration: 3 },
                     ]},
                 ],
                 Monsters: [
@@ -1200,11 +1208,13 @@
                     { name: 'Shadow Boss', url: 'https://i.postimg.cc/QdPmyn7y/SSP-N-Shadowboss.png', abilities: [
                         { name: 'Shadow Blast', type: 'attack', animation: 'drain', hitChance: 80, damageRange: [25, 40], level: 9 },
                         { name: 'Shadow Drain (DoT)', type: 'dot', animation: 'drain', hitChance: 90, damageRange: [8, 12], duration: 4, level: 10, statusName: 'Shadow Drain' },
+                        { name: 'Terrify', type: 'splash', animation: 'frightened', hitChance: 75, damageRange: [0, 0], level: 8, statusName: 'frightened', duration: 2 }, // NEW ABILITY
                     ]},
                     { name: 'Dragon', url: 'https://i.postimg.cc/zvzPrtjz/SSP-N-Dragon.png', abilities: [
                         { name: 'Fire Breath', type: 'splash', animation: 'fireball', hitChance: 85, damageRange: [30, 50], level: 10 },
                         { name: 'Tail Whip', type: 'attack', animation: 'slash', hitChance: 90, damageRange: [15, 25], level: 8 },
                         { name: 'Fear Presence', type: 'status', animation: 'frightened', hitChance: 80, duration: 3, statusName: 'frightened', level: 9 },
+                        { name: 'Wing Buffet', type: 'splash', animation: 'slash', hitChance: 70, damageRange: [10, 20], level: 7 }, // NEW ABILITY
                     ]},
                 ]
             },
@@ -2788,6 +2798,64 @@
                 updateDoc(vttDocRef, { 'turnTracker.currentIndex': newIndex }); 
             });
 
+            // --- NEW: Token Creation Button Listener ---
+            document.getElementById('add-token-btn').addEventListener('click', () => {
+                if (!isDM) return;
+                const activeMap = getActiveMap();
+                if (!activeMap) {
+                    sendChatMessage("Cannot add token: No active map.", "system");
+                    return;
+                }
+
+                const nameInput = document.getElementById('token-name-input');
+                const urlInput = document.getElementById('token-image-url-input');
+                const colorInput = document.getElementById('token-color-input');
+
+                const name = nameInput.value.trim();
+                const imageUrl = urlInput.value.trim();
+                const color = colorInput.value;
+
+                if (!name) {
+                    showModal("Input Error", "Token must have a name.", () => {});
+                    return;
+                }
+
+                const newToken = {
+                    id: crypto.randomUUID(),
+                    name,
+                    color: color,
+                    imageUrl: imageUrl || null,
+                    x: activeMap.width / 2,
+                    y: activeMap.height / 2,
+                    width: activeMap.grid.size || 50,
+                    height: activeMap.grid.size || 50,
+                    statusEffects: [],
+                    hp: 10,
+                    maxHp: 10,
+                    ac: 10,
+                    notes: '',
+                    ownedBy: 'dm',
+                    abilities: [],
+                    visionRange: 30, // Default vision
+                };
+
+                if (!activeMap.tokens) activeMap.tokens = [];
+                activeMap.tokens.push(newToken);
+                
+                updateDoc(vttDocRef, { maps: vttState.maps })
+                    .then(() => {
+                        sendChatMessage(`${currentUsername} added a custom token: ${name}.`, 'system');
+                        // Clear inputs
+                        nameInput.value = '';
+                        urlInput.value = '';
+                    })
+                    .catch(err => {
+                        console.error("Error adding custom token:", err);
+                        sendChatMessage("ERROR: Failed to add custom token.", "system");
+                    });
+            });
+            // --- END NEW: Token Creation Button Listener ---
+
 
         }
         
@@ -3813,21 +3881,39 @@
             [...(combatant.activeEffects || [])].forEach(effect => {
                 let effectLog = '';
                 
-                // 1. Check for stun/skip turn
-                if (effect.name === 'stunned') {
-                    isStunned = true;
-                    effectLog += `${combatant.name} is stunned and skips their turn.`;
+                // 1. Check for stun/skip turn based on standard status names
+                switch (effect.name) {
+                    case 'stunned':
+                        isStunned = true;
+                        effectLog += `😵 ${combatant.name} is stunned and skips their turn.`;
+                        break;
+                    case 'frozen':
+                        isStunned = true;
+                        effectLog += `❄️ ${combatant.name} is frozen and skips their turn.`;
+                        break;
+                    case 'burning':
+                        const burnDmg = Math.floor(Math.random() * 4) + 3; // 3-6
+                        combatant.currentHP = Math.max(0, combatant.currentHP - burnDmg);
+                        effectLog += `🔥 ${combatant.name} takes ${burnDmg} damage from ${effect.name}.`;
+                        break;
+                    case 'poisoned':
+                        const poisonDmg = Math.floor(Math.random() * 4) + 2; // 2-5
+                        combatant.currentHP = Math.max(0, combatant.currentHP - poisonDmg);
+                        effectLog += `💀 ${combatant.name} takes ${poisonDmg} damage from ${effect.name}.`;
+                        break;
                 }
 
-                // 2. Apply DoT/HoT damage/healing
+                // 2. Apply DoT/HoT damage/healing (for custom effects like 'Drain Life' or 'Regeneration')
                 if (effect.type === 'dot' || effect.type === 'hot') {
                     const amount = Math.floor(Math.random() * (effect.damageRange[1] - effect.damageRange[0] + 1)) + effect.damageRange[0];
-                    if (effect.type === 'dot') {
-                        combatant.currentHP = Math.max(0, combatant.currentHP - amount);
-                        effectLog += `🔥 ${combatant.name} takes ${amount} damage from ${effect.name}.`;
-                    } else {
-                        combatant.currentHP = Math.min(combatant.maxHp, combatant.currentHP + amount);
-                        effectLog += `✨ ${combatant.name} heals ${amount} HP from ${effect.name}.`;
+                    if (amount > 0) { // Only apply if there's an actual tick value
+                        if (effect.type === 'dot') {
+                            combatant.currentHP = Math.max(0, combatant.currentHP - amount);
+                            effectLog += `🔥 ${combatant.name} takes ${amount} damage from ${effect.name}.`;
+                        } else {
+                            combatant.currentHP = Math.min(combatant.maxHp, combatant.currentHP + amount);
+                            effectLog += `✨ ${combatant.name} heals ${amount} HP from ${effect.name}.`;
+                        }
                     }
                 }
                 
@@ -4113,8 +4199,8 @@
                     const isAttackerPlayer = currentCombatant.ownedBy !== 'dm';
                     const abilityType = battleActionState.selectedAbility.type;
 
-                    if (abilityType === 'attack' || abilityType === 'splash' || abilityType === 'dot' || abilityType === 'status') {
-                        // Attacks/DoT/Status target enemies (opposite team)
+                    if (abilityType === 'attack' || abilityType === 'splash' || abilityType === 'dot') {
+                        // Attacks/DoT target enemies (opposite team)
                         if (isTargetPlayer !== isAttackerPlayer) {
                             card.classList.add('targetable');
                         }
@@ -4123,6 +4209,9 @@
                         if (isTargetPlayer === isAttackerPlayer) {
                             card.classList.add('targetable');
                         }
+                    } else if (abilityType === 'status') {
+                        // Status effects (buffs/debuffs) can target ANYONE
+                        card.classList.add('targetable');
                     }
                 }
             });
@@ -4158,21 +4247,36 @@
         function executeAbility(attacker, target, ability) {
             const updatedBattle = JSON.parse(JSON.stringify(vttState.battle));
             const attackerCombatant = updatedBattle.combatants.find(c => c.id === attacker.id);
+            let logText = ''; // Initialize logText for modifiers
 
             if (ability) {
                 const targetCombatant = updatedBattle.combatants.find(c => c.id === target.id);
-                let logText = '';
                 
+                // --- STATUS EFFECT MODIFIERS ---
+                let baseHitChance = ability.hitChance || 100;
+                if ((ability.type === 'attack' || ability.type === 'splash' || ability.type === 'status' || ability.type === 'dot') && (attackerCombatant.activeEffects || []).length > 0) {
+                    if (attackerCombatant.activeEffects.some(e => e.name === 'blessed')) {
+                        baseHitChance += 15;
+                        logText += `✨ ${attackerCombatant.name} is blessed! (+15% Hit). `;
+                    }
+                    if (attackerCombatant.activeEffects.some(e => e.name === 'frightened')) {
+                        baseHitChance -= 15;
+                        logText += `😨 ${attackerCombatant.name} is frightened! (-15% Hit). `;
+                    }
+                    baseHitChance = Math.max(0, Math.min(100, baseHitChance));
+                }
+                // --- END STATUS EFFECT MODIFIERS ---
+
                 // Base chance to hit for attacks/status/DoT/HoT
                 const hitRoll = Math.floor(Math.random() * 100) + 1;
-                const isHit = ability.type === 'heal' || ability.type === 'hot' || hitRoll <= (ability.hitChance || 100);
+                const isHit = ability.type === 'heal' || ability.type === 'hot' || hitRoll <= baseHitChance;
 
                 if (ability.type === 'attack' || ability.type === 'splash') {
                     if (isHit) {
                         const damage = Math.floor(Math.random() * (ability.damageRange[1] - ability.damageRange[0] + 1)) + ability.damageRange[0];
                         targetCombatant.currentHP = Math.max(0, targetCombatant.currentHP - damage);
                         if(ability.animation) playBattleAnimation(targetCombatant.id, ability.animation);
-                        logText = `💥 ${attackerCombatant.name}'s ${ability.name} hits ${targetCombatant.name} for ${damage} damage!`;
+                        logText += `💥 ${attackerCombatant.name}'s ${ability.name} hits ${targetCombatant.name} for ${damage} damage!`;
                         
                         // Handle splash damage
                         if (ability.type === 'splash') {
@@ -4184,12 +4288,18 @@
                                     secondaryTarget.currentHP = Math.max(0, secondaryTarget.currentHP - splashDamage);
                                     if(ability.animation) setTimeout(() => playBattleAnimation(secondaryTarget.id, ability.animation), 200);
                                     logText += ` ${secondaryTarget.name} takes ${splashDamage} splash damage.`;
+                                    
+                                    // NEW: Check for status application on splash targets
+                                    if (ability.statusName && ability.duration > 0) {
+                                        applyStatusToTarget(secondaryTarget, ability.statusName, ability.duration, ability.type, ability.damageRange);
+                                    }
+                                    
                                     if (secondaryTarget.currentHP <= 0) secondaryTarget.isDefeated = true;
                                 }
                             });
                         }
                     } else {
-                        logText = `💨 ${attackerCombatant.name}'s ${ability.name} misses ${targetCombatant.name}!`;
+                        logText += `💨 ${attackerCombatant.name}'s ${ability.name} misses ${targetCombatant.name}!`;
                     }
                 } else if (ability.type === 'heal') {
                     const healing = Math.floor(Math.random() * (ability.healRange[1] - ability.healRange[0] + 1)) + ability.healRange[0];
@@ -4202,29 +4312,14 @@
                         const effectName = ability.statusName || ability.name;
                         const duration = ability.duration || 1;
                         
-                        let existingEffectIndex = (targetCombatant.activeEffects || []).findIndex(e => e.name === effectName);
-
-                        if (existingEffectIndex !== -1) {
-                            // If effect already exists, refresh duration
-                            targetCombatant.activeEffects[existingEffectIndex].duration = duration;
-                        } else {
-                            // Apply new effect
-                            const newEffect = {
-                                name: effectName,
-                                type: ability.type,
-                                duration: duration,
-                                damageRange: ability.damageRange || [0, 0], // used for dot/hot tick
-                            };
-                            if (!targetCombatant.activeEffects) targetCombatant.activeEffects = [];
-                            targetCombatant.activeEffects.push(newEffect);
-                        }
+                        applyStatusToTarget(targetCombatant, effectName, duration, ability.type, ability.damageRange);
 
                         if(ability.animation) playBattleAnimation(targetCombatant.id, ability.animation);
                         
-                        logText = `✅ ${attackerCombatant.name}'s ${ability.name} applies **${effectName}** to ${targetCombatant.name} for ${duration} turns!`;
+                        logText += `✅ ${attackerCombatant.name}'s ${ability.name} applies **${effectName}** to ${targetCombatant.name} for ${duration} turns!`;
 
                     } else {
-                         logText = `💨 ${attackerCombatant.name}'s ${ability.name} fails to apply its effect on ${targetCombatant.name}.`;
+                         logText += `💨 ${attackerCombatant.name}'s ${ability.name} fails to apply its effect on ${targetCombatant.name}.`;
                     }
                 }
 
@@ -4270,6 +4365,26 @@
             updatedBattle.turnTimerStartTime = serverTimestamp(); // Reset timer stamp
 
             updateDoc(vttDocRef, { battle: updatedBattle });
+        }
+        
+        // NEW Helper function to apply status effects
+        function applyStatusToTarget(targetCombatant, effectName, duration, abilityType, damageRange) {
+            let existingEffectIndex = (targetCombatant.activeEffects || []).findIndex(e => e.name === effectName);
+
+            if (existingEffectIndex !== -1) {
+                // If effect already exists, refresh duration
+                targetCombatant.activeEffects[existingEffectIndex].duration = duration;
+            } else {
+                // Apply new effect
+                const newEffect = {
+                    name: effectName,
+                    type: abilityType, // 'status', 'dot', 'hot'
+                    duration: duration,
+                    damageRange: damageRange || [0, 0], // used for dot/hot tick
+                };
+                if (!targetCombatant.activeEffects) targetCombatant.activeEffects = [];
+                targetCombatant.activeEffects.push(newEffect);
+            }
         }
         
         function endBattle() {
@@ -4527,3 +4642,5 @@
     </script>
 </body>
 </html>
+
+
